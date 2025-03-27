@@ -81,10 +81,9 @@ fun Navigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = null,
+            startDestination = HomeD,
             modifier = Modifier.padding(innerPadding)
         ) {
-
         }
     }
 }
