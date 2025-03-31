@@ -17,10 +17,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.client.R
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.valorarNotaPantalla.TestScreen
+import com.example.client.ui.valorarNotaPantalla.ValorateNoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 
@@ -40,7 +43,7 @@ fun Navigation() {
 
     val state by navController.currentBackStackEntryAsState()
 
-    val screen = appDestinationList.find { screen ->
+    val screen = appDestinationList_Adrian.find { screen ->
         val currentRoute = state?.destination?.route?.substringBefore("/")
         val screenRoute = screen.route.toString().substringBefore("@").substringBefore("$")
         currentRoute == screenRoute
@@ -49,7 +52,7 @@ fun Navigation() {
     val bottomBar: @Composable () -> Unit = {
         BottomBar(
             navController = navController,
-            screens = appDestinationList,
+            screens = appDestinationList_Adrian,
             isVisible = screen?.isBottomBarVisible ?: false
         )
     }
@@ -81,9 +84,15 @@ fun Navigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = HomeD,
+            startDestination = ValorateListDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable<ValorateListDestination> {
+                ValorateNoteListScreen()
+            }
+            composable<TestDestination> {
+                TestScreen()
+            }
         }
     }
 }
