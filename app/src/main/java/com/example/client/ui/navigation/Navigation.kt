@@ -22,8 +22,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.client.R
 import com.example.client.ui.common.TopBar
-import com.example.client.ui.valorarNotaPantalla.TestScreen
-import com.example.client.ui.valorarNotaPantalla.ValorateNoteListScreen
+import com.example.client.ui.noteScreen.detail.NoteDetailScreen
+import com.example.client.ui.noteScreen.list.NoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 
@@ -84,14 +84,14 @@ fun Navigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = ValorateListDestination,
+            startDestination = NoteListDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable<ValorateListDestination> {
-                ValorateNoteListScreen()
+            composable<NoteListDestination> {
+                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {})
             }
-            composable<TestDestination> {
-                TestScreen()
+            composable<NoteDetailDestination> {
+                NoteDetailScreen()
             }
         }
     }

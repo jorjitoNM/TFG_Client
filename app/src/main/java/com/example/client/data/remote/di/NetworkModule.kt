@@ -2,6 +2,9 @@ package com.example.client.data.remote.di
 
 
 import com.example.client.BuildConfig
+import com.example.client.data.remote.service.NoteService
+import com.example.client.ui.noteScreen.list.NoteDTO
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,10 +13,13 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
+
 
     @Provides
     fun provideHTTPLoggingInterceptor(): HttpLoggingInterceptor {
@@ -39,5 +45,10 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
     }
+
+    @Singleton
+    @Provides
+    fun providePlayerService(retrofit: Retrofit): NoteService =
+        retrofit.create(NoteService::class.java)
 
 }

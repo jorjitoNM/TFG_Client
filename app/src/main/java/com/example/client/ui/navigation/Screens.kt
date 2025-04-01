@@ -9,13 +9,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
 @Serializable
-object ValorateListDestination
+object NoteListDestination
 
 @Serializable
-object TestDestination
+object NoteDetailDestination
 
 val appDestinationList_Adrian = listOf(
-    ValorateList,Test)
+    NoteList,NoteDetail)
 
 interface AppDestination{
     val route: Any
@@ -34,9 +34,9 @@ interface AppMainBottomDestination : AppDestination {
     val icon: ImageVector
 }
 
-object ValorateList : AppMainBottomDestination {
-    override val route: Any = ValorateListDestination
-    override val title: String = "Home"
+object NoteList : AppMainBottomDestination {
+    override val route: Any = NoteListDestination
+    override val title: String = "Nota Lista"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -48,9 +48,9 @@ object ValorateList : AppMainBottomDestination {
     override val icon: ImageVector = Icons.Filled.Home
 }
 
-object Test : AppMainBottomDestination {
-    override val route: Any = TestDestination
-    override val title: String = "Test"
+object NoteDetail : AppMainBottomDestination {
+    override val route: Any = NoteDetailDestination
+    override val title: String = "Nota Detalle"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
