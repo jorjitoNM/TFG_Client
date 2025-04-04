@@ -1,7 +1,8 @@
 package com.example.client.data.remote.service
 
+import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.Note
-import com.example.client.ui.noteScreen.list.NoteDTO
+
 import retrofit2.Response
 import retrofit2.http.*
 

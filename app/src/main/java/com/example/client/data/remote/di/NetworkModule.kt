@@ -2,8 +2,9 @@ package com.example.client.data.remote.di
 
 
 import com.example.client.BuildConfig
+import com.example.client.common.NoteDTOTypeAdapter
+import com.example.client.data.model.NoteDTO
 import com.example.client.data.remote.service.NoteService
-import com.example.client.ui.noteScreen.list.NoteDTO
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
@@ -19,7 +20,14 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
+    @Provides
+    fun provideGsonConverterFactory(): GsonConverterFactory {
+        val gson = GsonBuilder()
+            .registerTypeAdapter(NoteDTO::class.java, NoteDTOTypeAdapter())
+            .create()
 
+        return GsonConverterFactory.create(gson)
+    }
 
     @Provides
     fun provideHTTPLoggingInterceptor(): HttpLoggingInterceptor {
@@ -38,10 +46,13 @@ object NetworkModule {
     }
 
     @Provides
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        gsonConverterFactory: GsonConverterFactory
+    ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.API_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(gsonConverterFactory)
             .client(okHttpClient)
             .build()
     }
