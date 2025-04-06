@@ -1,7 +1,6 @@
 package com.example.client.domain.usecases
 
-import com.example.client.data.remote.NoteRepository
-import com.example.client.domain.model.note.Note
+import com.example.client.data.repositories.NoteRepository
 import com.example.client.ui.noteScreen.list.NoteDTO
 import javax.inject.Inject
 
