@@ -6,8 +6,8 @@ import com.example.client.domain.model.note.NoteType
 
 class EventNoteDTO(
     baseNote: NoteDTO = NoteDTO(),
-    var start: String = "",
-    var end: String = ""
+    val start: String = "",
+    val end: String = ""
 ) : NoteDTO(
     id = baseNote.id,
     title = baseNote.title,
