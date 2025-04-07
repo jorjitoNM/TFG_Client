@@ -17,10 +17,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.client.R
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.noteMap.list.NoteMapScreen
+import com.example.client.ui.noteScreen.detail.NoteDetailScreen
+import com.example.client.ui.noteScreen.list.NoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 
@@ -81,10 +85,18 @@ fun Navigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = null,
+            startDestination = NoteListDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
-
+            composable<NoteListDestination> {
+                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {})
+            }
+            composable<NoteDetailDestination> {
+                NoteDetailScreen()
+            }
+            composable<NoteMapDestination> {
+                NoteMapScreen(showSnackbar = { showSnackbar(it) })
+            }
         }
     }
 }
