@@ -17,7 +17,7 @@ object NoteDetailDestination
 @Serializable
 object NoteMapDestination
 
-val appDestinationList_Adrian = listOf(
+val appDestinationList = listOf(
     NoteList,NoteDetail,NoteMap)
 
 interface AppDestination{

@@ -44,7 +44,7 @@ fun Navigation() {
 
     val state by navController.currentBackStackEntryAsState()
 
-    val screen = appDestinationList_Adrian.find { screen ->
+    val screen = appDestinationList.find { screen ->
         val currentRoute = state?.destination?.route?.substringBefore("/")
         val screenRoute = screen.route.toString().substringBefore("@").substringBefore("$")
         currentRoute == screenRoute
@@ -53,7 +53,7 @@ fun Navigation() {
     val bottomBar: @Composable () -> Unit = {
         BottomBar(
             navController = navController,
-            screens = appDestinationList_Adrian,
+            screens = appDestinationList,
             isVisible = screen?.isBottomBarVisible ?: false
         )
     }
