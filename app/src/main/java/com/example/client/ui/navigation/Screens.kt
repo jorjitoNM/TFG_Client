@@ -12,13 +12,13 @@ import kotlinx.serialization.Serializable
 object NoteListDestination
 
 @Serializable
-object NoteDetailDestination
+data class NoteDetailDestination (val noteId: Int)
 
 @Serializable
 object NoteMapDestination
 
 val appDestinationList = listOf(
-    NoteList,NoteDetail,NoteMap)
+    NoteList,NoteMap)
 
 interface AppDestination{
     val route: Any
@@ -51,20 +51,6 @@ object NoteList : AppMainBottomDestination {
     override val icon: ImageVector = Icons.Filled.Home
 }
 
-object NoteDetail : AppMainBottomDestination {
-    override val route: Any = NoteDetailDestination
-    override val title: String = "Nota Detalle"
-    override val isBottomBarVisible: Boolean = true
-    override val scaffoldState: ScaffoldState
-        get() = ScaffoldState(
-            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
-            fabVisible = false
-        )
-    override val isTopBarVisible: Boolean = true
-    override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Place
-}
-
 object NoteMap : AppMainBottomDestination {
     override val route: Any = NoteMapDestination
     override val title: String = "Nota aa"
@@ -74,7 +60,7 @@ object NoteMap : AppMainBottomDestination {
             topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
             fabVisible = false
         )
-    override val isTopBarVisible: Boolean = true
+    override val isTopBarVisible: Boolean = false
     override val onBottomBar: Boolean = true
     override val icon: ImageVector = Icons.Filled.Place
 }

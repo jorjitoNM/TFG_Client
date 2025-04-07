@@ -6,5 +6,5 @@ import com.example.client.domain.model.note.Note
 import javax.inject.Inject
 
 class UpdateNoteUseCase @Inject constructor(private val noteRepository: NoteRepository) {
-    suspend operator fun invoke(note: NoteDTO, username: String) = noteRepository.updateNote(note, username)
+    suspend operator fun invoke(note: NoteDTO) = noteRepository.updateNote(note)
 }

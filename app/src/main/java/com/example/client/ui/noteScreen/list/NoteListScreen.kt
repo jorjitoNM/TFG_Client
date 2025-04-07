@@ -144,7 +144,7 @@ fun NoteItem(
                 )
 
                 Text(
-                    text = "Rating: ${note.rating}/10",
+                    text = "Rating: ${note.rating}/5",
                     style = MaterialTheme.typography.bodySmall
                 )
             }

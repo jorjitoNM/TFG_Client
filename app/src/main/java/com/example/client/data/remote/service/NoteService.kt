@@ -13,20 +13,15 @@ interface NoteService {
     @GET("notes/{noteId}")
     suspend fun getNote(@Path("noteId") id: Int): Response<NoteDTO>
 
-    @GET("notes/area")
-    suspend fun getNotesByArea(@Query("latitude") latitude: Double, @Query("longitude") longitude: Double): Response<List<NoteDTO>>
-
     @PUT("notes")
     suspend fun updateNote(
         @Body note: NoteDTO,
-        @Header("X-Username") username: String
     ): Response<NoteDTO>
 
     @PATCH("notes/{id}/rate")
     suspend fun rateNote(
         @Path("id") id: Int,
         @Query("rating") rating: Int,
-        @Header("X-Username") username: String
     ): Response<NoteDTO>
 
     
