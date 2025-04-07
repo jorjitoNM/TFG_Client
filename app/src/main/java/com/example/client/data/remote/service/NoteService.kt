@@ -7,22 +7,27 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface NoteService {
-    @GET("api/notes")
+    @GET("notes")
     suspend fun getNotes(): Response<List<NoteDTO>>
 
-    @GET("api/notes/{noteId}")
+    @GET("notes/{noteId}")
     suspend fun getNote(@Path("noteId") id: Int): Response<NoteDTO>
 
-    @PUT("api/notes")
+    @GET("notes/area")
+    suspend fun getNotesByArea(@Query("latitude") latitude: Double, @Query("longitude") longitude: Double): Response<List<NoteDTO>>
+
+    @PUT("notes")
     suspend fun updateNote(
         @Body note: NoteDTO,
         @Header("X-Username") username: String
     ): Response<NoteDTO>
 
-    @PATCH("api/notes/{id}/rate")
+    @PATCH("notes/{id}/rate")
     suspend fun rateNote(
         @Path("id") id: Int,
         @Query("rating") rating: Int,
         @Header("X-Username") username: String
     ): Response<NoteDTO>
+
+    
 }

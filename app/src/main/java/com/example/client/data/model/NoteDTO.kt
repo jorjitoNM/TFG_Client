@@ -3,7 +3,7 @@ package com.example.client.data.model
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 
-open class NoteDTO(
+data class NoteDTO(
     val id: Int = 0,
     val title: String = "",
     val content: String? = null,
@@ -14,5 +14,7 @@ open class NoteDTO(
     val created: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
-    val type: NoteType = NoteType.CLASSIC
+    val type: NoteType = NoteType.CLASSIC,
+    val start: String? = null,
+    val end: String? = null
 )

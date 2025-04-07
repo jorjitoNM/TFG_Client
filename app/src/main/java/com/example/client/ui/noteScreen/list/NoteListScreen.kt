@@ -40,7 +40,6 @@ import com.example.client.ui.common.UiEvent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import  com.example.client.R
-import com.example.client.data.model.EventNoteDTO
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 
@@ -64,6 +63,7 @@ fun NoteListScreen(
                     showSnackbar(it.message)
                     viewModel.handleEvent(NoteListEvent.AvisoVisto)
                 }
+
                 is UiEvent.PopBackStack -> {
                     onNavigateToDetail(state.selectedNoteId)
                     viewModel.handleEvent(NoteListEvent.AvisoVisto)
@@ -149,42 +149,43 @@ fun NoteItem(
                 )
             }
 
-            // Verificar si es un evento y mostrar información adicional
+            // Check if it's an event note and display additional information
             if (note.type == NoteType.EVENT) {
-                // Usar un casting seguro para obtener los campos de EventNoteDTO
-                val eventNote = note as? EventNoteDTO
-                if (eventNote != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = "EVENT",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                Text(
+                    text = "EVENT",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    note.start?.let {
                         Text(
-                            text = "Start: ${formatDateTime(eventNote.start)}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Text(
-                            text = "End: ${formatDateTime(eventNote.end)}",
+                            text = "Start: ${formatDateTime(it)}",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+                    note.end?.let {
+                        Text(
+                            text = "End: ${formatDateTime(it)}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+
                 }
+
             }
         }
     }
 }
 
-// Función auxiliar para formatear fechas
 fun formatDateTime(dateTimeStr: String): String {
     return try {
         val formatter = DateTimeFormatter.ISO_DATE_TIME

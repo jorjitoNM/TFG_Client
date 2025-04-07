@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.client.R
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.noteScreen.detail.NoteDetailScreen
 import com.example.client.ui.noteScreen.list.NoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
@@ -92,6 +93,9 @@ fun Navigation() {
             }
             composable<NoteDetailDestination> {
                 NoteDetailScreen()
+            }
+            composable<NoteMapDestination> {
+                NoteMapScreen(showSnackbar = { showSnackbar(it) })
             }
         }
     }
