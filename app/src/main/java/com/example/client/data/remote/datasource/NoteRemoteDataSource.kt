@@ -11,7 +11,7 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
 
     suspend fun getNotes() = safeApiCall { noteService.getNotes() }
     suspend fun getNote(id: Int) = safeApiCall { noteService.getNote(id) }
-    suspend fun updateNote( note: NoteDTO, username: String) = safeApiCall { noteService.updateNote(note, username) }
-    suspend fun rateNote(id: Int, rating: Int, username: String) = safeApiCall { noteService.rateNote(id, rating, username) }
+    suspend fun updateNote( note: NoteDTO) = safeApiCall { noteService.updateNote(note) }
+    suspend fun rateNote(id: Int, rating: Int) = safeApiCall { noteService.rateNote(id, rating) }
 
 }
