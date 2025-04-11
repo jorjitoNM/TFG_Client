@@ -2,6 +2,7 @@ package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.remote.datasource.NoteRemoteDataSource
+import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.noteScreen.list.NoteDTO
 import com.example.musicapprest.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
@@ -59,5 +60,13 @@ class NoteRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
 
+    }
+
+    suspend fun filterNoteByType(noteType: NoteType)= withContext(dispatcher){
+        try{
+            noteRemoteDataSource.filterNoteByType(noteType)
+        }catch (e: Exception){
+            NetworkResult.Error(e.message ?: e.toString())
+        }
     }
 }

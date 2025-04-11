@@ -3,8 +3,10 @@ package com.example.client.ui.noteScreen.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.domain.model.note.NoteType
 import com.example.client.domain.usecases.FavNoteUseCase
 import com.example.client.domain.usecases.GetNotesUseCase
+import com.example.client.domain.usecases.OrderNoteByTypUseCase
 import com.example.client.domain.usecases.OrderNoteUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,6 +21,7 @@ class NoteListViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
     private val favNoteUseCase: FavNoteUseCase,
     private val orderNoteUseCase: OrderNoteUseCase,
+    private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()
@@ -30,6 +33,41 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.AvisoVisto -> avisoVisto()
             is NoteListEvent.FavNote -> favNote(event.noteId)
             is NoteListEvent.ApplyFilter -> filter(event.asc)
+            is NoteListEvent.OrderByType -> orderByType(event.type)
+        }
+    }
+
+    private fun orderByType(type: NoteType) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            when (val result = orderNoteByTypUseCase.invoke(type)) {
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            notes = result.data,
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
         }
     }
 

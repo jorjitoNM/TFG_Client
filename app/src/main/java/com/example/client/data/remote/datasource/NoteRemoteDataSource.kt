@@ -1,6 +1,7 @@
 package com.example.client.data.remote.datasource
 
 import com.example.client.data.remote.service.NoteService
+import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.noteScreen.list.NoteDTO
 import javax.inject.Inject
 
@@ -20,4 +21,7 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
         safeApiCall { noteService.favNote(id, username) }
 
     suspend fun orderNote(asc : Boolean) = safeApiCall { noteService.orderNote(asc) }
+
+    suspend fun filterNoteByType(noteType : NoteType) = safeApiCall { noteService.filterNoteByType(noteType) }
+
 }
