@@ -1,7 +1,6 @@
-package com.example.client.ui.noteScreen.list
+package com.example.client.ui.normalNoteScreen.list
 
 import com.example.client.data.model.NoteDTO
-import com.example.client.domain.model.note.Note
 import com.example.client.ui.common.UiEvent
 
 data class NoteListState(

@@ -1,4 +1,4 @@
-package com.example.client.ui.noteScreen.list
+package com.example.client.ui.normalNoteScreen.list
 
 sealed class NoteListEvent {
     data object GetNotes : NoteListEvent()

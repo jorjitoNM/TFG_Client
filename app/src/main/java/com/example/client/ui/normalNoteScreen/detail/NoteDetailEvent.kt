@@ -1,4 +1,4 @@
-package com.example.client.ui.noteScreen.detail
+package com.example.client.ui.normalNoteScreen.detail
 
 import com.example.client.domain.model.note.NotePrivacy
 

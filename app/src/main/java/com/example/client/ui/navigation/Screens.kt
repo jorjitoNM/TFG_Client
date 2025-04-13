@@ -9,16 +9,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
 @Serializable
-object NoteListDestination
+object NormalNoteListDestination
 
 @Serializable
-data class NoteDetailDestination (val noteId: Int)
+data class NormalNoteDetailDestination (val noteId: Int)
 
 @Serializable
 object NoteMapDestination
 
 val appDestinationList = listOf(
-    NoteList,NoteMap)
+    NormalNoteList,NoteMap)
 
 interface AppDestination{
     val route: Any
@@ -37,8 +37,8 @@ interface AppMainBottomDestination : AppDestination {
     val icon: ImageVector
 }
 
-object NoteList : AppMainBottomDestination {
-    override val route: Any = NoteListDestination
+object NormalNoteList : AppMainBottomDestination {
+    override val route: Any = NormalNoteListDestination
     override val title: String = "Nota Lista"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
