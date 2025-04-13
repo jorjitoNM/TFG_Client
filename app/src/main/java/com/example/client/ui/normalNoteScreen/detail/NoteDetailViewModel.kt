@@ -1,9 +1,8 @@
-package com.example.client.ui.noteScreen.detail
+package com.example.client.ui.normalNoteScreen.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.usecases.*
 import com.example.client.ui.common.UiEvent
