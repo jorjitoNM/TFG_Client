@@ -28,17 +28,17 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    suspend fun rateNote(id: Int, rating: Int, username: String) = withContext(dispatcher) {
+    suspend fun rateNote(id: Int, rating: Int) = withContext(dispatcher) {
         try {
-            noteRemoteDataSource.rateNote(id, rating, username)
+            noteRemoteDataSource.rateNote(id, rating)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
 
-    suspend fun updateNote(note: NoteDTO, username: String) = withContext(dispatcher) {
+    suspend fun updateNote(note: NoteDTO) = withContext(dispatcher) {
         try {
-            noteRemoteDataSource.updateNote(note, username)
+            noteRemoteDataSource.updateNote(note)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }

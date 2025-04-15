@@ -20,11 +20,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.client.R
 import com.example.client.ui.common.TopBar
 import com.example.client.ui.noteMap.list.NoteMapScreen
-import com.example.client.ui.noteScreen.detail.NoteDetailScreen
-import com.example.client.ui.noteScreen.list.NoteListScreen
+import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
+import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 
@@ -85,14 +86,15 @@ fun Navigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = NoteListDestination,
+            startDestination = NormalNoteListDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable<NoteListDestination> {
-                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {})
+            composable<NormalNoteListDestination> {
+                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})
             }
-            composable<NoteDetailDestination> {
-                NoteDetailScreen()
+            composable<NormalNoteDetailDestination> { backStackEntry ->
+                val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
+                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
                 NoteMapScreen(showSnackbar = { showSnackbar(it) })
