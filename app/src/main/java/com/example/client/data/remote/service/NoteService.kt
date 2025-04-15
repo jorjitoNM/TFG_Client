@@ -44,7 +44,7 @@ interface NoteService {
     ): Response<List<NoteDTO>>
 
 
-    @GET("/notes/types")
+    @GET("/notes/type")
     suspend fun filterNoteByType(
         @Query("type") noteType: NoteType,
     ): Response<List<NoteDTO>>

@@ -43,11 +43,20 @@ class NoteListViewModel @Inject constructor(
 
             when (val result = orderNoteByTypUseCase.invoke(type)) {
                 is NetworkResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            notes = result.data,
-                            isLoading = false
-                        )
+                    if (result.data.isNullOrEmpty()) {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar("No se encontraron notas para el tipo seleccionado."),
+                                isLoading = false
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                notes = result.data,
+                                isLoading = false
+                            )
+                        }
                     }
                 }
 
