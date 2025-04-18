@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -183,4 +184,10 @@ fun formatDateTime(dateTimeStr: String): String {
     } catch (e: Exception) {
         dateTimeStr
     }
+}
+
+@Preview
+@Composable
+fun NoteListScreenPreview () {
+    NoteList(listOf(NoteDTO(),NoteDTO(),NoteDTO()),{})
 }
