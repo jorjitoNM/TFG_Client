@@ -24,6 +24,7 @@ import com.example.client.R
 import com.example.client.ui.common.TopBar
 import com.example.client.ui.noteScreen.detail.NoteDetailScreen
 import com.example.client.ui.noteScreen.list.NoteListScreen
+import com.example.client.ui.savedNotes.SavedScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 
@@ -93,6 +94,9 @@ fun Navigation() {
             }
             composable<NoteDetailDestination> {
                 NoteDetailScreen()
+            }
+            composable<NoteSavedListDestination> {
+                SavedScreen(showSnackbar = { showSnackbar(it) })
             }
         }
     }

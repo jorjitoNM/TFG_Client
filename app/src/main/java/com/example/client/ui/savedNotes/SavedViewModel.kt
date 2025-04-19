@@ -1,11 +1,10 @@
-package com.example.client.ui.noteScreen.list
+package com.example.client.ui.savedNotes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteUseCase
-import com.example.client.domain.usecases.social.FavNoteUseCase
+import com.example.client.domain.usecases.social.GetNoteSavedUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,21 +14,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NoteListViewModel @Inject constructor(
-    private val getNotesUseCase: GetNotesUseCase,
-    private val favNoteUseCase: FavNoteUseCase,
+class SavedViewModel @Inject constructor(
+    private val getNoteSavedUseCase: GetNoteSavedUseCase,
     private val orderNoteUseCase: OrderNoteUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(NoteListState())
+
+    private val _uiState = MutableStateFlow(SavedSate())
     val uiState = _uiState.asStateFlow()
 
-    fun handleEvent(event: NoteListEvent) {
+    fun handleEvent(event: SavedEvent) {
         when (event) {
-            is NoteListEvent.SelectedNote -> selectNote(event.noteId)
-            is NoteListEvent.GetNotes -> getNotes()
-            is NoteListEvent.AvisoVisto -> avisoVisto()
-            is NoteListEvent.FavNote -> favNote(event.noteId)
-            is NoteListEvent.ApplyFilter -> filter(event.asc)
+            SavedEvent.GetNotes -> getNotes()
+            SavedEvent.AvisoVisto -> avisoVisto()
+            is SavedEvent.ApplyFilter -> filter(event.asc)
         }
     }
 
@@ -67,11 +64,15 @@ class NoteListViewModel @Inject constructor(
         }
     }
 
+    private fun avisoVisto() {
+        _uiState.update { it.copy(aviso = null) }
+    }
+
     private fun getNotes() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = getNotesUseCase()) {
+            when (val result = getNoteSavedUseCase()) {
                 is NetworkResult.Success -> {
                     _uiState.update {
                         it.copy(
@@ -101,43 +102,4 @@ class NoteListViewModel @Inject constructor(
         }
     }
 
-    private fun selectNote(id: Int) {
-        _uiState.update {
-            it.copy(
-                selectedNoteId = id,
-                aviso = UiEvent.PopBackStack
-            )
-        }
-    }
-
-    private fun avisoVisto() {
-        _uiState.update { it.copy(aviso = null) }
-    }
-
-    private fun favNote(noteId: Int) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            when (val result = favNoteUseCase.invoke(noteId, "user1")) {
-                is NetworkResult.Error -> _uiState.update {
-                    it.copy(
-                        aviso = UiEvent.ShowSnackbar(result.message),
-                        isLoading = false
-                    )
-                }
-
-
-                is NetworkResult.Loading -> _uiState.update {
-                    it.copy(
-                        isLoading = true
-                    )
-                }
-
-                is NetworkResult.Success -> _uiState.update {
-                    it.copy(
-                        isLoading = false
-                    )
-                }
-            }
-        }
-    }
 }

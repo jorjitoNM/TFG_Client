@@ -3,8 +3,7 @@ package com.example.client.data.remote.di
 
 import com.example.client.BuildConfig
 import com.example.client.data.remote.service.NoteService
-import com.example.client.ui.noteScreen.list.NoteDTO
-import com.google.gson.GsonBuilder
+import com.example.client.data.remote.service.SocialService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,5 +49,10 @@ object NetworkModule {
     @Provides
     fun providePlayerService(retrofit: Retrofit): NoteService =
         retrofit.create(NoteService::class.java)
+
+
+    @Provides
+    fun provideSocialService(retrofit: Retrofit): SocialService =
+        retrofit.create(SocialService::class.java)
 
 }

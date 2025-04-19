@@ -5,5 +5,5 @@ sealed class NoteListEvent {
     data class SelectedNote(val noteId: Int) : NoteListEvent()
     data object AvisoVisto : NoteListEvent()
     data class FavNote(val noteId: Int) : NoteListEvent()
-   data class ApplyFilter(val asc: Boolean) : NoteListEvent()
+    data class ApplyFilter(val asc: Boolean) : NoteListEvent()
 }

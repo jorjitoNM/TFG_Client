@@ -1,8 +1,0 @@
-package com.example.client.domain.usecases
-
-import com.example.client.data.repositories.NoteRepository
-import javax.inject.Inject
-
-class FavNoteUseCase @Inject constructor(private val noteRepository: NoteRepository) {
-    suspend operator fun invoke(id: Int, username: String) = noteRepository.favNote(id,username)
-}
