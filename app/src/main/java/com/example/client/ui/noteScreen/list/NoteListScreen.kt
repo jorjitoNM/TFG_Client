@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -48,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -85,7 +87,6 @@ fun NoteListScreen(
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
-
             NoteList(
                 notes = state.notes,
                 onNoteClick = { noteId ->
@@ -96,13 +97,21 @@ fun NoteListScreen(
                 },
                 onFilterSelected = { filterOption ->
                     viewModel.handleEvent(NoteListEvent.ApplyFilter(filterOption))
-                })
+                },
+                onFilterByNoteTypeSelected = { noteType ->
+                    noteType?.let {
+                        viewModel.handleEvent(NoteListEvent.OrderByType(it))
+                    } ?: viewModel.handleEvent(NoteListEvent.GetNotes)
+                }
+            )
         }
     }
 }
+
 @Composable
 private fun FilterHeader(
     onFilterSelected: (Boolean) -> Unit,
+    onNoteTypeFilterSelected: (NoteType?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -153,6 +162,7 @@ private fun FilterHeader(
                 Column(
                     modifier = Modifier.padding(vertical = 8.dp)
                 ) {
+                    // Filtro Ascendente
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -176,13 +186,14 @@ private fun FilterHeader(
                         )
                     }
 
-                    // Divider de Material 3 (no deprecated)
+                    // Divider
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                         thickness = 1.dp
                     )
 
+                    // Filtro Descendente
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -205,6 +216,63 @@ private fun FilterHeader(
                             color = textColor
                         )
                     }
+
+                    // Divider
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                        thickness = 1.dp
+                    )
+
+                    // Filtros por NoteType
+                    NoteType.values().forEach { noteType ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onNoteTypeFilterSelected(noteType)
+                                    isExpanded = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Filtrar por $noteType",
+                                tint = iconTint
+                            )
+                            Text(
+                                text = noteType.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = textColor
+                            )
+                        }
+                    }
+
+                    // Opción para limpiar el filtro
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onNoteTypeFilterSelected(null)
+                                isExpanded = false
+                            }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Limpiar filtro",
+                            tint = iconTint
+                        )
+                        Text(
+                            text = "Limpiar filtro",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = textColor
+                        )
+                    }
                 }
             }
         }
@@ -216,12 +284,16 @@ fun NoteList(
     notes: List<NoteDTO>,
     onNoteClick: (Int) -> Unit,
     onFavClick: (Int) -> Unit,
-    onFilterSelected: (Boolean) -> Unit
+    onFilterSelected: (Boolean) -> Unit,
+    onFilterByNoteTypeSelected: (NoteType?) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         FilterHeader(
             onFilterSelected = { filterOption ->
                 onFilterSelected(filterOption)
+            },
+            onNoteTypeFilterSelected = { noteType ->
+                onFilterByNoteTypeSelected(noteType)
             },
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
@@ -407,12 +479,13 @@ fun formatDateTime(dateTimeStr: String): String {
     }
 }
 
+
 @Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
 @Composable
 fun Preview() {
     NoteList(
         notes = listOf(
-            NoteDTO(title= "sdadasdadadadadadad", content = "dsadadadadad",rating = 10),
+            NoteDTO(title = "Nota 1", content = "Contenido 1", rating = 10),
             NoteDTO(rating = 5),
             NoteDTO(type = NoteTypeU.EVENT),
             NoteDTO(),
@@ -421,6 +494,7 @@ fun Preview() {
         ),
         onNoteClick = {},
         onFavClick = {},
-        onFilterSelected = {}
+        onFilterSelected = {},
+        onFilterByNoteTypeSelected = {}
     )
 }
