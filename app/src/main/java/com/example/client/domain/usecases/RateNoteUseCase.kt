@@ -1,6 +1,6 @@
 package com.example.client.domain.usecases
 
-import com.example.client.data.repositories.NoteRepository
+import com.example.client.data.remote.NoteRepository
 import javax.inject.Inject
 
 class RateNoteUseCase @Inject constructor(private val noteRepository: NoteRepository) {

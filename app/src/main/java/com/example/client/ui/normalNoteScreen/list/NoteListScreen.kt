@@ -1,5 +1,6 @@
 package com.example.client.ui.noteScreen.list
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,19 +12,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,8 +55,10 @@ import com.example.client.ui.common.UiEvent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import  com.example.client.R
-
-
+import com.example.client.data.model.NoteDTO
+import com.example.client.domain.model.note.NoteType
+import com.example.client.ui.normalNoteScreen.list.NoteListEvent
+import com.example.client.ui.normalNoteScreen.list.NoteListViewModel
 
 
 @Composable
@@ -341,7 +358,7 @@ fun NoteItem(
                     color = textColor
                 )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = note.content ?: "",
@@ -350,7 +367,7 @@ fun NoteItem(
                     maxLines = 2
                 )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -387,7 +404,7 @@ fun NoteItem(
                         )
                     }
                 }
-                if (note.type == NoteTypeU.EVENT && note is EventNoteDTO) {
+                if (note.type == NoteType.EVENT) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -404,12 +421,12 @@ fun NoteItem(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Start: ${formatDateTime(note.start)}",
+                            text = "Start: ${note.start?.let { formatDateTime(it) }}",
                             style = MaterialTheme.typography.bodySmall
                         )
 
                         Text(
-                            text = "End: ${formatDateTime(note.end)}",
+                            text = "End: ${note.end?.let { formatDateTime(it) }}",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -455,7 +472,6 @@ fun NoteItem(
         }
     }
 }
-
 // Función auxiliar para formatear fechas
 fun formatDateTime(dateTimeStr: String): String {
     return try {
@@ -469,14 +485,14 @@ fun formatDateTime(dateTimeStr: String): String {
 }
 
 
-@Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
+@Preview(name = "Portrait Mode", showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable
 fun Preview() {
     NoteList(
         notes = listOf(
             NoteDTO(title = "Nota 1", content = "Contenido 1", rating = 10),
             NoteDTO(rating = 5),
-            NoteDTO(type = NoteTypeU.EVENT),
+            NoteDTO(type = NoteType.EVENT),
             NoteDTO(),
             NoteDTO(),
             NoteDTO()

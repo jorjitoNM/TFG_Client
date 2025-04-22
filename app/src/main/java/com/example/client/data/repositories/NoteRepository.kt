@@ -1,9 +1,10 @@
 package com.example.client.data.remote
 
 import com.example.client.common.NetworkResult
+import com.example.client.data.model.NoteDTO
 import com.example.client.data.remote.datasource.NoteRemoteDataSource
 import com.example.client.domain.model.note.Note
-import com.example.client.ui.noteScreen.list.NoteDTO
+import com.example.client.domain.model.note.NoteType
 import com.example.musicapprest.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -28,17 +29,17 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    suspend fun rateNote(id: Int, rating: Int, username: String) = withContext(dispatcher) {
+    suspend fun rateNote(id: Int, rating: Int) = withContext(dispatcher) {
         try {
-            noteRemoteDataSource.rateNote(id, rating, username)
+            noteRemoteDataSource.rateNote(id, rating)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
 
-    suspend fun updateNote(note: NoteDTO, username: String) = withContext(dispatcher) {
+    suspend fun updateNote(note: NoteDTO) = withContext(dispatcher) {
         try {
-            noteRemoteDataSource.updateNote(note, username)
+            noteRemoteDataSource.updateNote(note)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
