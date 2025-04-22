@@ -34,6 +34,7 @@ fun Navigation() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     val showSnackbar = { message: String ->
         scope.launch {
             snackbarHostState.showSnackbar(

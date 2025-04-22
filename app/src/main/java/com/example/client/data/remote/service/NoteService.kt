@@ -1,8 +1,7 @@
 package com.example.client.data.remote.service
 
-import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.Note
-
+import com.example.client.ui.noteScreen.list.NoteDTO
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -24,5 +23,21 @@ interface NoteService {
         @Query("rating") rating: Int,
     ): Response<NoteDTO>
 
-    
+    @POST("/notes/saveds")
+    suspend fun favNote(
+        @Query("noteId") noteId: Int,
+        @Query("username") username: String
+    ): Response<Unit>
+
+    @GET("/notes/sorted")
+    suspend fun orderNote(
+        @Query("ascending") asc: Boolean
+    ): Response<List<NoteDTO>>
+
+
+    @GET("/notes/type")
+    suspend fun filterNoteByType(
+        @Query("type") noteType: NoteType,
+    ): Response<List<NoteDTO>>
+
 }
