@@ -47,6 +47,8 @@ abstract class BaseApiResponse {
         NetworkResult.Error(errorMessage)
 
 
+
+
 }
 
 fun <T> parseErrorResponse(errorBody: ResponseBody): NetworkResult<T> {

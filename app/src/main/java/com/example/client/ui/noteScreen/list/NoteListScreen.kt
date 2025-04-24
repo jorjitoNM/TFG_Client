@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.client.ui.common.SwipeToDeleteContainer
 import com.example.client.ui.common.UiEvent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -100,6 +101,7 @@ fun NoteListScreen(
         }
     }
 }
+
 @Composable
 private fun FilterHeader(
     onFilterSelected: (Boolean) -> Unit,
@@ -140,72 +142,73 @@ private fun FilterHeader(
         }
 
         if (isExpanded) {
-            Card(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .width(200.dp),
-                elevation = CardDefaults.cardElevation(8.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = backgroundColor
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onFilterSelected(true)
-                                isExpanded = false
-                            }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Orden ascendente",
-                            tint = iconTint
-                        )
-                        Text(
-                            text = "Ascendente",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
-                        )
-                    }
-
-                    // Divider de Material 3 (no deprecated)
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        thickness = 1.dp
+                Card(
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .width(200.dp),
+                    elevation = CardDefaults.cardElevation(8.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = backgroundColor
                     )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onFilterSelected(false)
-                                isExpanded = false
-                            }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Orden descendente",
-                            tint = iconTint
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onFilterSelected(true)
+                                    isExpanded = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowUp,
+                                contentDescription = "Orden ascendente",
+                                tint = iconTint
+                            )
+                            Text(
+                                text = "Ascendente",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = textColor
+                            )
+                        }
+
+                        // Divider de Material 3 (no deprecated)
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            thickness = 1.dp
                         )
-                        Text(
-                            text = "Descendente",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
-                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onFilterSelected(false)
+                                    isExpanded = false
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Orden descendente",
+                                tint = iconTint
+                            )
+                            Text(
+                                text = "Descendente",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = textColor
+                            )
+                        }
                     }
-                }
+
             }
         }
     }
@@ -412,7 +415,7 @@ fun formatDateTime(dateTimeStr: String): String {
 fun Preview() {
     NoteList(
         notes = listOf(
-            NoteDTO(title= "sdadasdadadadadadad", content = "dsadadadadad",rating = 10),
+            NoteDTO(title = "sdadasdadadadadadad", content = "dsadadadadad", rating = 10),
             NoteDTO(rating = 5),
             NoteDTO(type = NoteTypeU.EVENT),
             NoteDTO(),

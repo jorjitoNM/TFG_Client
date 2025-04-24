@@ -46,8 +46,8 @@ class NoteRepository @Inject constructor(
 
     suspend fun favNote(id: Int, username: String) = withContext(dispatcher) {
         try {
-            noteRemoteDataSource.favNote(id,username)
-        } catch (e: Exception){
+            noteRemoteDataSource.favNote(id, username)
+        } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
@@ -55,9 +55,17 @@ class NoteRepository @Inject constructor(
     suspend fun orderNote(asc: Boolean) = withContext(dispatcher) {
         try {
             noteRemoteDataSource.orderNote(asc)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
 
+    }
+
+    suspend fun deleteNote(idNote: Int) = withContext(dispatcher) {
+        try {
+            noteRemoteDataSource.deleteNote(idNote)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
     }
 }

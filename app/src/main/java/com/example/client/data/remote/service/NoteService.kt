@@ -3,6 +3,7 @@ package com.example.client.data.remote.service
 import com.example.client.ui.noteScreen.list.NoteDTO
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PATCH
@@ -41,4 +42,6 @@ interface NoteService {
     suspend fun orderNote(
         @Query("ascending") asc: Boolean
     ): Response<List<NoteDTO>>
+    @DELETE("api/notes/{id}")
+    suspend fun deleteNote(@Path("id") id: Int):Response<Unit>
 }

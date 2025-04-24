@@ -20,4 +20,5 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
         safeApiCall { noteService.favNote(id, username) }
 
     suspend fun orderNote(asc : Boolean) = safeApiCall { noteService.orderNote(asc) }
+    suspend fun deleteNote(idNote:Int)=safeApiCall { noteService.deleteNote(idNote) }
 }
