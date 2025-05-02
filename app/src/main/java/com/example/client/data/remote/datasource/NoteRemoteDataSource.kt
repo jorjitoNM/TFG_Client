@@ -26,23 +26,6 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
 
     suspend fun orderNote(asc : Boolean) = safeApiCall { noteService.orderNote(asc) }
 
-    suspend fun filterNoteByType(noteType: NoteType) = withContext(
-        Dispatchers.IO) {
-        try {
-            val response = noteService.filterNoteByType(noteType)
-            if (response.isSuccessful) {
-                val notes = response.body()
-                if (notes.isNullOrEmpty()) {
-                    NetworkResult.Error("No se encontraron notas para el tipo seleccionado.")
-                } else {
-                    NetworkResult.Success(notes)
-                }
-            } else {
-                NetworkResult.Error("Error en la respuesta del servidor: ${response.message()}")
-            }
-        } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
+    suspend fun filterNoteByType(noteType: NoteType) = safeApiCall { noteService.filterNoteByType(noteType) }
 
 }

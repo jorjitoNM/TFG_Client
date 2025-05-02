@@ -10,7 +10,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.domain.model.note.Note
 import com.example.client.ui.common.UiEvent
-
 @Composable
 fun AddNoteScreen(
     addViewModel: AddViewModel = hiltViewModel(),
@@ -19,14 +18,17 @@ fun AddNoteScreen(
 ) {
     val uiState = addViewModel.uiState.collectAsStateWithLifecycle().value
 
+    // Cargar la nota inicial
     LaunchedEffect(Unit) {
         addViewModel.handleEvent(AddEvent.LoadNote)
     }
 
+    // Mostrar contenido o indicador de carga
     if (!uiState.isLoading) {
         AddNoteContent(
             note = uiState.note,
             onEdit = { note -> addViewModel.handleEvent(AddEvent.EditNote(note)) },
+            onSave = { addViewModel.handleEvent(AddEvent.addNote) },
             onNavigateBack = onNavigateBack
         )
     } else {
@@ -38,12 +40,13 @@ fun AddNoteScreen(
         }
     }
 
+    // Manejar eventos de UI
     LaunchedEffect(uiState.uiEvent) {
         uiState.uiEvent?.let {
-            if (it is UiEvent.ShowSnackbar)
-                showSnackbar(it.message)
-            else if (it is UiEvent.Navigate)
-                onNavigateBack()
+            when (it) {
+                is UiEvent.ShowSnackbar -> showSnackbar(it.message)
+                is UiEvent.Navigate -> onNavigateBack()
+            }
             addViewModel.handleEvent(AddEvent.UiEventDone)
         }
     }
@@ -53,6 +56,7 @@ fun AddNoteScreen(
 fun AddNoteContent(
     note: Note,
     onEdit: (note: Note) -> Unit,
+    onSave: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     var title by remember { mutableStateOf(note.tittle) }
@@ -65,7 +69,7 @@ fun AddNoteContent(
                 title = it
                 onEdit(note.copy(tittle = it))
             },
-            label = { Text("Title") },
+            label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,15 +79,21 @@ fun AddNoteContent(
                 content = it
                 onEdit(note.copy(content = it))
             },
-            label = { Text("Content") },
+            label = { Text("Contenido") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onNavigateBack,
-            modifier = Modifier.align(Alignment.End)
+        Row(
+            horizontalArrangement = Arrangement.End,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Save")
+            Button(onClick = onSave) {
+                Text("Guardar")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = onNavigateBack) {
+                Text("Cancelar")
+            }
         }
     }
 }
