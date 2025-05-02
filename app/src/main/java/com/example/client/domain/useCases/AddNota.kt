@@ -1,8 +1,9 @@
 package com.example.client.domain.useCases
 
-import android.provider.ContactsContract.CommonDataKinds.Note
+import com.example.client.data.remote.NoteRepository
+import com.example.client.domain.model.note.Note
 import javax.inject.Inject
 
-class AddNota @Inject constructor(private val notesRepository: NotesRepository) {
-    operator fun invoke(note : Note) = notesRepository.addNotes(note)
+class AddNota @Inject constructor(private val notesRepository: NoteRepository) {
+    suspend operator fun invoke(note : Note, username: String) = notesRepository.addNote(note,username)
 }

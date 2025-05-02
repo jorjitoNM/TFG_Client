@@ -8,28 +8,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.client.domain.model.note.Note
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.normalNoteScreen.detail.NoteDetailEvent
+
 @Composable
 fun AddNoteScreen(
     addViewModel: AddViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit = {},
+    navController: NavController,
     showSnackbar: (String) -> Unit = {}
 ) {
     val uiState = addViewModel.uiState.collectAsStateWithLifecycle().value
 
-    // Cargar la nota inicial
-    LaunchedEffect(Unit) {
-        addViewModel.handleEvent(AddEvent.LoadNote)
+    LaunchedEffect(uiState.aviso) {
+        uiState.aviso?.let {
+            when (it) {
+                is UiEvent.ShowSnackbar -> {
+                    showSnackbar(it.message)
+                    addViewModel.handleEvent(AddEvent.UiEventDone)
+                }
+                else -> {}
+            }
+        }
     }
 
-    // Mostrar contenido o indicador de carga
+
     if (!uiState.isLoading) {
         AddNoteContent(
             note = uiState.note,
-            onEdit = { note -> addViewModel.handleEvent(AddEvent.EditNote(note)) },
+            onEdit = { note -> addViewModel.handleEvent(AddEvent.editNote(note)) },
             onSave = { addViewModel.handleEvent(AddEvent.addNote) },
-            onNavigateBack = onNavigateBack
+            onNavigateBack = { navController.popBackStack() }
         )
     } else {
         Box(
@@ -37,17 +47,6 @@ fun AddNoteScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             CircularProgressIndicator()
-        }
-    }
-
-    // Manejar eventos de UI
-    LaunchedEffect(uiState.uiEvent) {
-        uiState.uiEvent?.let {
-            when (it) {
-                is UiEvent.ShowSnackbar -> showSnackbar(it.message)
-                is UiEvent.Navigate -> onNavigateBack()
-            }
-            addViewModel.handleEvent(AddEvent.UiEventDone)
         }
     }
 }

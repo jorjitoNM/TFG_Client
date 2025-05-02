@@ -28,4 +28,6 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
 
     suspend fun filterNoteByType(noteType: NoteType) = safeApiCall { noteService.filterNoteByType(noteType) }
 
+    suspend fun addNote(note: Note, username: String) = safeApiCall { noteService.addNote(username,note) }
+
 }

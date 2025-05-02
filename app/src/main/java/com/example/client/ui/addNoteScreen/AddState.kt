@@ -6,5 +6,7 @@ import com.example.client.ui.common.UiEvent
 data class AddState(
     val note: Note = Note(),
     val isLoading: Boolean = true,
-    val uiEvent: UiEvent? = null
-)
+    val uiEvent: UiEvent? = null,
+    val aviso: UiEvent? = null,
+
+    )

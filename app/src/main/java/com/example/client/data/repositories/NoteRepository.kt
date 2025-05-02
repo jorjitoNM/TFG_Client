@@ -69,4 +69,12 @@ class NoteRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
+
+    suspend fun addNote(note: Note, username: String) = withContext(dispatcher) {
+        try {
+            noteRemoteDataSource.addNote(note,username)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
 }
