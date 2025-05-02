@@ -44,7 +44,7 @@ interface NoteService {
     @POST("notes/addNota")
     suspend fun addNote(
         @Query("username") username: String,
-        @Query("note") note: Note
+        @Query("note") note: NoteDTO
     ): Response<NoteDTO>
 
 }

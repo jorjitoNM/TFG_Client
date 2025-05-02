@@ -9,10 +9,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.Note
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailEvent
-
 @Composable
 fun AddNoteScreen(
     addViewModel: AddViewModel = hiltViewModel(),
@@ -33,7 +33,6 @@ fun AddNoteScreen(
         }
     }
 
-
     if (!uiState.isLoading) {
         AddNoteContent(
             note = uiState.note,
@@ -53,20 +52,20 @@ fun AddNoteScreen(
 
 @Composable
 fun AddNoteContent(
-    note: Note,
-    onEdit: (note: Note) -> Unit,
+    note: NoteDTO?,
+    onEdit: (note: NoteDTO) -> Unit,
     onSave: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    var title by remember { mutableStateOf(note.tittle) }
-    var content by remember { mutableStateOf(note.content) }
+    var title by remember { mutableStateOf(note?.title ?: "") }
+    var content by remember { mutableStateOf(note?.content ?: "") }
 
     Column(modifier = Modifier.padding(16.dp)) {
         TextField(
             value = title,
             onValueChange = {
                 title = it
-                onEdit(note.copy(tittle = it))
+                note?.let { onEdit(it.copy(title = it.title)) }
             },
             label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
@@ -76,7 +75,7 @@ fun AddNoteContent(
             value = content,
             onValueChange = {
                 content = it
-                onEdit(note.copy(content = it))
+                note?.let { onEdit(it.copy(content = it.content)) }
             },
             label = { Text("Contenido") },
             modifier = Modifier.fillMaxWidth()

@@ -70,7 +70,7 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    suspend fun addNote(note: Note, username: String) = withContext(dispatcher) {
+    suspend fun addNote(note: NoteDTO, username: String) = withContext(dispatcher) {
         try {
             noteRemoteDataSource.addNote(note,username)
         } catch (e: Exception) {
