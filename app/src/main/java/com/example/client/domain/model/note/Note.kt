@@ -1,6 +1,5 @@
 package com.example.client.domain.model.note
 
-import com.example.client.domain.model.user.User
 import java.time.LocalDateTime
 
 data class Note(
@@ -9,9 +8,12 @@ data class Note(
     val content : String = "",
     val privacy : NotePrivacy = NotePrivacy.FOLLOWERS,
     val rating: Int = 5,
-    val owner : User = User(),
+    val owner : String = "",
     val created : LocalDateTime = LocalDateTime.now(),
     val latitude : Double = 0.0,
     val longitude : Double = 0.0,
     val type : NoteType = NoteType.CLASSIC,
+    val likes : Int = 0,
+    val isLiked : Boolean = false,
+    val isSaved : Boolean = false,
 )

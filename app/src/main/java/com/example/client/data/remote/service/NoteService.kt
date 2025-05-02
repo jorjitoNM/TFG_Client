@@ -1,10 +1,15 @@
 package com.example.client.data.remote.service
 
 import com.example.client.data.model.NoteDTO
-import com.example.client.domain.model.note.Note
 import com.example.client.domain.model.note.NoteType
 import retrofit2.Response
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface NoteService {
     @GET("notes")
