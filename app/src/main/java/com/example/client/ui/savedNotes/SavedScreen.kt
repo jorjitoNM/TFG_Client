@@ -19,16 +19,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -94,138 +90,20 @@ fun SavedScreen(
                 onFavClick = {
 //                    noteId ->
 //                    viewModel.handleEvent(NoteListEvent.FavNote(noteId))
-                },
-                onFilterSelected = { filterOption ->
-                    viewModel.handleEvent(SavedEvent.ApplyFilter(filterOption))
-                })
-        }
-    }
-}
-
-@Composable
-private fun FilterHeader(
-    onFilterSelected: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-    val iconTint = MaterialTheme.colorScheme.primary
-    val backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    val textColor = MaterialTheme.colorScheme.onSurface
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End
-    ) {
-        Row(
-            modifier = Modifier
-                .clickable { isExpanded = !isExpanded }
-                .background(backgroundColor, RoundedCornerShape(8.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = "Ordenar",
-                tint = iconTint
-            )
-            Text(
-                text = "Filtros",
-                style = MaterialTheme.typography.labelMedium,
-                color = textColor
-            )
-            Icon(
-                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                contentDescription = if (isExpanded) "Cerrar menú" else "Abrir menú",
-                tint = iconTint
-            )
-        }
-
-        if (isExpanded) {
-            Card(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .width(200.dp),
-                elevation = CardDefaults.cardElevation(8.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = backgroundColor
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onFilterSelected(true)
-                                isExpanded = false
-                            }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Orden ascendente",
-                            tint = iconTint
-                        )
-                        Text(
-                            text = "Ascendente",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
-                        )
-                    }
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        thickness = 1.dp
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onFilterSelected(false)
-                                isExpanded = false
-                            }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Orden descendente",
-                            tint = iconTint
-                        )
-                        Text(
-                            text = "Descendente",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
-                        )
-                    }
                 }
-            }
+            )
         }
     }
 }
+
 
 @Composable
 fun NoteSavedList(
     notes: List<NoteDTO>,
     onNoteClick: (Int) -> Unit,
-    onFavClick: (Int) -> Unit,
-    onFilterSelected: (Boolean) -> Unit
+    onFavClick: (Int) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        FilterHeader(
-            onFilterSelected = { filterOption ->
-                onFilterSelected(filterOption)
-            },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
@@ -421,7 +299,6 @@ fun Preview() {
             NoteDTO()
         ),
         onNoteClick = {},
-        onFavClick = {},
-        onFilterSelected = {}
+        onFavClick = {}
     )
 }
