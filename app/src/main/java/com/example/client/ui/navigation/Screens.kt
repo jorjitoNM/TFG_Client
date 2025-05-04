@@ -14,8 +14,11 @@ object NoteListDestination
 @Serializable
 object NoteDetailDestination
 
-val appDestinationList_Adrian = listOf(
-    NoteList,NoteDetail)
+@Serializable
+object NoteMapDestination
+
+val appDestinationList = listOf(
+    NoteList,NoteDetail,NoteMap)
 
 interface AppDestination{
     val route: Any
@@ -51,6 +54,20 @@ object NoteList : AppMainBottomDestination {
 object NoteDetail : AppMainBottomDestination {
     override val route: Any = NoteDetailDestination
     override val title: String = "Nota Detalle"
+    override val isBottomBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+    override val onBottomBar: Boolean = true
+    override val icon: ImageVector = Icons.Filled.Place
+}
+
+object NoteMap : AppMainBottomDestination {
+    override val route: Any = NoteMapDestination
+    override val title: String = "Nota aa"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
