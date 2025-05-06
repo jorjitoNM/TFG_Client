@@ -1,4 +1,4 @@
-package com.example.client.data.remote
+package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO

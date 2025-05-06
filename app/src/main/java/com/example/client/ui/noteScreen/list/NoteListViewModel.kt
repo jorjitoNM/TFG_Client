@@ -38,7 +38,7 @@ class NoteListViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             when (val result = (orderNoteUseCase.invoke(asc))) {
-                is NetworkResult.Success -> {
+                is NetworkResult.Success<*> -> {
                     _uiState.update {
                         it.copy(
                             notes = result.data,
@@ -47,7 +47,7 @@ class NoteListViewModel @Inject constructor(
                     }
                 }
 
-                is NetworkResult.Error -> {
+                is NetworkResult.Error<*> -> {
                     _uiState.update {
                         it.copy(
                             aviso = UiEvent.ShowSnackbar(result.message),
@@ -56,7 +56,7 @@ class NoteListViewModel @Inject constructor(
                     }
                 }
 
-                is NetworkResult.Loading -> {
+                is NetworkResult.Loading<*> -> {
                     _uiState.update {
                         it.copy(
                             isLoading = true
@@ -118,21 +118,21 @@ class NoteListViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = favNoteUseCase.invoke(noteId, "user1")) {
-                is NetworkResult.Error -> _uiState.update {
+                is NetworkResult.Error<*> ->{ _uiState.update {
                     it.copy(
                         aviso = UiEvent.ShowSnackbar(result.message),
                         isLoading = false
                     )
-                }
+                }  }
 
 
-                is NetworkResult.Loading -> _uiState.update {
+                is NetworkResult.Loading<*> -> _uiState.update {
                     it.copy(
                         isLoading = true
                     )
                 }
 
-                is NetworkResult.Success -> _uiState.update {
+                is NetworkResult.Success<*> -> _uiState.update {
                     it.copy(
                         isLoading = false
                     )
