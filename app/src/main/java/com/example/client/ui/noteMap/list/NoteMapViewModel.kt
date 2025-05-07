@@ -7,7 +7,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.usecases.GetNotesUseCase
+import com.example.client.domain.useCases.GetNotesUseCase
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
