@@ -58,7 +58,6 @@ import  com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.normalNoteScreen.list.NoteListEvent
-import com.example.client.ui.normalNoteScreen.list.NoteListViewModel
 
 
 @Composable

@@ -44,10 +44,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.client.data.model.NoteDTO
+import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.noteScreen.list.EventNoteDTO
-import com.example.client.ui.noteScreen.list.NoteDTO
-import com.example.client.ui.noteScreen.list.NoteTypeU
+
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -206,7 +206,7 @@ fun NoteItem(
                         )
                     }
                 }
-                if (note.type == NoteTypeU.EVENT && note is EventNoteDTO) {
+                if (note.type == NoteType.EVENT) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -223,12 +223,12 @@ fun NoteItem(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Start: ${formatDateTime(note.start)}",
+                            text = "Start: ${note.start?.let { formatDateTime(it) }}",
                             style = MaterialTheme.typography.bodySmall
                         )
 
                         Text(
-                            text = "End: ${formatDateTime(note.end)}",
+                            text = "End: ${note.end?.let { formatDateTime(it) }}",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -293,7 +293,7 @@ fun Preview() {
         notes = listOf(
             NoteDTO(title = "sdadasdadadadadadad", content = "dsadadadadad", rating = 10),
             NoteDTO(rating = 5),
-            NoteDTO(type = NoteTypeU.EVENT),
+            NoteDTO(type = NoteType.EVENT),
             NoteDTO(),
             NoteDTO(),
             NoteDTO()

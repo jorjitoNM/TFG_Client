@@ -9,21 +9,10 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
-@Serializable
-object NormalNoteListDestination
-
-@Serializable
-data class NormalNoteDetailDestination (val noteId: Int)
-
-@Serializable
-object NoteMapDestination
-
-@Serializable
-object NoteSavedListDestination
 
 
 val appDestinationList = listOf(
-    NoteList,NoteDetail,NoteSavedList)
+    NormalNoteList,NoteMap,NoteSavedList)
 
 interface AppDestination{
     val route: Any

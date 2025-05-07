@@ -5,10 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
 import com.example.client.domain.usecases.FavNoteUseCase
-import com.example.client.domain.usecases.GetNotesUseCase
+import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.OrderNoteByTypUseCase
-import com.example.client.domain.usecases.OrderNoteUseCase
+import com.example.client.domain.usecases.note.OrderNoteUseCase
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.normalNoteScreen.list.NoteListEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
