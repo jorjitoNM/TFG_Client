@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.usecases.FavNoteUseCase
+import com.example.client.domain.usecases.GetNoteSearch
 import com.example.client.domain.usecases.GetNotesUseCase
 import com.example.client.domain.usecases.OrderNoteUseCase
 import com.example.client.ui.common.UiEvent
@@ -19,6 +20,7 @@ class NoteListViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
     private val favNoteUseCase: FavNoteUseCase,
     private val orderNoteUseCase: OrderNoteUseCase,
+    private val getNoteSearch: GetNoteSearch,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()
@@ -30,6 +32,35 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.AvisoVisto -> avisoVisto()
             is NoteListEvent.FavNote -> favNote(event.noteId)
             is NoteListEvent.ApplyFilter -> filter(event.asc)
+            is NoteListEvent.GetNoteSearch -> searchNote(event.title)
+        }
+    }
+
+    private fun searchNote(title:Any) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = getNoteSearch.invoke(title.toString())) {
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(result.message),
+                        isLoading = false
+                    )
+
+                }
+                is NetworkResult.Success -> {
+                    val notes = result.data.toList()
+                    _uiState.update { it.copy(notes = notes) }
+
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -118,12 +149,14 @@ class NoteListViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = favNoteUseCase.invoke(noteId, "user1")) {
-                is NetworkResult.Error<*> ->{ _uiState.update {
-                    it.copy(
-                        aviso = UiEvent.ShowSnackbar(result.message),
-                        isLoading = false
-                    )
-                }  }
+                is NetworkResult.Error<*> -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
 
 
                 is NetworkResult.Loading<*> -> _uiState.update {

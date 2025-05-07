@@ -19,6 +19,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -51,10 +52,11 @@ fun NoteListScreen(
     viewModel: NoteListViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-
+    var searchQuery by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
         viewModel.handleEvent(NoteListEvent.GetNotes)
     }
+
 
     LaunchedEffect(state.aviso) {
         state.aviso?.let {
@@ -71,17 +73,30 @@ fun NoteListScreen(
             }
         }
     }
+    Column(modifier = Modifier.fillMaxSize()) {
+        SearchBar(
+            query = searchQuery,
+            onQueryChange = {
+                searchQuery = it
+                viewModel.handleEvent(NoteListEvent.GetNoteSearch(it))
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else {
-            NoteList(
-                notes = state.notes,
-                onNoteClick = { noteId ->
-                    viewModel.handleEvent(NoteListEvent.SelectedNote(noteId))
-                }
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (state.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                NoteList(
+                    notes = state.notes,
+                    onNoteClick = { noteId ->
+                        viewModel.handleEvent(NoteListEvent.SelectedNote(noteId))
+                    }
+                )
+
+            }
         }
     }
 }
@@ -89,7 +104,7 @@ fun NoteListScreen(
 @Composable
 fun NoteList(
     notes: List<NoteDTO>,
-    onNoteClick: (Int) -> Unit
+    onNoteClick: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -184,6 +199,22 @@ fun NoteItem(
             }
         }
     }
+}
+
+@Composable
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.material3.OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = modifier,
+        placeholder = { Text("Buscar notas...") },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp)
+    )
 }
 
 fun formatDateTime(dateTimeStr: String): String {

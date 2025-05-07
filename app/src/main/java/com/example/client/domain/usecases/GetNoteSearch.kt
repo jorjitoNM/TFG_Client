@@ -6,12 +6,12 @@ import com.example.client.data.repositories.NoteRepository
 import javax.inject.Inject
 
 class GetNoteSearch @Inject constructor(private val noteRepository: NoteRepository) {
-    suspend operator fun invoke(texto: String): NetworkResult<List<NoteDTO>> {
+    suspend operator fun invoke(title: String): NetworkResult<List<NoteDTO>> {
         return when (val result = noteRepository.getNotes()) {
             is NetworkResult.Error -> NetworkResult.Error(result.message)
             is NetworkResult.Success -> {
                 val noteSearched = result.data.filter { note ->
-                    note.title.startsWith(texto, ignoreCase = true)
+                    note.title.startsWith(title, ignoreCase = true)
                 }
                 NetworkResult.Success(noteSearched)
             }
