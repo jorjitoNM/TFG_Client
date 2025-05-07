@@ -1,4 +1,4 @@
-package com.example.client.ui.normalNoteScreen.list
+package com.example.client.ui.noteScreen.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

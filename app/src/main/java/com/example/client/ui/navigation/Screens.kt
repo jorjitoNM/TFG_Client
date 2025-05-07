@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
@@ -17,8 +18,12 @@ data class NormalNoteDetailDestination (val noteId: Int)
 @Serializable
 object NoteMapDestination
 
+@Serializable
+object NoteSavedListDestination
+
+
 val appDestinationList = listOf(
-    NormalNoteList,NoteMap)
+    NoteList,NoteDetail,NoteSavedList)
 
 interface AppDestination{
     val route: Any
@@ -49,6 +54,34 @@ object NormalNoteList : AppMainBottomDestination {
     override val isTopBarVisible: Boolean = true
     override val onBottomBar: Boolean = true
     override val icon: ImageVector = Icons.Filled.Home
+}
+
+object NormalNoteDetail : AppMainBottomDestination {
+    override val route: Any = NormalNoteDetailDestination
+    override val title: String = "Nota Detalle"
+    override val isBottomBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+    override val onBottomBar: Boolean = true
+    override val icon: ImageVector = Icons.Filled.Place
+}
+
+object NoteSavedList : AppMainBottomDestination {
+    override val route: Any = NoteSavedListDestination
+    override val title: String = "Nota Saved Lista"
+    override val isBottomBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+    override val onBottomBar: Boolean = true
+    override val icon: ImageVector = Icons.Filled.Star
 }
 
 object NoteMap : AppMainBottomDestination {
