@@ -16,5 +16,6 @@ data class NoteDTO(
     val longitude: Double = 0.0,
     val type: NoteType = NoteType.CLASSIC,
     val start: String? = null,
-    val end: String? = null
+    val end: String? = null,
+    val photos : List<String> = emptyList()
 )
