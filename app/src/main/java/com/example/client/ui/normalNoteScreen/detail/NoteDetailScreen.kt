@@ -30,6 +30,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -50,7 +51,7 @@ import com.example.client.ui.common.UiEvent
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
-import com.example.client.ui.normalNoteScreen.list.formatDateTime
+import com.example.client.ui.noteScreen.list.formatDateTime
 
 @Composable
 fun NoteDetailScreen(
@@ -163,7 +164,7 @@ fun NoteDetailContent(
                     )
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 // Content
                 if (state.isEditing) {

@@ -25,7 +25,8 @@ import com.example.client.R
 import com.example.client.ui.common.TopBar
 import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
-import com.example.client.ui.normalNoteScreen.list.NoteListScreen
+import com.example.client.ui.noteScreen.list.NoteListScreen
+import com.example.client.ui.savedNotes.SavedScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 
@@ -34,6 +35,7 @@ fun Navigation() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     val showSnackbar = { message: String ->
         scope.launch {
             snackbarHostState.showSnackbar(
@@ -98,6 +100,9 @@ fun Navigation() {
             }
             composable<NoteMapDestination> {
                 NoteMapScreen(showSnackbar = { showSnackbar(it) })
+            }
+            composable<NoteSavedListDestination> {
+                SavedScreen(showSnackbar = { showSnackbar(it) })
             }
         }
     }
