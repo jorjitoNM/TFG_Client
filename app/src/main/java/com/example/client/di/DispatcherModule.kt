@@ -1,6 +1,5 @@
 package com.example.musicapprest.di
 
-import com.google.gson.JsonObject
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

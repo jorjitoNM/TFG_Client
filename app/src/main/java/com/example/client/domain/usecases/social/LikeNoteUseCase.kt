@@ -1,6 +1,6 @@
-package com.example.client.domain.usecases
+package com.example.client.domain.usecases.social
 
-import com.example.client.data.SocialRepository
+import com.example.client.data.repositories.SocialRepository
 import java.util.UUID
 import javax.inject.Inject
 
