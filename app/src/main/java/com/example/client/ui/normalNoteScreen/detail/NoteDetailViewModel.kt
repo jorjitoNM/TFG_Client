@@ -1,12 +1,19 @@
 package com.example.client.ui.normalNoteScreen.detail
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
-import com.example.client.domain.usecases.note.*
+import com.example.client.domain.usecases.note.GetNoteUseCase
+import com.example.client.domain.usecases.note.RateNoteUseCase
+import com.example.client.domain.usecases.note.UpdateNoteUseCase
+import com.example.client.domain.usecases.note.images.LoadNoteImagesUseCase
 import com.example.client.ui.common.UiEvent
+import com.example.musicapprest.di.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,7 +24,9 @@ import javax.inject.Inject
 class NoteDetailViewModel @Inject constructor(
     private val getNoteUseCase: GetNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
-    private val rateNoteUseCase: RateNoteUseCase
+    private val rateNoteUseCase: RateNoteUseCase,
+    private val loadNoteImagesUseCase: LoadNoteImagesUseCase,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteDetailState())
     val uiState = _uiState.asStateFlow()
@@ -33,6 +42,57 @@ class NoteDetailViewModel @Inject constructor(
             is NoteDetailEvent.UpdateEditedPrivacy -> updateEditedPrivacy(event.privacy)
             is NoteDetailEvent.AvisoVisto -> avisoVisto()
             is NoteDetailEvent.LikeNote -> {}
+            is NoteDetailEvent.LoadNoteImages -> loadNoteImages(event.imagesUris)
+        }
+    }
+
+    private fun loadNoteImages(imagesUris: List<Uri>) {
+        viewModelScope.launch(dispatcher) {
+            loadNoteImagesUseCase.invoke(imagesUris).collect { result ->
+                when (result) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                note = _uiState.value.note?.let { note ->
+                                    NoteDTO(
+                                        note.id,
+                                        note.title,
+                                        note.content,
+                                        note.privacy,
+                                        note.rating,
+                                        note.ownerUsername,
+                                        note.likes,
+                                        note.created,
+                                        note.latitude,
+                                        note.longitude,
+                                        note.type,
+                                        note.start,
+                                        note.end,
+                                        photos = result.data
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+                    }
+
+                    is NetworkResult.Loading -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -53,6 +113,7 @@ class NoteDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Error -> {
                     _uiState.update {
                         it.copy(
@@ -61,6 +122,7 @@ class NoteDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Loading -> {
                     _uiState.update {
                         it.copy(
@@ -94,6 +156,7 @@ class NoteDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Error -> {
                     _uiState.update {
                         it.copy(
@@ -102,6 +165,7 @@ class NoteDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Loading -> {
                     _uiState.update {
                         it.copy(
@@ -129,6 +193,7 @@ class NoteDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Error -> {
                     _uiState.update {
                         it.copy(
@@ -137,6 +202,7 @@ class NoteDetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Loading -> {
                     _uiState.update {
                         it.copy(

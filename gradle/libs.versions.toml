@@ -29,8 +29,10 @@ mapsCompose = "4.3.3"
 playServicesLocation = "21.2.0"
 accompanist = "0.32.0"
 
+#Firebase
 firebaseBom = "33.10.0"
 crashlytics = "3.0.2"
+services = "4.4.2"
 
 
 
@@ -94,6 +96,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = {module= "com.google.firebase:firebase-firestore"}
 firebase-crashlytics = {module = "com.google.firebase:firebase-crashlytics" }
+firebase-storage = { module = "com.google.firebase:firebase-storage-ktx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -104,3 +107,4 @@ kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 room = { id="androidx.room", version.ref = "roomRuntime" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 crashlytics = {id= "com.google.firebase.crashlytics", version.ref = "crashlytics"}
+googleServices = { id = "com.google.gms.google-services", version.ref = "services"}

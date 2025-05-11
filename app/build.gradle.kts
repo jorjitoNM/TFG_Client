@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.crashlytics)
 }
 
 android {
@@ -28,7 +30,7 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.1.17:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://192.168.1.108:8080/\"")
         }
     }
 
@@ -138,5 +140,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
 
 }

@@ -23,9 +23,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.client.R
 import com.example.client.ui.common.TopBar
-import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.savedNotes.SavedScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
