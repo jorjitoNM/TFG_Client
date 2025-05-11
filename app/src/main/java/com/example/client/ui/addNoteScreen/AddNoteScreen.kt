@@ -20,8 +20,8 @@ import com.example.client.ui.normalNoteScreen.detail.NoteDetailEvent
 @Composable
 fun AddNoteScreen(
     addViewModel: AddViewModel = hiltViewModel(),
-    navController: NavController,
-    showSnackbar: (String) -> Unit = {}
+    showSnackbar: (String) -> Unit = {},
+    onNavigateBack: () -> Unit
 ) {
     val uiState = addViewModel.uiState.collectAsStateWithLifecycle().value
 
@@ -42,7 +42,7 @@ fun AddNoteScreen(
             note = uiState.note,
             onEdit = { note -> addViewModel.handleEvent(AddEvent.editNote(note)) },
             onSave = { addViewModel.handleEvent(AddEvent.addNote) },
-            onNavigateBack = { navController.popBackStack() }
+            onNavigateBack = onNavigateBack
         )
     } else {
         Box(
@@ -53,6 +53,7 @@ fun AddNoteScreen(
         }
     }
 }
+
 @Composable
 fun AddNoteContent(
     note: NoteDTO?,

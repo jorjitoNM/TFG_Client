@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,11 +60,11 @@ import com.google.maps.android.compose.rememberMarkerState
 import java.time.LocalDateTime
 import kotlin.math.cos
 import kotlin.math.sin
-
 @Composable
 fun NoteMapScreen(
     showSnackbar: (String) -> Unit,
-    viewModel: NoteMapViewModel = hiltViewModel()
+    viewModel: NoteMapViewModel = hiltViewModel(),
+    onAddNoteClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val cameraPositionState = rememberCameraPositionState()
@@ -86,19 +88,6 @@ fun NoteMapScreen(
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             viewModel.handleEvent(NoteMapEvent.GetCurrentLocation)
-        }
-    }
-
-    LaunchedEffect(uiState.currentLocation) {
-        uiState.currentLocation?.let { location ->
-            cameraPositionState.animate(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder()
-                        .target(LatLng(location.latitude, location.longitude))
-                        .zoom(15f)
-                        .build()
-                )
-            )
         }
     }
 
@@ -171,8 +160,16 @@ fun NoteMapScreen(
                     .align(Alignment.Center)
             )
         }
+
+        FloatingActionButton(
+            onClick = onAddNoteClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Añadir Nota")
+        }
     }
 }
-
-
-

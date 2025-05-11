@@ -22,13 +22,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.client.R
+import com.example.client.ui.addNoteScreen.AddNoteScreen
 import com.example.client.ui.common.TopBar
 import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.noteScreen.list.NoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
-
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
@@ -70,6 +70,7 @@ fun Navigation() {
         if (screen?.scaffoldState?.fabVisible == true) {
             FloatingActionButton(
                 onClick = {
+                    navController.navigate("addNote") // Navega a AddNoteScreen
                 },
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding16)),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -91,14 +92,19 @@ fun Navigation() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<NormalNoteListDestination> {
-                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})
+                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = { navController.navigate(NormalNoteDetailDestination(it)) })
             }
             composable<NormalNoteDetailDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
                 NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
-                NoteMapScreen(showSnackbar = { showSnackbar(it) })
+                NoteMapScreen(showSnackbar = { showSnackbar(it) }, onAddNoteClick = { navController.navigate(AddNoteScreen) })
+            }
+            composable <AddNoteScreen> {
+                AddNoteScreen(
+                    showSnackbar = { showSnackbar(it) },onNavigateBack = { navController.navigateUp() }
+                )
             }
         }
     }
