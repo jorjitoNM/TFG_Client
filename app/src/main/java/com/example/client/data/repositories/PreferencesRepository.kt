@@ -1,4 +1,4 @@
-package com.example.client.data.remote
+package com.example.client.data.repositories
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
