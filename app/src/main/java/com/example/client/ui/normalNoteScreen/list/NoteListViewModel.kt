@@ -27,6 +27,7 @@ class NoteListViewModel @Inject constructor(
     private val orderNoteUseCase: OrderNoteUseCase,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
     private val getNoteSearch: GetNoteSearch,
+    private val likeNoteUseCase: LikeNoteUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()

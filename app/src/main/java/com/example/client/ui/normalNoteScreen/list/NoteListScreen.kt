@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.noteScreen.list.NoteListViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
