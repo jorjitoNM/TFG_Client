@@ -8,6 +8,7 @@ data class NoteMapState(
     val notes: List<NoteDTO> = emptyList(),
     val isLoading: Boolean = false,
     val aviso: UiEvent? = null,
+    val currentSearch : String = "",
     val currentLocation: Location? = null,
     val hasLocationPermission: Boolean = false
 )

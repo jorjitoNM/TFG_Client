@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.domain.usecases.note.GetNoteSearch
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteMapViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
+    private val getNoteSearch: GetNoteSearch,
     private val application: Application
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteMapState())
@@ -36,9 +38,43 @@ class NoteMapViewModel @Inject constructor(
             is NoteMapEvent.AvisoVisto -> avisoVisto()
             is NoteMapEvent.GetCurrentLocation -> getCurrentLocation()
             is NoteMapEvent.CheckLocationPermission -> checkLocationPermission()
-
+            is NoteMapEvent.SearchNote -> searchNote(event.query)
         }
     }
+
+    private fun searchNote (query: String) {
+        viewModelScope.launch {
+            when (val result = getNoteSearch(query)) {
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            notes = result.data,
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
 
     private fun getNotes() {
         viewModelScope.launch {
