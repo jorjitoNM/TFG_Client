@@ -7,6 +7,9 @@ import com.example.client.domain.model.note.NoteType
 import com.example.client.domain.usecases.note.FavNoteUseCase
 
 import com.example.client.domain.usecases.note.*
+import com.example.client.domain.usecases.note.GetNotesUseCase
+import com.example.client.domain.usecases.note.OrderNoteUseCase
+import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.normalNoteScreen.list.NoteListEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,8 +39,38 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.FavNote -> favNote(event.noteId)
             is NoteListEvent.ApplyFilter -> filter(event.asc)
             is NoteListEvent.OrderByType -> orderByType(event.type)
+            is NoteListEvent.LikeNote -> likeNote(event.noteId)
             is NoteListEvent.GetNoteSearch -> searchNote(event.title)
 
+        }
+    }
+
+    private fun likeNote(noteId: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            when (val result = likeNoteUseCase.invoke(noteId, UUID.fromString("11111111-1111-1111-1111-111111111111"))) {
+                is NetworkResult.Success -> {
+                    _uiState.update { it.copy( isLoading = false) }
+                }
+
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
         }
     }
 
