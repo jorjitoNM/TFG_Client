@@ -1,4 +1,4 @@
-package com.example.client.domain.usecases
+package com.example.client.domain.useCases
 
 import com.example.client.data.remote.NoteRepository
 import com.example.client.domain.model.note.NoteType
