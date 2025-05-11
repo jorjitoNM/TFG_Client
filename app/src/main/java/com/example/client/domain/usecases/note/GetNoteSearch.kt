@@ -1,4 +1,4 @@
-package com.example.client.domain.usecases
+package com.example.client.domain.usecases.note
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO

@@ -3,10 +3,12 @@ package com.example.client.ui.noteScreen.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.usecases.FavNoteUseCase
-import com.example.client.domain.usecases.GetNotesUseCase
-import com.example.client.domain.usecases.OrderNoteUseCase
+import com.example.client.domain.model.note.NoteType
+import com.example.client.domain.usecases.note.FavNoteUseCase
+
+import com.example.client.domain.usecases.note.*
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.normalNoteScreen.list.NoteListEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +34,7 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.AvisoVisto -> avisoVisto()
             is NoteListEvent.FavNote -> favNote(event.noteId)
             is NoteListEvent.ApplyFilter -> filter(event.asc)
-            is NoteListEvent.OrderByType -> orderByType(event.type)            is NoteListEvent.GetNoteSearch -> searchNote(event.title)
+            is NoteListEvent.OrderByType -> orderByType(event.type)
             is NoteListEvent.GetNoteSearch -> searchNote(event.title)
 
         }
@@ -44,7 +46,7 @@ class NoteListViewModel @Inject constructor(
 
             when (val result = orderNoteByTypUseCase.invoke(type)) {
                 is NetworkResult.Success -> {
-                    if (result.data.isNullOrEmpty()) {
+                    if (result.data.isEmpty()) {
                         _uiState.update {
                             it.copy(
                                 aviso = UiEvent.ShowSnackbar("No se encontraron notas para el tipo seleccionado."),
