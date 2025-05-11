@@ -4,6 +4,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -46,4 +47,6 @@ interface NoteService {
         @Query("type") noteType: NoteType,
     ): Response<List<NoteDTO>>
 
+    @DELETE("notes/{id}")
+    suspend fun deleteNote(@Path("id") id: Int):Response<Unit>
 }

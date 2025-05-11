@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.ui.common.UiEvent
@@ -140,6 +141,12 @@ fun NoteMapScreen(
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun NoteMapPreview (modifier: Modifier = Modifier) {
+    NoteMapScreen({})
 }
 
 

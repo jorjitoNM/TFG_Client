@@ -1,19 +1,23 @@
-package com.example.client.ui.normalNoteScreen.list
+package com.example.client.ui.noteScreen.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
-import com.example.client.domain.usecases.FavNoteUseCase
-import com.example.client.domain.usecases.GetNotesUseCase
-import com.example.client.domain.usecases.OrderNoteByTypUseCase
-import com.example.client.domain.usecases.OrderNoteUseCase
+import com.example.client.domain.usecases.note.FavNoteUseCase
+
+import com.example.client.domain.usecases.note.*
+import com.example.client.domain.usecases.note.GetNotesUseCase
+import com.example.client.domain.usecases.note.OrderNoteUseCase
+import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.normalNoteScreen.list.NoteListEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,6 +26,8 @@ class NoteListViewModel @Inject constructor(
     private val favNoteUseCase: FavNoteUseCase,
     private val orderNoteUseCase: OrderNoteUseCase,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
+    private val getNoteSearch: GetNoteSearch,
+    private val likeNoteUseCase: LikeNoteUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()
@@ -34,6 +40,38 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.FavNote -> favNote(event.noteId)
             is NoteListEvent.ApplyFilter -> filter(event.asc)
             is NoteListEvent.OrderByType -> orderByType(event.type)
+            is NoteListEvent.LikeNote -> likeNote(event.noteId)
+            is NoteListEvent.GetNoteSearch -> searchNote(event.title)
+
+        }
+    }
+
+    private fun likeNote(noteId: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            when (val result = likeNoteUseCase.invoke(noteId, UUID.fromString("11111111-1111-1111-1111-111111111111"))) {
+                is NetworkResult.Success -> {
+                    _uiState.update { it.copy( isLoading = false) }
+                }
+
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -43,7 +81,7 @@ class NoteListViewModel @Inject constructor(
 
             when (val result = orderNoteByTypUseCase.invoke(type)) {
                 is NetworkResult.Success -> {
-                    if (result.data.isNullOrEmpty()) {
+                    if (result.data.isEmpty()) {
                         _uiState.update {
                             it.copy(
                                 aviso = UiEvent.ShowSnackbar("No se encontraron notas para el tipo seleccionado."),
@@ -67,6 +105,34 @@ class NoteListViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun searchNote(title:Any) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = getNoteSearch.invoke(title.toString())) {
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(result.message),
+                        isLoading = false
+                    )
+
+                }
+                is NetworkResult.Success -> {
+                    val notes = result.data.toList()
+                    _uiState.update { it.copy(notes = notes) }
+
                 }
 
                 is NetworkResult.Loading -> {

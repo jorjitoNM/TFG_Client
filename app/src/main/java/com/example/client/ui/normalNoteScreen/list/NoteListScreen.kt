@@ -2,18 +2,7 @@ package com.example.client.ui.normalNoteScreen.list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,23 +12,12 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,9 +29,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.noteScreen.list.NoteListViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 
 @Composable
 fun NoteListScreen(
@@ -62,6 +40,7 @@ fun NoteListScreen(
     viewModel: NoteListViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(NoteListEvent.GetNotes)
@@ -88,6 +67,8 @@ fun NoteListScreen(
         } else {
             NoteList(
                 notes = state.notes,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
                 onNoteClick = { noteId ->
                     viewModel.handleEvent(NoteListEvent.SelectedNote(noteId))
                 },
@@ -101,14 +82,34 @@ fun NoteListScreen(
                     noteType?.let {
                         viewModel.handleEvent(NoteListEvent.OrderByType(it))
                     } ?: viewModel.handleEvent(NoteListEvent.GetNotes)
-                }
+                },
+                onLikeClick = { viewModel.handleEvent(NoteListEvent.LikeNote(it)) }
             )
         }
     }
 }
 
 @Composable
-private fun FilterHeader(
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text("Buscar notas...") },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+    )
+}
+
+@Composable
+fun FilterHeader(
     onFilterSelected: (Boolean) -> Unit,
     onNoteTypeFilterSelected: (NoteType?) -> Unit,
     modifier: Modifier = Modifier
@@ -161,7 +162,7 @@ private fun FilterHeader(
                 Column(
                     modifier = Modifier.padding(vertical = 8.dp)
                 ) {
-                    // Filtro Ascendente
+                    // Ascendente
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -185,14 +186,13 @@ private fun FilterHeader(
                         )
                     }
 
-                    // Divider
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                         thickness = 1.dp
                     )
 
-                    // Filtro Descendente
+                    // Descendente
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -216,14 +216,13 @@ private fun FilterHeader(
                         )
                     }
 
-                    // Divider
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                         thickness = 1.dp
                     )
 
-                    // Filtros por NoteType
+                    // Por tipo de nota
                     NoteType.values().forEach { noteType ->
                         Row(
                             modifier = Modifier
@@ -249,7 +248,7 @@ private fun FilterHeader(
                         }
                     }
 
-                    // Opción para limpiar el filtro
+                    // Limpiar filtro
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -281,31 +280,47 @@ private fun FilterHeader(
 @Composable
 fun NoteList(
     notes: List<NoteDTO>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onNoteClick: (Int) -> Unit,
     onFavClick: (Int) -> Unit,
     onFilterSelected: (Boolean) -> Unit,
     onFilterByNoteTypeSelected: (NoteType?) -> Unit,
+    onLikeClick: (Int) -> Unit,
 ) {
+    // Filtrado por búsqueda
+    val filteredNotes = if (searchQuery.isBlank()) {
+        notes
+    } else {
+        notes.filter { note ->
+            note.title.contains(searchQuery, ignoreCase = true) ||
+                    (note.content?.contains(searchQuery, ignoreCase = true) == true)
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
+        SearchBar(
+            query = searchQuery,
+            onQueryChange = onSearchQueryChange,
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
         FilterHeader(
-            onFilterSelected = { filterOption ->
-                onFilterSelected(filterOption)
-            },
-            onNoteTypeFilterSelected = { noteType ->
-                onFilterByNoteTypeSelected(noteType)
-            },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            onFilterSelected = onFilterSelected,
+            onNoteTypeFilterSelected = onFilterByNoteTypeSelected,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
         )
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(notes) { note ->
+            items(filteredNotes) { note ->
                 NoteItem(
                     note = note,
                     onClick = { onNoteClick(note.id) },
-                    onFavClick = { onFavClick(note.id) }
+                    onFavClick = { onFavClick(note.id) },
+                    onLikeClick = onLikeClick
                 )
             }
         }
@@ -316,7 +331,8 @@ fun NoteList(
 fun NoteItem(
     note: NoteDTO,
     onClick: () -> Unit,
-    onFavClick: (Int) -> Unit
+    onFavClick: (Int) -> Unit,
+    onLikeClick: (Int) -> Unit
 ) {
     var isFavorite by remember { mutableStateOf(false) }
     var isLiked by remember { mutableStateOf(false) }
@@ -330,9 +346,7 @@ fun NoteItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = cardBackground
-        ),
+        colors = CardDefaults.cardColors(containerColor = cardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -400,16 +414,12 @@ fun NoteItem(
                 }
                 if (note.type == NoteType.EVENT) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Spacer(modifier = Modifier.height(8.dp))
-
                     Text(
                         text = "EVENT",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
-
                     Spacer(modifier = Modifier.height(4.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -418,7 +428,6 @@ fun NoteItem(
                             text = "Start: ${note.start?.let { formatDateTime(it) }}",
                             style = MaterialTheme.typography.bodySmall
                         )
-
                         Text(
                             text = "End: ${note.end?.let { formatDateTime(it) }}",
                             style = MaterialTheme.typography.bodySmall
@@ -442,8 +451,7 @@ fun NoteItem(
                     Icon(
                         imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
                         contentDescription = "Favorito",
-                        tint = if (isFavorite) goldColor
-                        else textColor.copy(alpha = 0.4f),
+                        tint = if (isFavorite) goldColor else textColor.copy(alpha = 0.4f),
                         modifier = Modifier.size(34.dp)
                     )
                 }
@@ -451,14 +459,16 @@ fun NoteItem(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 IconButton(
-                    onClick = { isLiked = !isLiked },
+                    onClick = {
+                        isLiked = !isLiked
+                        onLikeClick(note.id)
+                    },
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
-                        contentDescription = "Me gusta",
-                        tint = if (isLiked) pinkColor
-                        else textColor.copy(alpha = 0.4f),
+                        contentDescription = "Like",
+                        tint = if (isLiked) pinkColor else textColor.copy(alpha = 0.4f),
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -466,7 +476,6 @@ fun NoteItem(
         }
     }
 }
-
 
 fun formatDateTime(dateTimeStr: String): String {
     return try {
@@ -478,7 +487,6 @@ fun formatDateTime(dateTimeStr: String): String {
         dateTimeStr
     }
 }
-
 
 @Preview(name = "Portrait Mode", showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable
@@ -492,9 +500,12 @@ fun Preview() {
             NoteDTO(),
             NoteDTO()
         ),
+        searchQuery = "",
+        onSearchQueryChange = {},
         onNoteClick = {},
         onFavClick = {},
         onFilterSelected = {},
-        onFilterByNoteTypeSelected = {}
+        onFilterByNoteTypeSelected = {},
+        onLikeClick = {},
     )
 }
