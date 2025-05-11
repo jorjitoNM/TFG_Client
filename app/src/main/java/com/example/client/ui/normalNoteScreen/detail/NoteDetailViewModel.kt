@@ -3,16 +3,12 @@ package com.example.client.ui.normalNoteScreen.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
-import com.example.client.domain.usecases.GetNoteUseCase
-import com.example.client.domain.usecases.RateNoteUseCase
-import com.example.client.domain.usecases.UpdateNoteUseCase
-import com.example.client.domain.usecases.social.LikeNoteUseCase
+import com.example.client.domain.usecases.note.GetNoteUseCase
+import com.example.client.domain.usecases.note.RateNoteUseCase
+import com.example.client.domain.usecases.note.UpdateNoteUseCase
 import com.example.client.ui.common.UiEvent
-import com.example.musicapprest.di.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,9 +19,7 @@ import javax.inject.Inject
 class NoteDetailViewModel @Inject constructor(
     private val getNoteUseCase: GetNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
-    private val rateNoteUseCase: RateNoteUseCase,
-    private val likeNoteUseCase: LikeNoteUseCase,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    private val rateNoteUseCase: RateNoteUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteDetailState())
     val uiState = _uiState.asStateFlow()
@@ -40,35 +34,6 @@ class NoteDetailViewModel @Inject constructor(
             is NoteDetailEvent.UpdateEditedContent -> updateEditedContent(event.content)
             is NoteDetailEvent.UpdateEditedPrivacy -> updateEditedPrivacy(event.privacy)
             is NoteDetailEvent.AvisoVisto -> avisoVisto()
-            is NoteDetailEvent.LikeNote -> likeNote(event.noteId)
-        }
-    }
-
-    private fun likeNote(noteId: Int) {
-        viewModelScope.launch(dispatcher) {
-            when (val result = likeNoteUseCase.invoke(noteId)) {
-                is NetworkResult.Success -> _uiState.update { it.copy(note = _uiState.value.note?.let { it1 ->
-                    NoteDTO(
-                        it1.id,
-                        it1.title,
-                        it1.content,
-                        it1.privacy,
-                        it1.rating,
-                        it1.ownerUsername,
-                        it1.likes+1,
-                        it1.created,
-                        it1.latitude,
-                        it1.longitude,
-                        it1.type,
-                        it1.start,
-                        it1.end,
-                        it1.photos
-                    )
-                }) }
-
-                is NetworkResult.Error -> TODO()
-                is NetworkResult.Loading -> TODO()
-            }
         }
     }
 

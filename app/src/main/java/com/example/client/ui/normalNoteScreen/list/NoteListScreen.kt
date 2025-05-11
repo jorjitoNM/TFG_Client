@@ -101,7 +101,8 @@ fun NoteListScreen(
                     noteType?.let {
                         viewModel.handleEvent(NoteListEvent.OrderByType(it))
                     } ?: viewModel.handleEvent(NoteListEvent.GetNotes)
-                }
+                },
+                onLikeClick = { viewModel.handleEvent(NoteListEvent.LikeNote(it))}
             )
         }
     }
@@ -285,6 +286,7 @@ fun NoteList(
     onFavClick: (Int) -> Unit,
     onFilterSelected: (Boolean) -> Unit,
     onFilterByNoteTypeSelected: (NoteType?) -> Unit,
+    onLikeClick : (Int) -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         FilterHeader(
@@ -305,7 +307,8 @@ fun NoteList(
                 NoteItem(
                     note = note,
                     onClick = { onNoteClick(note.id) },
-                    onFavClick = { onFavClick(note.id) }
+                    onFavClick = { onFavClick(note.id) },
+                    onLikeClick = onLikeClick,
                 )
             }
         }
@@ -316,7 +319,8 @@ fun NoteList(
 fun NoteItem(
     note: NoteDTO,
     onClick: () -> Unit,
-    onFavClick: (Int) -> Unit
+    onFavClick: (Int) -> Unit,
+    onLikeClick: (Int) -> Unit,
 ) {
     var isFavorite by remember { mutableStateOf(false) }
     var isLiked by remember { mutableStateOf(false) }
@@ -451,15 +455,17 @@ fun NoteItem(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 IconButton(
-                    onClick = { isLiked = !isLiked },
+                    onClick = {
+                        isLiked = !isLiked
+                        onLikeClick(note.id) },
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
-                        contentDescription = "Me gusta",
+                        contentDescription = "Like",
                         tint = if (isLiked) pinkColor
                         else textColor.copy(alpha = 0.4f),
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(28.dp).clickable {  }
                     )
                 }
             }
@@ -495,6 +501,7 @@ fun Preview() {
         onNoteClick = {},
         onFavClick = {},
         onFilterSelected = {},
-        onFilterByNoteTypeSelected = {}
+        onFilterByNoteTypeSelected = {},
+        onLikeClick = {},
     )
 }

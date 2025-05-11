@@ -1,24 +1,18 @@
 package com.example.client.ui.normalNoteScreen.detail
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
@@ -46,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,7 +48,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
@@ -101,8 +93,7 @@ fun NoteDetailScreen(
                 onSaveClick = { viewModel.handleEvent(NoteDetailEvent.UpdateNote) },
                 onCancelClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
                 onBackClick = onNavigateBack,
-                onDeleteClick = { /* Implement if needed */ },
-                onLikeClick = { viewModel.handleEvent(NoteDetailEvent.LikeNote(noteId))}
+                onDeleteClick = { /* Implement if needed */ }
             )
         }
     }
@@ -119,8 +110,7 @@ fun NoteDetailContent(
     onSaveClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
-    onLikeClick : (noteId : Int) -> Unit = {},
+    onDeleteClick: () -> Unit = {}
 ) {
     val note = state.note ?: return
 
@@ -234,19 +224,6 @@ fun NoteDetailContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-
-                    LazyRow( modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(0.3f)
-                        .padding(horizontal = 16.dp)
-                    ) {
-                        itemsIndexed(note.photos) { index, url ->
-                            if (index == note.photos.size)
-                                PlusImageButton()
-                            else
-                                ImageItem(url)
-                        }
-                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -336,31 +313,6 @@ fun NoteDetailContent(
             }
         }
     }
-}
-
-@Composable
-fun PlusImageButton() {
-    Box(modifier = Modifier
-        .padding(4.dp)
-        .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "Add",
-            modifier = Modifier.fillMaxSize(),
-            tint = MaterialTheme.colorScheme.primary
-        )
-    }
-}
-
-@Composable
-fun ImageItem(url: String) {
-    AsyncImage(
-        model = url,
-        contentDescription = "Imagine this is an epic photo",
-        modifier = Modifier
-            .padding(4.dp)
-            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
-    )
 }
 
 @Composable
