@@ -14,6 +14,7 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
     BaseApiResponse() {
 
     suspend fun getNotes() = safeApiCall { noteService.getNotes() }
+
     suspend fun getNote(id: Int) = safeApiCall { noteService.getNote(id) }
     suspend fun updateNote(note: NoteDTO) =
         safeApiCall { noteService.updateNote(note) }
@@ -24,8 +25,9 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
     suspend fun favNote(id: Int, username: String) =
         safeApiCall { noteService.favNote(id, username) }
 
-    
+
     suspend fun orderNote(asc : Boolean) = safeApiCall { noteService.orderNote(asc) }
+    suspend fun deleteNote(idNote:Int)=safeApiCall { noteService.deleteNote(idNote) }
 
     suspend fun filterNoteByType(noteType: NoteType) = withContext(
         Dispatchers.IO) {

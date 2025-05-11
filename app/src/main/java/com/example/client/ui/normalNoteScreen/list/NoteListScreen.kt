@@ -50,7 +50,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
 import com.example.client.ui.common.UiEvent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -79,6 +78,7 @@ fun NoteListScreen(
                     showSnackbar(it.message)
                     viewModel.handleEvent(NoteListEvent.AvisoVisto)
                 }
+
                 is UiEvent.PopBackStack -> {
                     onNavigateToDetail(state.selectedNoteId)
                     viewModel.handleEvent(NoteListEvent.AvisoVisto)
@@ -91,6 +91,7 @@ fun NoteListScreen(
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
+
             NoteList(
                 notes = state.notes,
                 onNoteClick = { noteId ->
@@ -111,7 +112,6 @@ fun NoteListScreen(
         }
     }
 }
-
 @Composable
 private fun FilterHeader(
     onFilterSelected: (Boolean) -> Unit,
@@ -471,7 +471,7 @@ fun NoteItem(
         }
     }
 }
-// Función auxiliar para formatear fechas
+
 fun formatDateTime(dateTimeStr: String): String {
     return try {
         val formatter = DateTimeFormatter.ISO_DATE_TIME
