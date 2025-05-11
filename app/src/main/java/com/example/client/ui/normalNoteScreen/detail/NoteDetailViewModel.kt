@@ -32,6 +32,7 @@ class NoteDetailViewModel @Inject constructor(
             is NoteDetailEvent.UpdateEditedContent -> updateEditedContent(event.content)
             is NoteDetailEvent.UpdateEditedPrivacy -> updateEditedPrivacy(event.privacy)
             is NoteDetailEvent.AvisoVisto -> avisoVisto()
+            is NoteDetailEvent.LikeNote -> {}
         }
     }
 

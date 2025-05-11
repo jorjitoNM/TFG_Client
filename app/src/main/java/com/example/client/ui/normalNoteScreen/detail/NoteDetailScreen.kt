@@ -1,5 +1,7 @@
 package com.example.client.ui.normalNoteScreen.detail
 
+import android.widget.RatingBar
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -8,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
@@ -32,6 +37,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -39,6 +45,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathSegment
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -46,6 +55,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 
 import com.example.client.ui.common.UiEvent
 import com.example.client.data.model.NoteDTO
@@ -241,6 +251,11 @@ fun NoteDetailContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                Row (modifier = Modifier
+                    .fillMaxWidth()) {
+                    NoteImages(modifier = Modifier ,photos = listOf("https://thispersondoesnotexist.com/","https://thispersondoesnotexist.com/","https://thispersondoesnotexist.com/"))
+                }
+
                 // Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -370,6 +385,46 @@ fun EventDetails(note: NoteDTO) {
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun NoteImages (modifier: Modifier = Modifier, photos : List<String>) {
+    LazyRow {
+        itemsIndexed(photos) { index, imageUrl ->
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(200.dp)
+            ) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Note image $index",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+
+                IconButton(
+                    onClick = { //onRemoveImage(imageUrl) },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                shape = CircleShape
+                            )
+                            .size(24.dp)
+                            .padding(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Remove image",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
             }
         }
     }
