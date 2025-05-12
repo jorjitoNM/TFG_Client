@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -175,11 +174,6 @@ fun NoteMapScreen(
         }
     }
 
-    LaunchedEffect(cameraPositionState.position.zoom) {
-        viewModel.handleEvent(NoteMapEvent.GetGroupedNotesByZoom(cameraPositionState.position.zoom))
-    }
-
-
     // Filtrado de notas por tipo y búsqueda
     val filteredNotes = remember(uiState.notes, uiState.selectedType, uiState.currentSearch) {
         uiState.notes
@@ -244,10 +238,11 @@ fun NoteMapScreen(
                 }
             ) {
 
-                uiState.groupedNotes.forEach { group ->
-                    val markerState = rememberMarkerState(position = LatLng(group.latitude, group.longitude))
-                    val noteType = group.notes.firstOrNull()?.type ?: NoteType.CLASSIC // Usa el tipo de la primera nota
-                    val isSelected = selectedLocation?.latitude == group.latitude && selectedLocation?.longitude == group.longitude
+                notesByLocation.forEach { (location, notes) ->
+                    val markerState = rememberMarkerState(position = location)
+                    val note = notes.first()
+                    val noteType = note.type
+                    val isSelected = selectedLocation == location
 
                     val iconBitmapDescriptor = if (isSelected) {
                         BitmapDescriptorFactory.defaultMarker(getMarkerColor(noteType))
@@ -257,19 +252,18 @@ fun NoteMapScreen(
 
                     Marker(
                         state = markerState,
-                        title = "${group.notes.size} nota(s) (${group.totalLikes} likes)",
-                        snippet = "Click para ver detalles",
+                        title = "${notes.size} note(s)",
+                        snippet = "Click to view details",
                         icon = iconBitmapDescriptor,
                         onClick = {
                             selectedNotes.clear()
-                            selectedNotes.addAll(group.notes)
-                            selectedLocation = LatLng(group.latitude, group.longitude)
+                            selectedNotes.addAll(notes)
+                            selectedLocation = location
                             scope.launch { bottomSheetState.expand() }
                             true
                         }
                     )
                 }
-
             }
 
             // Floating search bar on top of everything
@@ -397,11 +391,10 @@ fun NoteMapScreen(
 
             // Loading indicator
             if (uiState.isLoading) {
-                LinearProgressIndicator(
+                CircularProgressIndicator(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .height(3.dp)
+                        .size(50.dp)
+                        .align(Alignment.Center)
                 )
             }
         }

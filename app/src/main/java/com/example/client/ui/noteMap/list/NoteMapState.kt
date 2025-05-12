@@ -10,7 +10,6 @@ import com.google.android.gms.maps.model.LatLng
 
 data class NoteMapState(
     val notes: List<NoteDTO> = emptyList(),
-    val groupedNotes: List<NoteMapDTO> = emptyList(),
     val isLoading: Boolean = false,
     val aviso: UiEvent? = null,
     val currentSearch: String = "",

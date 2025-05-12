@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
-import com.example.client.domain.usecases.note.GetGroupedNotesByZoomUseCase
 import com.example.client.domain.usecases.note.GetNoteSearch
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
@@ -24,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteMapViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
-    private val getGroupedNotesByZoomUseCase: GetGroupedNotesByZoomUseCase,
     private val getNoteSearch: GetNoteSearch,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
     private val application: Application
@@ -47,7 +45,6 @@ class NoteMapViewModel @Inject constructor(
             is NoteMapEvent.UpdateSelectedType -> updateSelectedType(event.noteType)
             is NoteMapEvent.UpdateSearchText -> updateSearchText(event.text)
             is NoteMapEvent.FilterByType -> filterByType(event.noteType)
-            is NoteMapEvent.GetGroupedNotesByZoom -> getGroupedNotesByZoom(event.zoom)
 
         }
     }
@@ -82,26 +79,7 @@ class NoteMapViewModel @Inject constructor(
         }
     }
 
-    fun getGroupedNotesByZoom(zoom: Float) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            when (val result = getGroupedNotesByZoomUseCase(zoom)) {
-                is NetworkResult.Success -> {
-                    _uiState.update {
-                        it.copy(groupedNotes = result.data, isLoading = false)
-                    }
-                }
-                is NetworkResult.Error -> {
-                    _uiState.update {
-                        it.copy(aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"), isLoading = false)
-                    }
-                }
-                is NetworkResult.Loading -> {
-                    _uiState.update { it.copy(isLoading = true) }
-                }
-            }
-        }
-    }
+
 
 
 

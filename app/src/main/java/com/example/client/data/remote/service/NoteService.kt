@@ -20,9 +20,6 @@ interface NoteService {
     @GET("notes/{noteId}")
     suspend fun getNote(@Path("noteId") id: Int): Response<NoteDTO>
 
-    @GET("notes/grouped")
-    suspend fun getGroupedNotesByZoom ( @Query("zoomLevel") zoomLevel:Float) : Response<List<NoteMapDTO>>
-
     @PUT("notes")
     suspend fun updateNote(
         @Body note: NoteDTO,
