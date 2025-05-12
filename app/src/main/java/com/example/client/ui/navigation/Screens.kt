@@ -11,6 +11,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 val appDestinationList = listOf(
     NormalNoteList,NoteMap,NoteSavedList)
+val detailDestinationList = listOf(
+    NormalNoteDetail
+)
+
 
 interface AppDestination{
     val route: Any

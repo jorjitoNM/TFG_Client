@@ -8,13 +8,13 @@
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M12,2a10,10 0 1,0 0,20a10,10 0 1,0 0,-20"/>
-    />
+
 
     <!-- Círculo morado (más pequeño, para crear el efecto de borde) -->
     <path
         android:fillColor="#9C27B0"
         android:pathData="M12,4a8,8 0 1,0 0,16a8,8 0 1,0 0,-16"/>
-    />
+
 
     <!-- Icono blanco, más pequeño y centrado -->
     <group
