@@ -21,6 +21,14 @@ class NoteRepository @Inject constructor(
         }
     }
 
+    suspend fun getGroupNotesByZoom(zoom: Float) = withContext(dispatcher) {
+        try {
+            noteRemoteDataSource.getGroupedNotesByZoom(zoom)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
     suspend fun getNote(id: Int) = withContext(dispatcher) {
         try {
             noteRemoteDataSource.getNote(id)
