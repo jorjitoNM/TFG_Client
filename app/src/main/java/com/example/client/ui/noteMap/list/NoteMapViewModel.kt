@@ -9,6 +9,7 @@ import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
 import com.example.client.domain.usecases.note.GetNoteSearch
 import com.example.client.domain.usecases.note.GetNotesUseCase
+import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -23,6 +24,7 @@ import javax.inject.Inject
 class NoteMapViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
     private val getNoteSearch: GetNoteSearch,
+    private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
     private val application: Application
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteMapState())
@@ -42,8 +44,40 @@ class NoteMapViewModel @Inject constructor(
             is NoteMapEvent.SaveCameraPosition -> saveCameraPosition(event.latLng, event.zoom)
             is NoteMapEvent.UpdateSelectedType -> updateSelectedType(event.noteType)
             is NoteMapEvent.UpdateSearchText -> updateSearchText(event.text)
+            is NoteMapEvent.FilterByType -> filterByType(event.noteType)
         }
     }
+
+    private fun filterByType(noteType: NoteType?) {
+        if (noteType == null) {
+            // Si no hay tipo seleccionado, carga todas las notas
+            getNotes()
+            _uiState.update { it.copy(selectedType = null) }
+        } else {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, selectedType = noteType) }
+                when (val result = orderNoteByTypUseCase(noteType)) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(notes = result.data, isLoading = false)
+                        }
+                    }
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Loading -> {
+                        _uiState.update { it.copy(isLoading = true) }
+                    }
+                }
+            }
+        }
+    }
+
 
     private fun updateSearchText(text: String) {
         _uiState.update { it.copy(currentSearch = text) }

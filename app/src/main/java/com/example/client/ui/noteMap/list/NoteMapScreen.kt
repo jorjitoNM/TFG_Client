@@ -333,12 +333,13 @@ fun NoteMapScreen(
                                     isSelected = uiState.selectedType == type,
                                     onClick = {
                                         val newType = if (uiState.selectedType == type) null else type
-                                        viewModel.handleEvent(NoteMapEvent.UpdateSelectedType(newType))
+                                        viewModel.handleEvent(NoteMapEvent.FilterByType(newType))
                                     }
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                             }
                         }
+
                     }
                 }
             }

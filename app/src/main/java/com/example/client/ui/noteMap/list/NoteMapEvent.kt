@@ -11,4 +11,6 @@ sealed class NoteMapEvent {
     data class SaveCameraPosition(val latLng: LatLng, val zoom: Float) : NoteMapEvent()
     data class UpdateSelectedType(val noteType: NoteType?) : NoteMapEvent()
     data class UpdateSearchText(val text: String) : NoteMapEvent()
+    data class FilterByType(val noteType: NoteType?) : NoteMapEvent()
+
 }
