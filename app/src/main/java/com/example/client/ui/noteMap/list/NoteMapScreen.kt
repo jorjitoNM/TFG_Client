@@ -77,17 +77,12 @@ fun NoteMapScreen(
     showSnackbar: (String) -> Unit,
     viewModel: NoteMapViewModel = hiltViewModel()
 ) {
+    var moveToCurrentLocation by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
     val cameraPositionState = rememberCameraPositionState()
     val defaultLocation = LatLng(0.0, 0.0)
     val defaultZoom = 2f
     val scope = rememberCoroutineScope()
-    val notesByLocation = uiState.notes.groupBy { note ->
-        LatLng(note.latitude, note.longitude)
-    }
-    // Search and filter state
-    var searchText by remember { mutableStateOf("") }
-    var selectedType by remember { mutableStateOf<NoteType?>(null) }
 
     // Bottom sheet state
     val bottomSheetState = rememberStandardBottomSheetState(
@@ -109,9 +104,14 @@ fun NoteMapScreen(
         }
     }
 
+    // Lanzar eventos iniciales
     LaunchedEffect(Unit) {
         viewModel.handleEvent(NoteMapEvent.GetNotes)
         viewModel.handleEvent(NoteMapEvent.CheckLocationPermission)
+    }
+
+    // Solicitar permisos si no los tiene
+    LaunchedEffect(uiState.hasLocationPermission) {
         if (!uiState.hasLocationPermission) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
@@ -119,29 +119,78 @@ fun NoteMapScreen(
         }
     }
 
-    LaunchedEffect(uiState.currentLocation) {
-        uiState.currentLocation?.let { location ->
-            cameraPositionState.animate(
+    // Restaurar la posición de la cámara si hay guardada
+    LaunchedEffect(uiState.cameraLatLng, uiState.cameraZoom) {
+        if (uiState.cameraZoom != null) {
+            uiState.cameraLatLng?.let {
+                CameraPosition.Builder()
+                    .target(it)
+                    .zoom(uiState.cameraZoom!!)
+                    .build()
+            }?.let {
                 CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder()
-                        .target(LatLng(location.latitude, location.longitude))
-                        .zoom(15f)
-                        .build()
+                    it
+                )
+            }?.let {
+                cameraPositionState.move(
+                    it
+                )
+            }
+        }
+    }
+
+    // Guardar la posición de la cámara cuando cambia
+    LaunchedEffect(cameraPositionState.position) {
+        if (!cameraPositionState.isMoving) {
+            viewModel.handleEvent(
+                NoteMapEvent.SaveCameraPosition(
+                    latLng = cameraPositionState.position.target,
+                    zoom = cameraPositionState.position.zoom
                 )
             )
         }
     }
 
-    uiState.aviso?.let { event ->
-        when (event) {
-            is UiEvent.ShowSnackbar -> {
-                LaunchedEffect(event) {
+    // Si no hay posición guardada, mover a la ubicación actual
+    LaunchedEffect(uiState.currentLocation) {
+        if (uiState.cameraLatLng == null) {
+            uiState.currentLocation?.let { location ->
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.Builder()
+                            .target(LatLng(location.latitude, location.longitude))
+                            .zoom(15f)
+                            .build()
+                    )
+                )
+            }
+        }
+    }
+
+    // Filtrado de notas por tipo y búsqueda
+    val filteredNotes = remember(uiState.notes, uiState.selectedType, uiState.currentSearch) {
+        uiState.notes
+            .filter { note ->
+                (uiState.selectedType == null || note.type == uiState.selectedType) &&
+                        (uiState.currentSearch.isBlank() ||
+                                note.title.contains(uiState.currentSearch, ignoreCase = true) ||
+                                (note.content?.contains(uiState.currentSearch, ignoreCase = true) ?: false))
+            }
+    }
+    val notesByLocation = remember(filteredNotes) {
+        filteredNotes.groupBy { note -> LatLng(note.latitude, note.longitude) }
+    }
+
+    // Mostrar Snackbar si hay aviso
+    LaunchedEffect(uiState.aviso) {
+        uiState.aviso?.let { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
                     showSnackbar(event.message)
                     viewModel.handleEvent(NoteMapEvent.AvisoVisto)
                 }
+                else -> Unit
             }
-
-            else -> Unit
         }
     }
 
@@ -168,7 +217,7 @@ fun NoteMapScreen(
                 ),
                 cameraPositionState = cameraPositionState,
                 onMapLoaded = {
-                    if (uiState.currentLocation == null && !cameraPositionState.isMoving) {
+                    if (uiState.currentLocation == null && !cameraPositionState.isMoving && uiState.cameraLatLng == null) {
                         cameraPositionState.move(
                             CameraUpdateFactory.newCameraPosition(
                                 CameraPosition.Builder()
@@ -180,21 +229,16 @@ fun NoteMapScreen(
                     }
                 }
             ) {
-                // Agrupa las notas por ubicación
                 val context = LocalContext.current
-
                 notesByLocation.forEach { (location, notes) ->
                     val markerState = rememberMarkerState(position = location)
                     val note = notes.first()
                     val noteType = note.type
                     val isSelected = selectedLocation == location
 
-                    // Si quieres cambiar el color cuando está seleccionado, puedes combinar así:
                     val iconBitmapDescriptor = if (isSelected) {
-                        // Usa un marcador de color si está seleccionado
                         BitmapDescriptorFactory.defaultMarker(getMarkerColor(noteType))
                     } else {
-                        // Usa el icono personalizado si NO está seleccionado
                         vectorToBitmap(getMarkerIconRes(noteType), context)
                     }
 
@@ -212,7 +256,6 @@ fun NoteMapScreen(
                         }
                     )
                 }
-
             }
 
             // Floating search bar on top of everything
@@ -229,10 +272,12 @@ fun NoteMapScreen(
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Buscador
+                        // Search field
                         TextField(
-                            value = searchText,
-                            onValueChange = { searchText = it },
+                            value = uiState.currentSearch,
+                            onValueChange = {
+                                viewModel.handleEvent(NoteMapEvent.UpdateSearchText(it))
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -246,9 +291,9 @@ fun NoteMapScreen(
                                 )
                             },
                             trailingIcon = {
-                                if (searchText.isNotEmpty()) {
+                                if (uiState.currentSearch.isNotEmpty()) {
                                     IconButton(onClick = {
-                                        searchText = ""
+                                        viewModel.handleEvent(NoteMapEvent.UpdateSearchText(""))
                                         viewModel.handleEvent(NoteMapEvent.GetNotes)
                                     }) {
                                         Icon(
@@ -263,8 +308,8 @@ fun NoteMapScreen(
                             ),
                             keyboardActions = KeyboardActions(
                                 onSearch = {
-                                    if (searchText.isNotEmpty()) {
-                                        viewModel.handleEvent(NoteMapEvent.SearchNote(searchText))
+                                    if (uiState.currentSearch.isNotEmpty()) {
+                                        viewModel.handleEvent(NoteMapEvent.SearchNote(uiState.currentSearch))
                                     }
                                 }
                             ),
@@ -277,6 +322,7 @@ fun NoteMapScreen(
                             )
                         )
 
+                        // Note type filters
                         LazyRow(
                             modifier = Modifier.fillMaxWidth(),
                             contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 6.dp),
@@ -284,9 +330,10 @@ fun NoteMapScreen(
                             items(NoteType.entries) { type ->
                                 FilterChip(
                                     noteType = type,
-                                    isSelected = selectedType == type,
+                                    isSelected = uiState.selectedType == type,
                                     onClick = {
-                                        selectedType = if (selectedType == type) null else type
+                                        val newType = if (uiState.selectedType == type) null else type
+                                        viewModel.handleEvent(NoteMapEvent.UpdateSelectedType(newType))
                                     }
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -299,7 +346,8 @@ fun NoteMapScreen(
             // Location button
             if (uiState.hasLocationPermission) {
                 FloatingActionButton(
-                    onClick = { viewModel.handleEvent(NoteMapEvent.GetCurrentLocation) },
+                    onClick = { viewModel.handleEvent(NoteMapEvent.GetCurrentLocation)
+                        moveToCurrentLocation = true},
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.BottomStart),
@@ -310,6 +358,25 @@ fun NoteMapScreen(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = "My Location"
                     )
+                }
+            }
+
+            LaunchedEffect(uiState.currentLocation, moveToCurrentLocation) {
+                if (moveToCurrentLocation && uiState.currentLocation != null) {
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newCameraPosition(
+                            CameraPosition.Builder()
+                                .target(
+                                    LatLng(
+                                        uiState.currentLocation!!.latitude,
+                                        uiState.currentLocation!!.longitude
+                                    )
+                                )
+                                .zoom(15f)
+                                .build()
+                        )
+                    )
+                    moveToCurrentLocation = false
                 }
             }
 
