@@ -99,9 +99,9 @@ fun Navigation() {
                 NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
-                NoteMapScreen(showSnackbar = { showSnackbar(it) }, onAddNoteClick = { navController.navigate(AddNoteScreen) })
+                NoteMapScreen(showSnackbar = { showSnackbar(it) }, onAddNoteClick = { navController.navigate(AddNoteDestination) })
             }
-            composable <AddNoteScreen> {
+            composable <AddNoteDestination> {
                 AddNoteScreen(
                     showSnackbar = { showSnackbar(it) },onNavigateBack = { navController.navigateUp() }
                 )

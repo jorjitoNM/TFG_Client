@@ -6,7 +6,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.client.ui.addNoteScreen.AddNoteScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,7 +18,7 @@ data class NormalNoteDetailDestination (val noteId: Int)
 object NoteMapDestination
 
 @Serializable
-object AddNoteScreen
+object AddNoteDestination
 
 val appDestinationList = listOf(
     NormalNoteList,NoteMap, AddNote)
@@ -70,7 +69,7 @@ object NoteMap : AppMainBottomDestination {
 }
 
 object AddNote: AppDestination {
-    override val route: Any = AddNoteScreen
+    override val route: Any = AddNoteDestination
     override val title: String = "Añadir Nota"
     override val isBottomBarVisible: Boolean = false
     override val isTopBarVisible: Boolean = false
