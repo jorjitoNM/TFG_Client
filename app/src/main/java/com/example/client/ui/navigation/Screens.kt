@@ -10,10 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 
 val appDestinationList = listOf(
-    NormalNoteList,NoteMap,NoteSavedList)
-val detailDestinationList = listOf(
-    NormalNoteDetail
-)
+    NormalNoteList,NoteMap,NoteSavedList,NormalNoteDetail)
 
 
 interface AppDestination{
@@ -47,7 +44,7 @@ object NormalNoteList : AppMainBottomDestination {
     override val icon: ImageVector = Icons.Filled.Home
 }
 
-object NormalNoteDetail : AppMainBottomDestination {
+object NormalNoteDetail : AppDestination {
     override val route: Any = NormalNoteDetailDestination
     override val title: String = "Nota Detalle"
     override val isBottomBarVisible: Boolean = true
@@ -57,8 +54,6 @@ object NormalNoteDetail : AppMainBottomDestination {
             fabVisible = false
         )
     override val isTopBarVisible: Boolean = true
-    override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Place
 }
 
 object NoteSavedList : AppMainBottomDestination {

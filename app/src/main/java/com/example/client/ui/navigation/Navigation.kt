@@ -51,10 +51,6 @@ fun Navigation() {
         val currentRoute = state?.destination?.route?.substringBefore("/")
         val screenRoute = screen.route.toString().substringBefore("@").substringBefore("$")
         currentRoute == screenRoute
-    } ?: detailDestinationList.firstOrNull { detailScreen ->
-        val currentRoute = state?.destination?.route?.substringBefore("/")
-        val detailRoute = detailScreen.route.toString().substringBefore("@").substringBefore("$")
-        currentRoute == detailRoute
     }
 
     val bottomBar: @Composable () -> Unit = {
@@ -75,6 +71,10 @@ fun Navigation() {
         if (screen?.scaffoldState?.fabVisible == true) {
             FloatingActionButton(
                 onClick = {
+                    when (screen) {
+                        is NoteMap -> {}
+                        is NoteSavedList -> {}
+                    }
                 },
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding16)),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
