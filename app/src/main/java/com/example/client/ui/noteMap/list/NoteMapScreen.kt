@@ -262,15 +262,13 @@ fun NoteMapScreen(
 
                     Marker(
                         state = markerState,
-                        title = "${notes.size} note(s)",
-                        snippet = "Click to view details",
-                        icon = iconBitmapDescriptor,
+
                         onClick = {
                             selectedNotes.clear()
                             selectedNotes.addAll(notes)
                             selectedLocation = location
                             scope.launch { bottomSheetState.expand() }
-                            true
+                            false
                         }
                     )
                 }
