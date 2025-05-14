@@ -30,6 +30,8 @@ import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.savedNotes.SavedScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 
 @Composable
 fun Navigation() {
@@ -92,7 +94,12 @@ fun Navigation() {
         NavHost(
             navController = navController,
             startDestination = NormalNoteListDestination,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+
         ) {
             composable<NormalNoteListDestination> {
                 NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})

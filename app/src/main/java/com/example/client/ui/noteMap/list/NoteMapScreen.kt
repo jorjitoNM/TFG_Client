@@ -5,6 +5,7 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -306,19 +308,24 @@ fun NoteMapScreen(
                             onValueChange = {
                                 viewModel.handleEvent(NoteMapEvent.UpdateSearchText(it))
                             },
-
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 10.dp)
-                                .height(56.dp).clickable {
+                                .height(56.dp)
+                                .clickable(
+                                    indication = null, // Quita el ripple
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
                                     viewModel.handleEvent(NoteMapEvent.NavigateToSearch)
                                 },
+                            enabled = false, // Deshabilita edición directa aquí
                             placeholder = { Text("Buscar notas...") },
                             singleLine = true,
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Search,
-                                    contentDescription = "Search Icon"
+                                    contentDescription = "Search Icon",
+                                    tint = Color.DarkGray
                                 )
                             },
                             trailingIcon = {
@@ -350,8 +357,7 @@ fun NoteMapScreen(
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
                                 errorIndicatorColor = Color.Transparent
-                            ),
-
+                            )
                         )
 
                         // Note type filters
@@ -415,7 +421,7 @@ fun NoteMapScreen(
 
             // Loading indicator
             if (uiState.isLoading) {
-                CircularProgressIndicator(
+                LinearProgressIndicator(
                     modifier = Modifier
                         .size(50.dp)
                         .align(Alignment.Center)

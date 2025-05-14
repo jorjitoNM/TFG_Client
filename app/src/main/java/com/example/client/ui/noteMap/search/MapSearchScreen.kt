@@ -79,6 +79,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 
 import androidx.compose.ui.unit.dp
 
@@ -88,6 +90,13 @@ fun MapSearchScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var query by remember { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
+
+    // Solicita el foco (y el teclado) al entrar en la pantalla
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     LaunchedEffect(uiState.aviso) {
         uiState.aviso?.let { event ->
@@ -96,50 +105,46 @@ fun MapSearchScreen(
                     onNavigateBack()
                     viewModel.handleEvent(MapSearchEvent.AvisoVisto)
                 }
-                // ...otros eventos
-                is UiEvent.ShowSnackbar -> TODO()
+                is UiEvent.ShowSnackbar -> { /* ... */ }
             }
         }
     }
 
-
     Box(modifier = Modifier.fillMaxSize()) {
-        IconButton(
-            onClick = { viewModel.handleEvent(MapSearchEvent.NavigateBack) },
-            modifier = Modifier.align(Alignment.TopStart)
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopStart)
         ) {
             Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = Color.White,
-                shadowElevation = 8.dp
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Search field vacío
                     TextField(
-                        value = "",
-                        onValueChange = {},
+                        value = query,
+                        onValueChange = { query = it },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 10.dp)
-                            .height(56.dp),
+                            .height(56.dp)
+                            .focusRequester(focusRequester), // <- Aquí se asigna el focusRequester
                         placeholder = { Text("Buscar notas...") },
                         singleLine = true,
                         leadingIcon = {
+                            IconButton(
+                                onClick = { viewModel.handleEvent(MapSearchEvent.NavigateBack) },
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            }
+                        },
+                        trailingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search Icon"
                             )
                         },
-                        trailingIcon = {},
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Search
                         ),
@@ -156,6 +161,4 @@ fun MapSearchScreen(
             }
         }
     }
-
-
 }
