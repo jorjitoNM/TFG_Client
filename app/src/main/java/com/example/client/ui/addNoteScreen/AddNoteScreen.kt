@@ -1,47 +1,69 @@
 package com.example.client.ui.addNoteScreen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.example.client.data.model.NoteDTO
-import com.example.client.domain.model.note.Note
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.normalNoteScreen.detail.NoteDetailEvent
+
 @Composable
 fun AddNoteScreen(
-    addViewModel: AddViewModel = hiltViewModel(),
+    addNoteViewModel: AddNoteViewModel = hiltViewModel(),
     showSnackbar: (String) -> Unit = {},
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
-    val uiState = addViewModel.uiState.collectAsStateWithLifecycle().value
+    val uiState = addNoteViewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uiState.aviso) {
-        uiState.aviso?.let {
+    LaunchedEffect(uiState.value.aviso) {
+        uiState.value.aviso?.let {
             when (it) {
                 is UiEvent.ShowSnackbar -> {
                     showSnackbar(it.message)
-                    addViewModel.handleEvent(AddEvent.UiEventDone)
+                    addNoteViewModel.handleEvent(AddNoteEvents.UiNoteEventsDone)
                 }
-                else -> {}
+                is UiEvent.PopBackStack -> {}
             }
         }
     }
 
-    if (!uiState.isLoading) {
+    if (!uiState.value.isLoading) {
         AddNoteContent(
-            note = uiState.note,
-            onEdit = { note -> addViewModel.handleEvent(AddEvent.editNote(note)) },
-            onSave = { addViewModel.handleEvent(AddEvent.addNote) },
+            note = uiState.value.note,
+            onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
+            onSave = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
             onNavigateBack = onNavigateBack
         )
     } else {
@@ -56,25 +78,25 @@ fun AddNoteScreen(
 
 @Composable
 fun AddNoteContent(
-    note: NoteDTO?,
+    note: NoteDTO,
     onEdit: (note: NoteDTO) -> Unit,
     onSave: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    var title by remember { mutableStateOf(note?.title ?: "") }
-    var content by remember { mutableStateOf(note?.content ?: "") }
-    var privacy by remember { mutableStateOf(note?.privacy ?: NotePrivacy.FOLLOWERS) }
-    var rating by remember { mutableStateOf(note?.rating ?: 5) }
-    var latitude by remember { mutableStateOf(note?.latitude ?: 0.0) }
-    var longitude by remember { mutableStateOf(note?.longitude ?: 0.0) }
-    var type by remember { mutableStateOf(note?.type ?: NoteType.CLASSIC) }
+    var title by remember { mutableStateOf(note.title) }
+    var content by remember { mutableStateOf(note.content) }
+    var privacy by remember { mutableStateOf(note.privacy) }
+    var rating by remember { mutableIntStateOf(note.rating) }
+    var latitude by remember { mutableDoubleStateOf(note.latitude) }
+    var longitude by remember { mutableDoubleStateOf(note.longitude) }
+    var type by remember { mutableStateOf(note.type) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         TextField(
             value = title,
             onValueChange = {
                 title = it
-                note?.let { onEdit(it.copy(title = title)) }
+                onEdit(note.copy(title = title))
             },
             label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
@@ -84,7 +106,7 @@ fun AddNoteContent(
             value = content,
             onValueChange = {
                 content = it
-                note?.let { onEdit(it.copy(content = content)) }
+                onEdit(note.copy(content = content))
             },
             label = { Text("Contenido") },
             modifier = Modifier.fillMaxWidth()
@@ -124,7 +146,7 @@ fun AddNoteContent(
             value = longitude.toString(),
             onValueChange = {
                 longitude = it.toDoubleOrNull() ?: longitude
-                note?.let { onEdit(it.copy(longitude = longitude)) }
+                onEdit(note.copy(longitude = longitude))
             },
             label = { Text("Longitud") },
             modifier = Modifier.fillMaxWidth()
@@ -132,11 +154,11 @@ fun AddNoteContent(
         Spacer(modifier = Modifier.height(8.dp))
         DropdownMenuField(
             label = "Tipo",
-            options = NoteType.values().toList(),
+            options = NoteType.entries,
             selectedOption = type,
             onOptionSelected = {
                 type = it
-                note?.let { onEdit(it.copy(type = type)) }
+                onEdit(note.copy(type = type))
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -191,4 +213,11 @@ fun <T> DropdownMenuField(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun AddNoteScreenPreview ()  {
+    AddNoteContent(NoteDTO(1,"asd","asd",NotePrivacy.FOLLOWERS,4,"juan",50,"ayer",1.6,5.6,NoteType.FOOD,null,null),
+        {},{},{})
 }

@@ -24,11 +24,12 @@ import androidx.navigation.toRoute
 import com.example.client.R
 import com.example.client.ui.addNoteScreen.AddNoteScreen
 import com.example.client.ui.common.TopBar
-import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.noteScreen.list.NoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
+
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
@@ -103,7 +104,7 @@ fun Navigation() {
             }
             composable <AddNoteDestination> {
                 AddNoteScreen(
-                    showSnackbar = { showSnackbar(it) },onNavigateBack = { navController.navigateUp() }
+                    showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() }
                 )
             }
         }

@@ -1,13 +1,8 @@
 package com.example.client.data.remote.datasource
 
-import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO
-import com.example.client.data.remote.datasource.BaseApiResponse
 import com.example.client.data.remote.service.NoteService
-import com.example.client.domain.model.note.Note
 import com.example.client.domain.model.note.NoteType
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class NoteRemoteDataSource @Inject constructor(private val noteService: NoteService) :

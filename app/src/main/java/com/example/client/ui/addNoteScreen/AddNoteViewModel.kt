@@ -3,7 +3,6 @@ package com.example.client.ui.addNoteScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.model.note.Note
 import com.example.client.domain.useCases.AddNota
 import com.example.client.ui.common.UiEvent
 import com.example.musicapprest.di.IoDispatcher
@@ -16,19 +15,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddViewModel @Inject constructor(
+class AddNoteViewModel @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val addNota: AddNota,
 ) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<AddState> = MutableStateFlow(AddState())
-    val uiState: StateFlow<AddState> = _uiState
+    private val _uiState: MutableStateFlow<AddNoteState> = MutableStateFlow(AddNoteState())
+    val uiState: StateFlow<AddNoteState> = _uiState
 
-    fun handleEvent(event: AddEvent) {
+    fun handleEvent(event: AddNoteEvents) {
         when (event) {
-            is AddEvent.addNote -> addNote()
-            is AddEvent.UiEventDone -> _uiState.update { it.copy(uiEvent = null) }
-            is AddEvent.editNote -> {
+            is AddNoteEvents.AddNoteNote -> addNote()
+            is AddNoteEvents.UiNoteEventsDone -> _uiState.update { it.copy(uiEvent = null) }
+            is AddNoteEvents.EditNote -> {
                 _uiState.update { it.copy(note = event.note) }
             }
         }
