@@ -26,6 +26,7 @@ import com.example.client.ui.common.TopBar
 import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
+import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.savedNotes.SavedScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
@@ -101,11 +102,16 @@ fun Navigation() {
                 NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
-                NoteMapScreen(showSnackbar = { showSnackbar(it) })
+                NoteMapScreen(showSnackbar = { showSnackbar(it) } , onNavigateToList = { navController.navigate(MapSearchDestination) })
             }
             composable<NoteSavedListDestination> {
                 SavedScreen(showSnackbar = { showSnackbar(it) })
             }
+
+            composable<MapSearchDestination> {
+                MapSearchScreen(onNavigateBack = { navController.navigateUp() })
+            }
+
         }
     }
 }

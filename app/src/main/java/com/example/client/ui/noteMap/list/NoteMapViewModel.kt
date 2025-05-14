@@ -45,6 +45,9 @@ class NoteMapViewModel @Inject constructor(
             is NoteMapEvent.UpdateSelectedType -> updateSelectedType(event.noteType)
             is NoteMapEvent.UpdateSearchText -> updateSearchText(event.text)
             is NoteMapEvent.FilterByType -> filterByType(event.noteType)
+            is NoteMapEvent.NavigateToSearch -> {
+                _uiState.update { it.copy(aviso = UiEvent.PopBackStack) }
+            }
 
         }
     }

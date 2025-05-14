@@ -44,6 +44,19 @@ object NormalNoteList : AppMainBottomDestination {
     override val icon: ImageVector = Icons.Filled.Home
 }
 
+object MapSearch : AppDestination{
+    override val route: Any = MapSearchDestination
+    override val title: String = "Busqueda"
+    override val isBottomBarVisible: Boolean = false
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = false
+
+}
+
 object NormalNoteDetail : AppDestination {
     override val route: Any = NormalNoteDetailDestination
     override val title: String = "Nota Detalle"

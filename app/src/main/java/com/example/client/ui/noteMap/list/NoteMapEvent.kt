@@ -12,6 +12,5 @@ sealed class NoteMapEvent {
     data class UpdateSelectedType(val noteType: NoteType?) : NoteMapEvent()
     data class UpdateSearchText(val text: String) : NoteMapEvent()
     data class FilterByType(val noteType: NoteType?) : NoteMapEvent()
-
-
+    data object NavigateToSearch : NoteMapEvent()
 }

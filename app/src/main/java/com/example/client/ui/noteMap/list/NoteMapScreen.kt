@@ -4,6 +4,7 @@ package com.example.client.ui.noteMap.list
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -77,7 +78,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun NoteMapScreen(
     showSnackbar: (String) -> Unit,
-    viewModel: NoteMapViewModel = hiltViewModel()
+    viewModel: NoteMapViewModel = hiltViewModel(),
+    onNavigateToList: () -> Unit,
+
 ) {
     var moveToCurrentLocation by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
@@ -196,6 +199,10 @@ fun NoteMapScreen(
                     showSnackbar(event.message)
                     viewModel.handleEvent(NoteMapEvent.AvisoVisto)
                 }
+                is UiEvent.PopBackStack -> {
+                    onNavigateToList()
+                    viewModel.handleEvent(NoteMapEvent.AvisoVisto)
+                }
                 else -> Unit
             }
         }
@@ -254,15 +261,20 @@ fun NoteMapScreen(
                     val noteType = note.type
                     val isSelected = selectedLocation == location
 
-                    val iconBitmapDescriptor = if (isSelected) {
-                        BitmapDescriptorFactory.defaultMarker(getMarkerColor(noteType))
-                    } else {
-                        vectorToBitmap(getMarkerIconRes(noteType), context)
+                    val iconBitmapDescriptor = when {
+                        notes.size > 1 && isSelected ->
+                            BitmapDescriptorFactory.defaultMarker(210f) // Gris aproximado
+                        notes.size > 1 ->
+                            vectorToBitmap(R.drawable.ic_note_multinote, context)
+                        isSelected ->
+                            BitmapDescriptorFactory.defaultMarker(getMarkerColor(noteType))
+                        else ->
+                            vectorToBitmap(getMarkerIconRes(noteType), context)
                     }
 
                     Marker(
                         state = markerState,
-
+                        icon = iconBitmapDescriptor,
                         onClick = {
                             selectedNotes.clear()
                             selectedNotes.addAll(notes)
@@ -294,10 +306,13 @@ fun NoteMapScreen(
                             onValueChange = {
                                 viewModel.handleEvent(NoteMapEvent.UpdateSearchText(it))
                             },
+
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 10.dp)
-                                .height(56.dp),
+                                .height(56.dp).clickable {
+                                    viewModel.handleEvent(NoteMapEvent.NavigateToSearch)
+                                },
                             placeholder = { Text("Buscar notas...") },
                             singleLine = true,
                             leadingIcon = {
@@ -335,7 +350,8 @@ fun NoteMapScreen(
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
                                 errorIndicatorColor = Color.Transparent
-                            )
+                            ),
+
                         )
 
                         // Note type filters
@@ -408,14 +424,3 @@ fun NoteMapScreen(
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-

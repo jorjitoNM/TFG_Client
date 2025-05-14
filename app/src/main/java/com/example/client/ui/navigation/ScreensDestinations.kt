@@ -13,3 +13,7 @@ object NoteMapDestination
 
 @Serializable
 object NoteSavedListDestination
+
+@Serializable
+object MapSearchDestination
+
