@@ -7,5 +7,5 @@ import javax.inject.Inject
 class SignUpUseCase @Inject constructor(
     private val userRepository : UserRepository
 ) {
-    suspend fun invoke (credentialUser: CredentialUser) = userRepository.signUp()
+    suspend fun invoke (credentialUser: CredentialUser) = userRepository.signUp(credentialUser)
 }
