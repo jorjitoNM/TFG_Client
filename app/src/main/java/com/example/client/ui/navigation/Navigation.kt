@@ -72,8 +72,6 @@ fun Navigation() {
             FloatingActionButton(
                 onClick = {
                     when (screen) {
-                        is NoteMap -> {}
-                        is NoteSavedList -> {}
                     }
                 },
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding16)),

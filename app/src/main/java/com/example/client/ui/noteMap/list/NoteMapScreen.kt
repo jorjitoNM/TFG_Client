@@ -221,7 +221,7 @@ fun NoteMapScreen(
                 properties = MapProperties(
                     mapType = MapType.NORMAL,
                     isMyLocationEnabled = uiState.hasLocationPermission,
-                    mapStyleOptions = mapStyleOptions
+//                    mapStyleOptions = mapStyleOptions
                 ),
                 cameraPositionState = cameraPositionState,
                 onMapLoaded = {
@@ -235,7 +235,17 @@ fun NoteMapScreen(
                             )
                         )
                     }
+                },
+                onMapClick = { latLng ->
+                    // Limpiar selección
+                    selectedNotes.clear()
+                    selectedLocation = null
+                    // Cerrar el bottom sheet
+                    scope.launch {
+                        bottomSheetState.hide()
+                    }
                 }
+
             ) {
 
                 notesByLocation.forEach { (location, notes) ->
