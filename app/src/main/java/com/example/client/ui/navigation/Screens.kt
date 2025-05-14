@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.client.ui.common.Constantes
 
 
 val appDestinationList = listOf(
@@ -85,4 +86,15 @@ object NoteMap : AppMainBottomDestination {
     override val icon: ImageVector = Icons.Filled.Place
 }
 
+
+object SignUp : AppDestination {
+    override val route = SignUpDestination
+    override val title : String = Constantes.LOGIN
+    override val isBottomBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = false
+    override val scaffoldState = ScaffoldState(
+        topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+        fabVisible = false,
+    )
+}
 
