@@ -4,4 +4,9 @@
     <string name="rating">Rating:</string>
     <string name="event_dates">Event Dates:</string>
     <string name="no_notes_found">No notes found</string>
+    <string name="app_logo">App logo</string>
+    <string name="start_Screen_background">Start screen background</string>
+    <string name="app_real_name">Nomada</string>
+    <string name="app_slogan">Pin Your Finds, Inspire the World.</string>
+    <string name="register">Register</string>
 </resources>

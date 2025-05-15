@@ -16,3 +16,9 @@ object NoteSavedListDestination
 
 @Serializable
 object SignUpDestination
+
+@Serializable
+object StartDestination
+
+@Serializable
+object LoginDestination

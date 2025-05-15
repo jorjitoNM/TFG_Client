@@ -2,6 +2,7 @@ package com.example.client.ui.common
 
 
 object Constantes {
+    const val START: String = "Start"
     const val SONGS_LIST: String = "Favourite Songs"
     const val PLAYLIST_DETAILS: String = "Details"
     const val PLAYLIST_LIST: String = "Playlists list"
