@@ -55,14 +55,6 @@ class NoteRepository @Inject constructor(
 
     }
 
-    suspend fun favNote(id: Int, username: String) = withContext(dispatcher) {
-        try {
-            noteRemoteDataSource.favNote(id,username)
-        } catch (e: Exception){
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
-
     suspend fun filterNoteByType(noteType: NoteType)= withContext(dispatcher){
         try{
             noteRemoteDataSource.filterNoteByType(noteType)

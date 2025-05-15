@@ -53,7 +53,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.noteScreen.list.NoteListViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -65,6 +64,7 @@ fun NoteListScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
+    var isFilterExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(NoteListEvent.GetNotes)
@@ -77,6 +77,7 @@ fun NoteListScreen(
                     showSnackbar(it.message)
                     viewModel.handleEvent(NoteListEvent.AvisoVisto)
                 }
+
                 is UiEvent.PopBackStack -> {
                     onNavigateToDetail(state.selectedNoteId)
                     viewModel.handleEvent(NoteListEvent.AvisoVisto)
@@ -89,7 +90,7 @@ fun NoteListScreen(
         if (state.isLoading) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
-            NoteList(
+            NoteListContent(
                 notes = state.notes,
                 searchQuery = searchQuery,
                 onSearchQueryChange = { searchQuery = it },
@@ -99,16 +100,246 @@ fun NoteListScreen(
                 onFavClick = { noteId ->
                     viewModel.handleEvent(NoteListEvent.FavNote(noteId))
                 },
-                onFilterSelected = { filterOption ->
-                    viewModel.handleEvent(NoteListEvent.ApplyFilter(filterOption))
-                },
-                onFilterByNoteTypeSelected = { noteType ->
-                    noteType?.let {
-                        viewModel.handleEvent(NoteListEvent.OrderByType(it))
-                    } ?: viewModel.handleEvent(NoteListEvent.GetNotes)
-                },
-                onLikeClick = { viewModel.handleEvent(NoteListEvent.LikeNote(it)) }
+                onLikeClick = { viewModel.handleEvent(NoteListEvent.LikeNote(it)) },
+
+                isFilterExpanded = isFilterExpanded,
+                onFilterExpandToggle = { isFilterExpanded = !isFilterExpanded }
             )
+
+            if (isFilterExpanded) {
+                FilterMenuOverlay(
+                    onFilterSelected = { filterOption ->
+                        viewModel.handleEvent(NoteListEvent.ApplyFilter(filterOption))
+                        isFilterExpanded = false
+                    },
+                    onNoteTypeFilterSelected = { noteType ->
+                        noteType?.let {
+                            viewModel.handleEvent(NoteListEvent.OrderByType(it))
+                        } ?: viewModel.handleEvent(NoteListEvent.GetNotes)
+                        isFilterExpanded = false
+                    },
+                    onDismiss = { isFilterExpanded = false }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NoteListContent(
+    notes: List<NoteDTO>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onNoteClick: (Int) -> Unit,
+    onFavClick: (Int) -> Unit,
+    onLikeClick: (Int) -> Unit,
+    isFilterExpanded: Boolean,
+    onFilterExpandToggle: () -> Unit,
+) {
+    val filteredNotes = if (searchQuery.isBlank()) {
+        notes
+    } else {
+        notes.filter { note ->
+            note.title.contains(searchQuery, ignoreCase = true) ||
+                    (note.content?.contains(searchQuery, ignoreCase = true) == true)
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        SearchBar(
+            query = searchQuery,
+            onQueryChange = onSearchQueryChange,
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+        FilterHeader(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            isExpanded = isFilterExpanded,
+            onExpandToggle = onFilterExpandToggle
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(filteredNotes) { note ->
+                NoteItem(
+                    note = note,
+                    onClick = { onNoteClick(note.id) },
+                    onFavClick = onFavClick,
+                    onLikeClick = onLikeClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FilterHeader(
+    modifier: Modifier = Modifier,
+    isExpanded: Boolean,
+    onExpandToggle: () -> Unit
+) {
+    val iconTint = MaterialTheme.colorScheme.primary
+    val backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    val textColor = MaterialTheme.colorScheme.onSurface
+
+    Row(
+        modifier = modifier
+            .clickable { onExpandToggle() }
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Menu,
+            contentDescription = "Ordenar",
+            tint = iconTint
+        )
+        Text(
+            text = "Filtros",
+            style = MaterialTheme.typography.labelMedium,
+            color = textColor
+        )
+        Icon(
+            imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+            contentDescription = if (isExpanded) "Cerrar menú" else "Abrir menú",
+            tint = iconTint
+        )
+    }
+}
+
+@Composable
+fun FilterMenuOverlay(
+    onFilterSelected: (Boolean) -> Unit,
+    onNoteTypeFilterSelected: (NoteType?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val iconTint = MaterialTheme.colorScheme.primary
+    val backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    val textColor = MaterialTheme.colorScheme.onSurface
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.3f))
+            .clickable { onDismiss() },
+        contentAlignment = Alignment.TopEnd
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(16.dp)
+                .width(220.dp),
+            elevation = CardDefaults.cardElevation(8.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = backgroundColor)
+        ) {
+            Column(
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onFilterSelected(true)
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowUp,
+                        contentDescription = "Orden ascendente",
+                        tint = iconTint
+                    )
+                    Text(
+                        text = "Ascendente",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    thickness = 1.dp
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onFilterSelected(false)
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Orden descendente",
+                        tint = iconTint
+                    )
+                    Text(
+                        text = "Descendente",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    thickness = 1.dp
+                )
+
+                NoteType.entries.forEach { noteType ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onNoteTypeFilterSelected(noteType)
+                            }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Filtrar por $noteType",
+                            tint = iconTint
+                        )
+                        Text(
+                            text = noteType.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = textColor
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onNoteTypeFilterSelected(null)
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Limpiar filtro",
+                        tint = iconTint
+                    )
+                    Text(
+                        text = "Limpiar filtro",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor
+                    )
+                }
+            }
         }
     }
 }
@@ -132,224 +363,6 @@ fun SearchBar(
     )
 }
 
-@Composable
-fun FilterHeader(
-    onFilterSelected: (Boolean) -> Unit,
-    onNoteTypeFilterSelected: (NoteType?) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var isExpanded by remember { mutableStateOf(false) }
-    val iconTint = MaterialTheme.colorScheme.primary
-    val backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    val textColor = MaterialTheme.colorScheme.onSurface
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End
-    ) {
-        Row(
-            modifier = Modifier
-                .clickable { isExpanded = !isExpanded }
-                .background(backgroundColor, RoundedCornerShape(8.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = "Ordenar",
-                tint = iconTint
-            )
-            Text(
-                text = "Filtros",
-                style = MaterialTheme.typography.labelMedium,
-                color = textColor
-            )
-            Icon(
-                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                contentDescription = if (isExpanded) "Cerrar menú" else "Abrir menú",
-                tint = iconTint
-            )
-        }
-
-        if (isExpanded) {
-            Card(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .width(200.dp),
-                elevation = CardDefaults.cardElevation(8.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = backgroundColor
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    // Ascendente
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onFilterSelected(true)
-                                isExpanded = false
-                            }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Orden ascendente",
-                            tint = iconTint
-                        )
-                        Text(
-                            text = "Ascendente",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
-                        )
-                    }
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        thickness = 1.dp
-                    )
-
-                    // Descendente
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onFilterSelected(false)
-                                isExpanded = false
-                            }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Orden descendente",
-                            tint = iconTint
-                        )
-                        Text(
-                            text = "Descendente",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
-                        )
-                    }
-
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                        thickness = 1.dp
-                    )
-
-                    // Por tipo de nota
-                    NoteType.values().forEach { noteType ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onNoteTypeFilterSelected(noteType)
-                                    isExpanded = false
-                                }
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Filtrar por $noteType",
-                                tint = iconTint
-                            )
-                            Text(
-                                text = noteType.name,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = textColor
-                            )
-                        }
-                    }
-
-                    // Limpiar filtro
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                onNoteTypeFilterSelected(null)
-                                isExpanded = false
-                            }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Limpiar filtro",
-                            tint = iconTint
-                        )
-                        Text(
-                            text = "Limpiar filtro",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = textColor
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NoteList(
-    notes: List<NoteDTO>,
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    onNoteClick: (Int) -> Unit,
-    onFavClick: (Int) -> Unit,
-    onFilterSelected: (Boolean) -> Unit,
-    onFilterByNoteTypeSelected: (NoteType?) -> Unit,
-    onLikeClick: (Int) -> Unit,
-) {
-    // Filtrado por búsqueda
-    val filteredNotes = if (searchQuery.isBlank()) {
-        notes
-    } else {
-        notes.filter { note ->
-            note.title.contains(searchQuery, ignoreCase = true) ||
-                    (note.content?.contains(searchQuery, ignoreCase = true) == true)
-        }
-    }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        SearchBar(
-            query = searchQuery,
-            onQueryChange = onSearchQueryChange,
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-        FilterHeader(
-            onFilterSelected = onFilterSelected,
-            onNoteTypeFilterSelected = onFilterByNoteTypeSelected,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-        )
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(filteredNotes) { note ->
-                NoteItem(
-                    note = note,
-                    onClick = { onNoteClick(note.id) },
-                    onFavClick = { onFavClick(note.id) },
-                    onLikeClick = onLikeClick
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun NoteItem(
@@ -363,14 +376,12 @@ fun NoteItem(
 
     val goldColor = Color(0xFFFFD700)
     val pinkColor = Color(0xFFFF4081)
-    val cardBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
     val textColor = MaterialTheme.colorScheme.onSurface
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = cardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -473,9 +484,9 @@ fun NoteItem(
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                        imageVector = if (note.saved) Icons.Filled.Star else Icons.Outlined.Star,
                         contentDescription = "Favorito",
-                        tint = if (isFavorite) goldColor else textColor.copy(alpha = 0.4f),
+                        tint = if (note.saved) goldColor else textColor.copy(alpha = 0.4f),
                         modifier = Modifier.size(34.dp)
                     )
                 }
@@ -490,9 +501,9 @@ fun NoteItem(
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
-                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                        imageVector = if (note.liked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
                         contentDescription = "Like",
-                        tint = if (isLiked) pinkColor else textColor.copy(alpha = 0.4f),
+                        tint = if (note.liked) pinkColor else textColor.copy(alpha = 0.4f),
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -515,11 +526,11 @@ fun formatDateTime(dateTimeStr: String): String {
 @Preview(name = "Portrait Mode", showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable
 fun Preview() {
-    NoteList(
+    NoteListContent(
         notes = listOf(
-            NoteDTO(title = "Nota 1", content = "Contenido 1", rating = 10),
+            NoteDTO(title = "Nota 1", content = "Contenido 1", rating = 10, saved = true),
             NoteDTO(rating = 5),
-            NoteDTO(type = NoteType.EVENT),
+            NoteDTO(type = NoteType.EVENT, liked = true),
             NoteDTO(),
             NoteDTO(),
             NoteDTO()
@@ -528,8 +539,8 @@ fun Preview() {
         onSearchQueryChange = {},
         onNoteClick = {},
         onFavClick = {},
-        onFilterSelected = {},
-        onFilterByNoteTypeSelected = {},
+        isFilterExpanded = false,
+        onFilterExpandToggle = {},
         onLikeClick = {},
     )
 }

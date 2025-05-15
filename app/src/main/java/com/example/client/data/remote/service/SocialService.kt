@@ -10,7 +10,8 @@ import retrofit2.http.Query
 import java.util.UUID
 
 interface SocialService {
-    @POST("notes/saveds")
+
+    @POST("social/saveds")
     suspend fun favNote(
         @Query("noteId") noteId: Int,
         @Query("username") username: String

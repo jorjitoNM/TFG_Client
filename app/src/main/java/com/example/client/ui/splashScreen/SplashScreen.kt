@@ -97,7 +97,6 @@ fun SplashScreen(onFinished: () -> Unit) {
                     .alpha(alpha.value)
                     .scale(scale.value)
             )
-
         }
     }
 }

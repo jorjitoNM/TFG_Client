@@ -1,17 +1,17 @@
-package com.example.client.ui.noteScreen.list
+package com.example.client.ui.normalNoteScreen.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
-import com.example.client.domain.usecases.note.FavNoteUseCase
 import com.example.client.domain.usecases.note.GetNoteSearch
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.domain.usecases.note.OrderNoteUseCase
+import com.example.client.domain.usecases.social.FavNoteUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.normalNoteScreen.list.NoteListEvent
+import com.example.client.ui.noteScreen.list.NoteListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
