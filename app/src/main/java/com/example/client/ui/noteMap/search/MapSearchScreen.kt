@@ -124,7 +124,7 @@ fun MapSearchScreen(
                 ) {
                     TextField(
                         value = query,
-                        onValueChange = { query = it },
+                        onValueChange = { viewModel.handleEvent(MapSearchEvent.UpdateSearchText(it)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 10.dp)
@@ -157,6 +157,12 @@ fun MapSearchScreen(
                             errorIndicatorColor = Color.Transparent
                         )
                     )
+                }
+                LazyColumn {
+                    items(uiState.results) { place ->
+                        Text(text = place.displayName ?: "")
+                        // Puedes mostrar lat/lon si quieres
+                    }
                 }
             }
         }
