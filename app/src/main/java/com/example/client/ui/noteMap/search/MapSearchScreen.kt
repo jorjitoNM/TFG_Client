@@ -123,13 +123,13 @@ fun MapSearchScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     TextField(
-                        value = query,
+                        value = uiState.searchText, // <-- usa el estado del ViewModel
                         onValueChange = { viewModel.handleEvent(MapSearchEvent.UpdateSearchText(it)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 10.dp)
                             .height(56.dp)
-                            .focusRequester(focusRequester), // <- Aquí se asigna el focusRequester
+                            .focusRequester(focusRequester),
                         placeholder = { Text("Buscar notas...") },
                         singleLine = true,
                         leadingIcon = {
@@ -158,12 +158,13 @@ fun MapSearchScreen(
                         )
                     )
                 }
-                LazyColumn {
-                    items(uiState.results) { place ->
-                        Text(text = place.displayName ?: "")
-                        // Puedes mostrar lat/lon si quieres
-                    }
-                }
+
+            }
+        }
+        LazyColumn {
+            items(uiState.results) { place ->
+                Text(text = place.displayName ?: "")
+                // Puedes mostrar lat/lon si quieres
             }
         }
     }
