@@ -2,8 +2,12 @@ package com.example.client.ui.registerScreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.client.domain.model.user.CredentialUser
+import com.example.client.R
+import com.example.client.common.NetworkResult
+import com.example.client.common.StringProvider
+import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.user.RegisterUseCase
+import com.example.client.ui.common.UiEvent
 import com.example.musicapprest.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +18,7 @@ import javax.inject.Inject
 
 class RegisterViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
+    private val stringProvider: StringProvider,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -22,17 +27,31 @@ class RegisterViewModel @Inject constructor(
 
     fun handleEvent(event: RegisterEvents) {
         when (event) {
-            is RegisterEvents.Register -> signUp(event.credentialUser)
+            is RegisterEvents.Register -> register(event.authenticationUser)
             is RegisterEvents.UpdateEmail -> updateEmail(event.newEmail)
             is RegisterEvents.UpdateUsername -> updateUsername(event.newUsername)
             is RegisterEvents.UpdatePassword -> updatePassword(event.newPassword)
         }
     }
 
-    private fun signUp(credentialUser: CredentialUser) {
+    private fun register(authenticationUser: AuthenticationUser) {
         viewModelScope.launch(dispatcher) {
-            when (val result = registerUseCase.invoke(credentialUser)) {
+            when (val result = registerUseCase.invoke(authenticationUser)) {
+                is NetworkResult.Success -> _uiState.value =
+                    _uiState.value.copy(event = UiEvent.ShowSnackbar(stringProvider.getString(R.string.user_registered)))
 
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        event = UiEvent.ShowSnackbar(result.message),
+                        isLoading = false,
+                    )
+                }
+
+                is NetworkResult.Loading -> _uiState.update {
+                    it.copy(
+                        isLoading = true
+                    )
+                }
             }
         }
     }

@@ -9,4 +9,5 @@
     <string name="app_real_name">Nomada</string>
     <string name="app_slogan">Pin Your Finds, Inspire the World.</string>
     <string name="register">Register</string>
+    <string name="user_registered">You have been registered successfully, check you email for verification</string>
 </resources>

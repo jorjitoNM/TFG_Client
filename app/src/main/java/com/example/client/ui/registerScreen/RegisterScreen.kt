@@ -16,7 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.R
-import com.example.client.domain.model.user.CredentialUser
+import com.example.client.domain.model.user.AuthenticationUser
 
 @Composable
 fun SignUpScreen (
@@ -27,7 +27,7 @@ fun SignUpScreen (
     val uiState = registerViewModel.uiState.collectAsStateWithLifecycle()
 
     SignUpScreenContent(
-        credentialUser = uiState.value.credentialsUser,
+        authenticationUser = uiState.value.credentialsUser,
         onSignUpClick = { registerViewModel.handleEvent(RegisterEvents.Register(uiState.value.credentialsUser)) },
         onEmailChange = { email -> registerViewModel.handleEvent(RegisterEvents.UpdateEmail(email)) },
         onUsernameChange = { username -> registerViewModel.handleEvent(RegisterEvents.UpdateUsername(username)) },
@@ -37,8 +37,8 @@ fun SignUpScreen (
 
 @Composable
 fun SignUpScreenContent (
-    credentialUser: CredentialUser,
-    onSignUpClick : (CredentialUser) -> Unit,
+    authenticationUser: AuthenticationUser,
+    onSignUpClick : (AuthenticationUser) -> Unit,
     onEmailChange : (String) -> Unit,
     onUsernameChange : (String) -> Unit,
     onPasswordChange : (String) -> Unit,
@@ -64,5 +64,5 @@ fun SignUpScreenContent (
 @Preview
 @Composable
 fun SignUpScreenPreview () {
-    SignUpScreenContent(CredentialUser(),{},{},{},{})
+    SignUpScreenContent(AuthenticationUser(),{},{},{},{})
 }
