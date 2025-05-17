@@ -129,12 +129,18 @@ fun Navigation() {
                 MapSearchScreen(
                     onNavigateBack = { navController.navigateUp() },
                     navController = navController,
-                    sharedLocationViewModel = sharedLocationViewModel
+                    sharedLocationViewModel = sharedLocationViewModel,
+                    showSnackbar = { showSnackbar(it) }
                 )
             }
 
-            composable<UserScreenDestination> {
-                UserScreen()
+            composable<UserScreenDestination> { backStackEntry ->
+                // Supón que tienes el username en el argumento
+                val destination = backStackEntry.toRoute() as UserScreenDestination
+
+                UserScreen(
+                    showSnackbar = { showSnackbar(it) }
+                )
             }
 
 

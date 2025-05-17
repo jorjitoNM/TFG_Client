@@ -53,6 +53,7 @@ import timber.log.Timber
 fun MapSearchScreen(
     viewModel: MapSearchViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
+    showSnackbar : (String) -> Unit,
     navController: NavController,
     sharedLocationViewModel: SharedLocationViewModel // <-- Aquí
 
@@ -73,7 +74,9 @@ fun MapSearchScreen(
                     viewModel.handleEvent(MapSearchEvent.AvisoVisto)
                 }
 
-                is UiEvent.ShowSnackbar -> { /* ... */
+                is UiEvent.ShowSnackbar -> {
+                    showSnackbar(event.message)
+                    viewModel.handleEvent(MapSearchEvent.AvisoVisto)
                 }
             }
         }
