@@ -5,7 +5,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.data.repositories.NoteRepository
 import javax.inject.Inject
 
-class GetNoteSearch @Inject constructor(private val noteRepository: NoteRepository) {
+class GetNoteSearchUseCase @Inject constructor(private val noteRepository: NoteRepository) {
     suspend operator fun invoke(title: String): NetworkResult<List<NoteDTO>> {
         return when (val result = noteRepository.getNotes()) {
             is NetworkResult.Error -> NetworkResult.Error(result.message)

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -63,6 +61,7 @@ import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.getMarkerColor
 import com.example.client.ui.common.getMarkerIconRes
 import com.example.client.ui.common.vectorToBitmap
+import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -80,13 +79,15 @@ import timber.log.Timber
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteMapScreen(
-    showSnackbar: (String) -> Unit,
+    showSnackbar: (String) -> Unit ,
     viewModel: NoteMapViewModel = hiltViewModel(),
-    initialLat: Double? = null,
-    initialLon: Double? = null,
+    sharedLocationViewModel: SharedLocationViewModel,
     onNavigateToList: () -> Unit,
 
 ) {
+    val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
+    val initialLat = latLong?.first
+    val initialLon = latLong?.second
     var moveToCurrentLocation by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
     val cameraPositionState = rememberCameraPositionState {

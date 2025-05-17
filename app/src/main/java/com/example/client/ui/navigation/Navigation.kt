@@ -32,12 +32,16 @@ import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.client.ui.noteMap.search.SharedLocationViewModel
+import com.example.client.ui.userScreen.detail.UserScreen
 
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val sharedLocationViewModel: SharedLocationViewModel = hiltViewModel()
 
     val showSnackbar = { message: String ->
         scope.launch {
@@ -108,15 +112,14 @@ fun Navigation() {
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
                 NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
-            composable<NoteMapDestination> { backStackEntry ->
-                val destination = backStackEntry.toRoute() as NoteMapDestination
+            composable<NoteMapDestination> {
                 NoteMapScreen(
                     showSnackbar = { showSnackbar(it) },
                     onNavigateToList = { navController.navigate(MapSearchDestination) },
-                    initialLat = destination.lat,
-                    initialLon = destination.lon
+                    sharedLocationViewModel = sharedLocationViewModel
                 )
             }
+
 
             composable<NoteSavedListDestination> {
                 SavedScreen(showSnackbar = { showSnackbar(it) })
@@ -125,11 +128,16 @@ fun Navigation() {
             composable<MapSearchDestination> {
                 MapSearchScreen(
                     onNavigateBack = { navController.navigateUp() },
-                    onNavigateToMap = { lat, lon ->
-                        navController.navigate(NoteMapDestination(lat, lon))
-                    }
+                    navController = navController,
+                    sharedLocationViewModel = sharedLocationViewModel
                 )
             }
+
+            composable<UserScreenDestination> {
+                UserScreen()
+            }
+
+
 
 
 

@@ -3,6 +3,7 @@ package com.example.client.ui.navigation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
@@ -32,7 +33,7 @@ interface AppMainBottomDestination : AppDestination {
 
 object NormalNoteList : AppMainBottomDestination {
     override val route: Any = NormalNoteListDestination
-    override val title: String = "Nota Lista"
+    override val title: String = "Inicio"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -71,7 +72,7 @@ object NormalNoteDetail : AppDestination {
 
 object NoteSavedList : AppMainBottomDestination {
     override val route: Any = NoteSavedListDestination
-    override val title: String = "Nota Saved Lista"
+    override val title: String = "Favoritos"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -84,8 +85,8 @@ object NoteSavedList : AppMainBottomDestination {
 }
 
 object NoteMap : AppMainBottomDestination {
-    override val route: Any = NoteMapDestination()
-    override val title: String = "Nota aa"
+    override val route: Any = NoteMapDestination
+    override val title: String = "Mapa"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -95,6 +96,20 @@ object NoteMap : AppMainBottomDestination {
     override val isTopBarVisible: Boolean = false
     override val onBottomBar: Boolean = true
     override val icon: ImageVector = Icons.Filled.Place
+}
+
+object UserScreen : AppMainBottomDestination {
+    override val route: Any = UserScreenDestination
+    override val title: String = "Perfil"
+    override val isBottomBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+    override val onBottomBar: Boolean = true
+    override val icon: ImageVector = Icons.Filled.AccountCircle
 }
 
 

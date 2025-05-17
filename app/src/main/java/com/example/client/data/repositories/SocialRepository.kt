@@ -2,7 +2,7 @@ package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.remote.datasource.SocialRemoteDataSource
-import com.example.musicapprest.di.IoDispatcher
+import com.example.client.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.util.UUID

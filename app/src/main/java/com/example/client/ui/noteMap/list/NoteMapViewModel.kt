@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
-import com.example.client.domain.usecases.note.GetNoteSearch
+import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.ui.common.UiEvent
@@ -23,7 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteMapViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
-    private val getNoteSearch: GetNoteSearch,
+    private val getNoteSearchUseCase: GetNoteSearchUseCase,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
     private val application: Application
 ) : ViewModel() {
@@ -101,7 +101,7 @@ class NoteMapViewModel @Inject constructor(
     private fun searchNote(query: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            when (val result = getNoteSearch(query)) {
+            when (val result = getNoteSearchUseCase(query)) {
                 is NetworkResult.Success -> {
                     _uiState.update {
                         it.copy(notes = result.data, isLoading = false)

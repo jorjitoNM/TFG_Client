@@ -2,8 +2,7 @@ package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.remote.service.NominatimService
-import com.example.client.domain.model.note.NominatimPlace
-import com.example.musicapprest.di.IoDispatcher
+import com.example.client.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

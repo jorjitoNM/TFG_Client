@@ -42,15 +42,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.client.domain.model.note.NominatimPlace
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.navigation.NoteMapDestination
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import timber.log.Timber
 
 @Composable
 fun MapSearchScreen(
     viewModel: MapSearchViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    onNavigateToMap : (Double, Double) -> Unit
+    navController: NavController,
+    sharedLocationViewModel: SharedLocationViewModel // <-- Aquí
+
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusRequester = remember { FocusRequester() }
@@ -149,14 +154,14 @@ fun MapSearchScreen(
                 items(uiState.results) { place ->
                     PlaceCard(
                         place = place,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .fillMaxWidth()
-                            .clickable {
-                                val lat = place.latitude?.toDoubleOrNull() ?: 0.0
-                                val lon = place.longitude?.toDoubleOrNull() ?: 0.0
-                                onNavigateToMap(lat, lon)
-                            }
+                        onClick = {
+                            // Guarda la ubicación seleccionada en el ViewModel compartido
+                            sharedLocationViewModel.setLocation(
+                                place.latitude?.toDouble() ?: 0.0,
+                                place.longitude?.toDouble() ?: 0.0
+                            )
+                            navController.navigate(NoteMapDestination)
+                        }
                     )
                 }
             }
@@ -167,11 +172,11 @@ fun MapSearchScreen(
 
 
 @Composable
-fun PlaceCard(place: NominatimPlace, modifier: Modifier = Modifier) {
+fun PlaceCard(place: NominatimPlace, modifier: Modifier = Modifier,onClick: () -> Unit) {
     Card(
-        modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        modifier = modifier.clickable { onClick() }
     ) {
         Row(
             modifier = Modifier

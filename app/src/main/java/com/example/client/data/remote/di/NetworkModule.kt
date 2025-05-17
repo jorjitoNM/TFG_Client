@@ -5,6 +5,7 @@ import com.example.client.BuildConfig
 import com.example.client.data.remote.service.NominatimService
 import com.example.client.data.remote.service.NoteService
 import com.example.client.data.remote.service.SocialService
+import com.example.client.data.remote.service.UserService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,10 +73,14 @@ object NetworkModule {
             )
             .build()
 
-    @Singleton
+
     @Provides
     fun provideNoteService(@MainRetrofit retrofit: Retrofit): NoteService =
         retrofit.create(NoteService::class.java)
+
+    @Provides
+    fun provideUserService(@MainRetrofit retrofit: Retrofit): UserService =
+        retrofit.create(UserService::class.java)
 
     @Provides
     fun provideNominatimService(@NominatimRetrofit retrofit: Retrofit): NominatimService =
