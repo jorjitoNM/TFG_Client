@@ -1,6 +1,7 @@
 package com.example.client.data.remote.service
 
 import com.example.client.data.model.NoteDTO
+import com.example.client.data.model.NoteMapDTO
 import com.example.client.domain.model.note.NoteType
 import retrofit2.Response
 import retrofit2.http.Body
@@ -42,4 +43,6 @@ interface NoteService {
 
     @DELETE("notes/{id}")
     suspend fun deleteNote(@Path("id") id: Int):Response<Unit>
+
+
 }

@@ -26,7 +26,7 @@ class NoteListViewModel @Inject constructor(
     private val favNoteUseCase: FavNoteUseCase,
     private val orderNoteUseCase: OrderNoteUseCase,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
-    private val getNoteSearch: GetNoteSearch,
+    private val getNoteSearchUseCase: GetNoteSearchUseCase,
     private val likeNoteUseCase: LikeNoteUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
@@ -121,7 +121,7 @@ class NoteListViewModel @Inject constructor(
     private fun searchNote(title:Any) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            when (val result = getNoteSearch.invoke(title.toString())) {
+            when (val result = getNoteSearchUseCase.invoke(title.toString())) {
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(
                         aviso = UiEvent.ShowSnackbar(result.message),
