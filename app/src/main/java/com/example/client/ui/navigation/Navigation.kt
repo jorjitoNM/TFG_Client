@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.userScreen.detail.UserScreen
 
