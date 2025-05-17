@@ -8,6 +8,8 @@ import com.example.client.ui.noteMap.list.NoteMapState
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -22,16 +24,34 @@ class MapSearchViewModel @Inject constructor()
  : ViewModel() {
     private val _uiState = MutableStateFlow(MapSearchState())
     val uiState = _uiState.asStateFlow()
+    private var searchJob: Job? = null
     fun handleEvent(event: MapSearchEvent) {
         when (event) {
             is MapSearchEvent.UpdateSearchText -> {
-                _uiState.update { it.copy(searchText = event.query) }
-                viewModelScope.launch {
-                    // Cambia aquí: ejecuta en IO dispatcher
-                    val results = withContext(Dispatchers.IO) {
-                        searchPlaces(event.query)
+                _uiState.update { it.copy(searchText = event.query, isLoading = true) }
+                searchJob?.cancel()
+                searchJob = viewModelScope.launch {
+                    delay(500) // Espera 500ms después de la última tecla
+                    if (event.query.isNotBlank()) {
+                        val results = withContext(Dispatchers.IO) {
+                            searchPlaces(event.query)
+                        }
+                        _uiState.update {
+                            it.copy(
+                                results = results,
+                                isLoading = false,
+                                showEmptyState = results.isEmpty()
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                results = emptyList(),
+                                isLoading = false,
+                                showEmptyState = false
+                            )
+                        }
                     }
-                    _uiState.update { it.copy(results = results) }
                 }
             }
             is MapSearchEvent.NavigateBack -> _uiState.update { it.copy(aviso = UiEvent.PopBackStack) }

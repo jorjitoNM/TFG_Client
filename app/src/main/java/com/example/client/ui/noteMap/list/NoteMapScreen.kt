@@ -421,9 +421,8 @@ fun NoteMapScreen(
 
             // Loading indicator
             if (uiState.isLoading) {
-                LinearProgressIndicator(
+                CircularProgressIndicator(
                     modifier = Modifier
-                        .size(50.dp)
                         .align(Alignment.Center)
                 )
             }
