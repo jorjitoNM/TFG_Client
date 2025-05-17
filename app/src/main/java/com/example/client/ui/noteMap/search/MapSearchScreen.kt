@@ -2,6 +2,7 @@ package com.example.client.ui.noteMap.search
 
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,11 +44,13 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.domain.model.note.NominatimPlace
 import com.example.client.ui.common.UiEvent
+import timber.log.Timber
 
 @Composable
 fun MapSearchScreen(
     viewModel: MapSearchViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToMap : (Double, Double) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusRequester = remember { FocusRequester() }
@@ -149,6 +152,11 @@ fun MapSearchScreen(
                         modifier = Modifier
                             .padding(vertical = 8.dp)
                             .fillMaxWidth()
+                            .clickable {
+                                val lat = place.latitude?.toDoubleOrNull() ?: 0.0
+                                val lon = place.longitude?.toDoubleOrNull() ?: 0.0
+                                onNavigateToMap(lat, lon)
+                            }
                     )
                 }
             }
@@ -195,6 +203,7 @@ fun PlaceCard(place: NominatimPlace, modifier: Modifier = Modifier) {
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+                Timber.d("Latitude: ${place.latitude}, Longitude: ${place.longitude}")
             }
         }
     }

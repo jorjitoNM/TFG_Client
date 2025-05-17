@@ -75,20 +75,44 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteMapScreen(
     showSnackbar: (String) -> Unit,
     viewModel: NoteMapViewModel = hiltViewModel(),
+    initialLat: Double? = null,
+    initialLon: Double? = null,
     onNavigateToList: () -> Unit,
 
 ) {
     var moveToCurrentLocation by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
-    val cameraPositionState = rememberCameraPositionState()
-    val defaultLocation = LatLng(0.0, 0.0)
-    val defaultZoom = 2f
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(initialLat ?: 0.0, initialLon ?: 0.0),
+            if (initialLat != null && initialLon != null) 15f else 2f
+        )
+    }
+    var cameraMoved by remember { mutableStateOf(false) }
+    val defaultLocation = LatLng( 0.0,  0.0)
+    val defaultZoom =  2f
+    Timber.d("initialLat: $initialLat, initialLon: $initialLon")
+    // Al cargar, mueve la cámara si hay coordenadas iniciales
+    LaunchedEffect(initialLat, initialLon) {
+        if (!cameraMoved && initialLat != null && initialLon != null) {
+            cameraPositionState.animate(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition.builder()
+                        .target(LatLng(initialLat, initialLon))
+                        .zoom(15f)
+                        .build()
+                )
+            )
+            cameraMoved = true
+        }
+    }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val mapStyleOptions = remember {

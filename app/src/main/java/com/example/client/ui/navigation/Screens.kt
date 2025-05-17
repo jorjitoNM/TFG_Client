@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 
 val appDestinationList = listOf(
-    NormalNoteList,NoteMap,NoteSavedList,NormalNoteDetail)
+    NormalNoteList,NoteMap,NoteSavedList,NormalNoteDetail,MapSearch)
 
 
 interface AppDestination{
@@ -84,7 +84,7 @@ object NoteSavedList : AppMainBottomDestination {
 }
 
 object NoteMap : AppMainBottomDestination {
-    override val route: Any = NoteMapDestination
+    override val route: Any = NoteMapDestination()
     override val title: String = "Nota aa"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState

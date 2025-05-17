@@ -9,11 +9,18 @@ object NormalNoteListDestination
 data class NormalNoteDetailDestination (val noteId: Int)
 
 @Serializable
-object NoteMapDestination
+data class NoteMapDestination(
+    val lat: Double? = null,
+    val lon: Double? = null
+)
+
 
 @Serializable
 object NoteSavedListDestination
 
 @Serializable
 object MapSearchDestination
+
+
+
 

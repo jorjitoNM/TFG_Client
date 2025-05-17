@@ -108,16 +108,32 @@ fun Navigation() {
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
                 NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
-            composable<NoteMapDestination> {
-                NoteMapScreen(showSnackbar = { showSnackbar(it) } , onNavigateToList = { navController.navigate(MapSearchDestination) })
+            composable<NoteMapDestination> { backStackEntry ->
+                val destination = backStackEntry.toRoute() as NoteMapDestination
+                NoteMapScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateToList = { navController.navigate(MapSearchDestination) },
+                    initialLat = destination.lat,
+                    initialLon = destination.lon
+                )
             }
+
             composable<NoteSavedListDestination> {
                 SavedScreen(showSnackbar = { showSnackbar(it) })
             }
 
             composable<MapSearchDestination> {
-                MapSearchScreen(onNavigateBack = { navController.navigateUp() })
+                MapSearchScreen(
+                    onNavigateBack = { navController.navigateUp() },
+                    onNavigateToMap = { lat, lon ->
+                        navController.navigate(NoteMapDestination(lat, lon))
+                    }
+                )
             }
+
+
+
+
 
         }
     }
