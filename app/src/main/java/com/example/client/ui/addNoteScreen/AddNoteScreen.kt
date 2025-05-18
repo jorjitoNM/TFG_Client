@@ -75,7 +75,6 @@ fun AddNoteScreen(
         }
     }
 }
-
 @Composable
 fun AddNoteContent(
     note: NoteDTO,
@@ -83,30 +82,24 @@ fun AddNoteContent(
     onSave: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    var title by remember { mutableStateOf(note.title) }
-    var content by remember { mutableStateOf(note.content) }
-    var privacy by remember { mutableStateOf(note.privacy) }
-    var rating by remember { mutableIntStateOf(note.rating) }
-    var latitude by remember { mutableDoubleStateOf(note.latitude) }
-    var longitude by remember { mutableDoubleStateOf(note.longitude) }
-    var type by remember { mutableStateOf(note.type) }
+    val noteState = remember { mutableStateOf(note) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         TextField(
-            value = title,
+            value = noteState.value.title,
             onValueChange = {
-                title = it
-                onEdit(note.copy(title = title))
+                noteState.value = noteState.value.copy(title = it)
+                onEdit(noteState.value)
             },
             label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
-            value = content,
+            value = noteState.value.content,
             onValueChange = {
-                content = it
-                onEdit(note.copy(content = content))
+                noteState.value = noteState.value.copy(content = it)
+                onEdit(noteState.value)
             },
             label = { Text("Contenido") },
             modifier = Modifier.fillMaxWidth()
@@ -115,38 +108,41 @@ fun AddNoteContent(
         DropdownMenuField(
             label = "Privacidad",
             options = NotePrivacy.values().toList(),
-            selectedOption = privacy,
+            selectedOption = noteState.value.privacy,
             onOptionSelected = {
-                privacy = it
-                note?.let { onEdit(it.copy(privacy = privacy)) }
+                noteState.value = noteState.value.copy(privacy = it)
+                onEdit(noteState.value)
             }
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
-            value = rating.toString(),
+            value = noteState.value.rating.toString(),
             onValueChange = {
-                rating = it.toIntOrNull() ?: rating
-                note?.let { onEdit(it.copy(rating = rating)) }
+                val newRating = it.toIntOrNull() ?: noteState.value.rating
+                noteState.value = noteState.value.copy(rating = newRating)
+                onEdit(noteState.value)
             },
             label = { Text("Calificación") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
-            value = latitude.toString(),
+            value = noteState.value.latitude.toString(),
             onValueChange = {
-                latitude = it.toDoubleOrNull() ?: latitude
-                note?.let { onEdit(it.copy(latitude = latitude)) }
+                val newLatitude = it.toDoubleOrNull() ?: noteState.value.latitude
+                noteState.value = noteState.value.copy(latitude = newLatitude)
+                onEdit(noteState.value)
             },
             label = { Text("Latitud") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
-            value = longitude.toString(),
+            value = noteState.value.longitude.toString(),
             onValueChange = {
-                longitude = it.toDoubleOrNull() ?: longitude
-                onEdit(note.copy(longitude = longitude))
+                val newLongitude = it.toDoubleOrNull() ?: noteState.value.longitude
+                noteState.value = noteState.value.copy(longitude = newLongitude)
+                onEdit(noteState.value)
             },
             label = { Text("Longitud") },
             modifier = Modifier.fillMaxWidth()
@@ -155,10 +151,10 @@ fun AddNoteContent(
         DropdownMenuField(
             label = "Tipo",
             options = NoteType.entries,
-            selectedOption = type,
+            selectedOption = noteState.value.type,
             onOptionSelected = {
-                type = it
-                onEdit(note.copy(type = type))
+                noteState.value = noteState.value.copy(type = it)
+                onEdit(noteState.value)
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
