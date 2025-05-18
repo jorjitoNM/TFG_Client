@@ -52,7 +52,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.savedNotes.formatDateTime
+import com.example.client.ui.normalNoteScreen.list.formatDateTime
 
 @Composable
 fun NoteDetailScreen(

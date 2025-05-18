@@ -6,15 +6,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
 val appDestinationList = listOf(
-    NormalNoteList,NoteMap,NoteSavedList,NormalNoteDetail,MapSearch,UserScreen)
+    NormalNoteList, NoteMap, NormalNoteDetail, MapSearch, UserScreen
+)
 
 
-interface AppDestination{
+interface AppDestination {
     val route: Any
     val title: String
     val scaffoldState: ScaffoldState
@@ -22,8 +22,8 @@ interface AppDestination{
             topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
             fabVisible = true
         )
-    val isBottomBarVisible : Boolean
-    val isTopBarVisible : Boolean
+    val isBottomBarVisible: Boolean
+    val isTopBarVisible: Boolean
 }
 
 interface AppMainBottomDestination : AppDestination {
@@ -45,7 +45,7 @@ object NormalNoteList : AppMainBottomDestination {
     override val icon: ImageVector = Icons.Filled.Home
 }
 
-object MapSearch : AppDestination{
+object MapSearch : AppDestination {
     override val route: Any = MapSearchDestination
     override val title: String = "Busqueda"
     override val isBottomBarVisible: Boolean = false
@@ -70,19 +70,6 @@ object NormalNoteDetail : AppDestination {
     override val isTopBarVisible: Boolean = true
 }
 
-object NoteSavedList : AppMainBottomDestination {
-    override val route: Any = NoteSavedListDestination
-    override val title: String = "Favoritos"
-    override val isBottomBarVisible: Boolean = true
-    override val scaffoldState: ScaffoldState
-        get() = ScaffoldState(
-            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
-            fabVisible = false
-        )
-    override val isTopBarVisible: Boolean = true
-    override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Star
-}
 
 object NoteMap : AppMainBottomDestination {
     override val route: Any = NoteMapDestination

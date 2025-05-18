@@ -3,22 +3,15 @@ package com.example.client.ui.noteMap.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.model.note.NominatimPlace
 import com.example.client.domain.usecases.map.SearchPlacesUseCase
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.noteMap.list.NoteMapState
-import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import javax.inject.Inject
 
 @HiltViewModel

@@ -12,9 +12,8 @@ data class NormalNoteDetailDestination (val noteId: Int)
 object NoteMapDestination
 
 @Serializable
-object NoteSavedListDestination
-@Serializable
 object MapSearchDestination
+
 @Serializable
 object UserScreenDestination
 
