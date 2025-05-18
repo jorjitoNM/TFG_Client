@@ -1,17 +1,17 @@
-package com.example.client.ui.noteScreen.list
+package com.example.client.ui.normalNoteScreen.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
-import com.example.client.domain.usecases.note.FavNoteUseCase
-import com.example.client.domain.usecases.note.GetNoteSearch
+import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.domain.usecases.note.OrderNoteUseCase
+import com.example.client.domain.usecases.social.FavNoteUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.normalNoteScreen.list.NoteListEvent
+import com.example.client.ui.noteScreen.list.NoteListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +26,7 @@ class NoteListViewModel @Inject constructor(
     private val favNoteUseCase: FavNoteUseCase,
     private val orderNoteUseCase: OrderNoteUseCase,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
-    private val getNoteSearch: GetNoteSearch,
+    private val getNoteSearchUseCase: GetNoteSearchUseCase,
     private val likeNoteUseCase: LikeNoteUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
@@ -121,7 +121,7 @@ class NoteListViewModel @Inject constructor(
     private fun searchNote(title:Any) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            when (val result = getNoteSearch.invoke(title.toString())) {
+            when (val result = getNoteSearchUseCase.invoke(title.toString())) {
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(
                         aviso = UiEvent.ShowSnackbar(result.message),

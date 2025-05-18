@@ -1,42 +1,136 @@
 package com.example.client.ui.noteMap.list
 
+
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.client.R
+import com.example.client.data.model.NoteDTO
+import com.example.client.domain.model.note.NoteType
+import com.example.client.ui.common.FilterChip
+import com.example.client.ui.common.NotesBottomSheet
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.common.getMarkerColor
+import com.example.client.ui.common.getMarkerIconRes
+import com.example.client.ui.common.vectorToBitmap
+import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteMapScreen(
-    showSnackbar: (String) -> Unit,
-    viewModel: NoteMapViewModel = hiltViewModel()
+    showSnackbar: (String) -> Unit ,
+    viewModel: NoteMapViewModel = hiltViewModel(),
+    sharedLocationViewModel: SharedLocationViewModel,
+    onNavigateToList: () -> Unit,
+
 ) {
+    val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
+    val initialLat = latLong?.first
+    val initialLon = latLong?.second
+    var moveToCurrentLocation by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
-    val cameraPositionState = rememberCameraPositionState()
-    val defaultLocation = LatLng(0.0, 0.0)
-    val defaultZoom = 2f
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(initialLat ?: 0.0, initialLon ?: 0.0),
+            if (initialLat != null && initialLon != null) 15f else 2f
+        )
+    }
+    var cameraMoved by remember { mutableStateOf(false) }
+    val defaultLocation = LatLng( 0.0,  0.0)
+    val defaultZoom =  2f
+    Timber.d("initialLat: $initialLat, initialLon: $initialLon")
+    // Al cargar, mueve la cámara si hay coordenadas iniciales
+    LaunchedEffect(initialLat, initialLon) {
+        if (!cameraMoved && initialLat != null && initialLon != null) {
+            cameraPositionState.animate(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition.builder()
+                        .target(LatLng(initialLat, initialLon))
+                        .zoom(15f)
+                        .build()
+                )
+            )
+            cameraMoved = true
+        }
+    }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val mapStyleOptions = remember {
+        MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)
+    }
+
+    // Bottom sheet state
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        skipHiddenState = false
+    )
+    val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
+
+
+    // Selected notes for the bottom sheet
+    val selectedNotes = remember { mutableStateListOf<NoteDTO>() }
+    var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -47,10 +141,14 @@ fun NoteMapScreen(
         }
     }
 
+    // Lanzar eventos iniciales
     LaunchedEffect(Unit) {
         viewModel.handleEvent(NoteMapEvent.GetNotes)
         viewModel.handleEvent(NoteMapEvent.CheckLocationPermission)
+    }
 
+    // Solicitar permisos si no los tiene
+    LaunchedEffect(uiState.hasLocationPermission) {
         if (!uiState.hasLocationPermission) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
@@ -58,96 +156,301 @@ fun NoteMapScreen(
         }
     }
 
-    LaunchedEffect(uiState.currentLocation) {
-        uiState.currentLocation?.let { location ->
-            cameraPositionState.animate(
+    // Restaurar la posición de la cámara si hay guardada
+    LaunchedEffect(uiState.cameraLatLng, uiState.cameraZoom) {
+        if (uiState.cameraZoom != null) {
+            uiState.cameraLatLng?.let {
+                CameraPosition.Builder()
+                    .target(it)
+                    .zoom(uiState.cameraZoom!!)
+                    .build()
+            }?.let {
                 CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder()
-                        .target(LatLng(location.latitude, location.longitude))
-                        .zoom(15f)
-                        .build()
+                    it
+                )
+            }?.let {
+                cameraPositionState.move(
+                    it
+                )
+            }
+        }
+    }
+
+    // Guardar la posición de la cámara cuando cambia
+    LaunchedEffect(cameraPositionState.position) {
+        if (!cameraPositionState.isMoving) {
+            viewModel.handleEvent(
+                NoteMapEvent.SaveCameraPosition(
+                    latLng = cameraPositionState.position.target,
+                    zoom = cameraPositionState.position.zoom
                 )
             )
         }
     }
 
+    // Si no hay posición guardada, mover a la ubicación actual
     LaunchedEffect(uiState.currentLocation) {
-        uiState.currentLocation?.let { location ->
-            cameraPositionState.animate(
-                CameraUpdateFactory.newCameraPosition(
-                    CameraPosition.Builder()
-                        .target(LatLng(location.latitude, location.longitude))
-                        .zoom(15f)
-                        .build()
+        if (uiState.cameraLatLng == null) {
+            uiState.currentLocation?.let { location ->
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.Builder()
+                            .target(LatLng(location.latitude, location.longitude))
+                            .zoom(15f)
+                            .build()
+                    )
                 )
-            )
+            }
         }
     }
 
-    uiState.aviso?.let { event ->
-        when (event) {
-            is UiEvent.ShowSnackbar -> {
-                LaunchedEffect(event) {
+    // Filtrado de notas por tipo y búsqueda
+    val filteredNotes = remember(uiState.notes, uiState.selectedType, uiState.currentSearch) {
+        uiState.notes
+            .filter { note ->
+                (uiState.selectedType == null || note.type == uiState.selectedType) &&
+                        (uiState.currentSearch.isBlank() ||
+                                note.title.contains(uiState.currentSearch, ignoreCase = true) ||
+                                (note.content?.contains(uiState.currentSearch, ignoreCase = true) ?: false))
+            }
+    }
+    val notesByLocation = remember(filteredNotes) {
+        filteredNotes.groupBy { note -> LatLng(note.latitude, note.longitude) }
+    }
+
+    // Mostrar Snackbar si hay aviso
+    LaunchedEffect(uiState.aviso) {
+        uiState.aviso?.let { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
                     showSnackbar(event.message)
                     viewModel.handleEvent(NoteMapEvent.AvisoVisto)
                 }
+                is UiEvent.PopBackStack -> {
+                    onNavigateToList()
+                    viewModel.handleEvent(NoteMapEvent.AvisoVisto)
+                }
+                else -> Unit
             }
-
-            else -> {}
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            properties = MapProperties(
-                mapType = MapType.NORMAL,
-                isMyLocationEnabled = uiState.hasLocationPermission
-            ),
-            cameraPositionState = cameraPositionState,
-            onMapLoaded = {
-                if (uiState.currentLocation == null && !cameraPositionState.isMoving) {
-                    cameraPositionState.move(
-                        CameraUpdateFactory.newCameraPosition(
-                            CameraPosition.Builder()
-                                .target(defaultLocation)
-                                .zoom(defaultZoom)
-                                .build()
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetContent = {
+            NotesBottomSheet(
+                notes = selectedNotes,
+                location = selectedLocation
+            )
+        },
+        sheetPeekHeight = 0.dp,
+        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        sheetContainerColor = Color.White,
+        sheetShadowElevation = 8.dp
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Map content
+            GoogleMap(
+                modifier = Modifier.fillMaxSize(),
+                properties = MapProperties(
+                    mapType = MapType.NORMAL,
+                    isMyLocationEnabled = uiState.hasLocationPermission,
+//                    mapStyleOptions = mapStyleOptions
+                ),
+                cameraPositionState = cameraPositionState,
+                onMapLoaded = {
+                    if (uiState.currentLocation == null && !cameraPositionState.isMoving && uiState.cameraLatLng == null) {
+                        cameraPositionState.move(
+                            CameraUpdateFactory.newCameraPosition(
+                                CameraPosition.Builder()
+                                    .target(defaultLocation)
+                                    .zoom(defaultZoom)
+                                    .build()
+                            )
                         )
+                    }
+                },
+                onMapClick = { latLng ->
+                    // Limpiar selección
+                    selectedNotes.clear()
+                    selectedLocation = null
+                    // Cerrar el bottom sheet
+                    scope.launch {
+                        bottomSheetState.hide()
+                    }
+                }
+
+            ) {
+
+                notesByLocation.forEach { (location, notes) ->
+                    val markerState = rememberMarkerState(position = location)
+                    val note = notes.first()
+                    val noteType = note.type
+                    val isSelected = selectedLocation == location
+
+                    val iconBitmapDescriptor = when {
+                        notes.size > 1 && isSelected ->
+                            BitmapDescriptorFactory.defaultMarker(210f) // Gris aproximado
+                        notes.size > 1 ->
+                            vectorToBitmap(R.drawable.ic_note_multinote, context)
+                        isSelected ->
+                            BitmapDescriptorFactory.defaultMarker(getMarkerColor(noteType))
+                        else ->
+                            vectorToBitmap(getMarkerIconRes(noteType), context)
+                    }
+
+                    Marker(
+                        state = markerState,
+                        icon = iconBitmapDescriptor,
+                        onClick = {
+                            selectedNotes.clear()
+                            selectedNotes.addAll(notes)
+                            selectedLocation = location
+                            scope.launch { bottomSheetState.expand() }
+                            false
+                        }
                     )
                 }
             }
-        ) {
-            uiState.notes.forEach { note ->
-                val position = LatLng(note.latitude, note.longitude)
-                val markerColor = if (note.start != null && note.end != null) {
-                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                } else {
-                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+
+            // Floating search bar on top of everything
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopStart)
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.White,
+                    shadowElevation = 8.dp
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Search field
+                        TextField(
+                            value = uiState.currentSearch,
+                            onValueChange = {
+                                viewModel.handleEvent(NoteMapEvent.UpdateSearchText(it))
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp)
+                                .height(56.dp)
+                                .clickable(
+                                    indication = null, // Quita el ripple
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
+                                    viewModel.handleEvent(NoteMapEvent.NavigateToSearch)
+                                },
+                            enabled = false, // Deshabilita edición directa aquí
+                            placeholder = { Text("Buscar notas...") },
+                            singleLine = true,
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search Icon",
+                                    tint = Color.DarkGray
+                                )
+                            },
+                            trailingIcon = {
+                                if (uiState.currentSearch.isNotEmpty()) {
+                                    IconButton(onClick = {
+                                        viewModel.handleEvent(NoteMapEvent.UpdateSearchText(""))
+                                        viewModel.handleEvent(NoteMapEvent.GetNotes)
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Clear search"
+                                        )
+                                    }
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Search
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    if (uiState.currentSearch.isNotEmpty()) {
+                                        viewModel.handleEvent(NoteMapEvent.SearchNote(uiState.currentSearch))
+                                    }
+                                }
+                            ),
+                            shape = RoundedCornerShape(28.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                errorIndicatorColor = Color.Transparent
+                            )
+                        )
+
+                        // Note type filters
+                        LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 6.dp),
+                        ) {
+                            items(NoteType.entries) { type ->
+                                FilterChip(
+                                    noteType = type,
+                                    isSelected = uiState.selectedType == type,
+                                    onClick = {
+                                        val newType = if (uiState.selectedType == type) null else type
+                                        viewModel.handleEvent(NoteMapEvent.FilterByType(newType))
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                        }
+
+                    }
                 }
-                Marker(
-                    state = rememberMarkerState(position = position),
-                    title = note.title,
-                    snippet = note.content,
-                    icon = markerColor
+            }
+
+            // Location button
+            if (uiState.hasLocationPermission) {
+                FloatingActionButton(
+                    onClick = { viewModel.handleEvent(NoteMapEvent.GetCurrentLocation)
+                        moveToCurrentLocation = true},
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.BottomStart),
+                    containerColor = Color.White,
+                    contentColor = Color.Black
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "My Location"
+                    )
+                }
+            }
+
+            LaunchedEffect(uiState.currentLocation, moveToCurrentLocation) {
+                if (moveToCurrentLocation && uiState.currentLocation != null) {
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newCameraPosition(
+                            CameraPosition.Builder()
+                                .target(
+                                    LatLng(
+                                        uiState.currentLocation!!.latitude,
+                                        uiState.currentLocation!!.longitude
+                                    )
+                                )
+                                .zoom(15f)
+                                .build()
+                        )
+                    )
+                    moveToCurrentLocation = false
+                }
+            }
+
+            // Loading indicator
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
                 )
             }
         }
-        if (uiState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(50.dp)
-                    .align(Alignment.Center)
-            )
-        }
     }
 }
-
-@Preview
-@Composable
-fun NoteMapPreview (modifier: Modifier = Modifier) {
-    NoteMapScreen({})
-}
-
-
-

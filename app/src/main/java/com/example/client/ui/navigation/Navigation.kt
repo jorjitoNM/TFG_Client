@@ -32,12 +32,19 @@ import com.example.client.ui.savedNotes.SavedScreen
 import com.example.client.ui.startScreen.StartScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.client.ui.noteMap.search.MapSearchScreen
+import com.example.client.ui.noteMap.search.SharedLocationViewModel
+import com.example.client.ui.userScreen.detail.UserScreen
 
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val sharedLocationViewModel: SharedLocationViewModel = hiltViewModel()
 
     val showSnackbar = { message: String ->
         scope.launch {
@@ -93,6 +100,13 @@ fun Navigation() {
             navController = navController,
             startDestination = StartDestination,
             modifier = Modifier.padding(innerPadding)
+            startDestination = NormalNoteListDestination,
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+
         ) {
             composable<NormalNoteListDestination> {
                 NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})
@@ -102,7 +116,11 @@ fun Navigation() {
                 NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
-                NoteMapScreen(showSnackbar = { showSnackbar(it) })
+                NoteMapScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateToList = { navController.navigate(MapSearchDestination) },
+                    sharedLocationViewModel = sharedLocationViewModel
+                )
             }
             composable<NoteSavedListDestination> {
                 SavedScreen(showSnackbar = { showSnackbar(it) })
@@ -116,6 +134,31 @@ fun Navigation() {
             composable<LoginDestination> {
                 LoginScreen( onNavigateToApp = { navController.navigate(NoteMapDestination)}, showSnackbar = { showSnackbar(it)})
             }
+
+            composable<MapSearchDestination> {
+                MapSearchScreen(
+                    onNavigateBack = { navController.navigateUp() },
+                    navController = navController,
+                    sharedLocationViewModel = sharedLocationViewModel,
+                    showSnackbar = { showSnackbar(it) }
+                )
+            }
+
+            composable<UserScreenDestination> { backStackEntry ->
+                // Supón que tienes el username en el argumento
+                val destination = backStackEntry.toRoute() as UserScreenDestination
+
+                UserScreen(
+                    showSnackbar = { showSnackbar(it) }
+                )
+            }
+
+
+
+
+
+
+
         }
     }
 }

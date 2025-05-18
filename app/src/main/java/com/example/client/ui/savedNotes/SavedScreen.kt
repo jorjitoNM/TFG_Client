@@ -131,16 +131,12 @@ fun NoteItem(
 
     val goldColor = Color(0xFFFFD700)
     val pinkColor = Color(0xFFFF4081)
-    val cardBackground = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
     val textColor = MaterialTheme.colorScheme.onSurface
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = cardBackground
-        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -248,10 +244,9 @@ fun NoteItem(
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
-                        imageVector = if (isFavorite) Icons.Filled.Star else Icons.Outlined.Star,
+                        imageVector = if (note.saved) Icons.Filled.Star else Icons.Outlined.Star,
                         contentDescription = "Favorito",
-                        tint = if (isFavorite) goldColor
-                        else textColor.copy(alpha = 0.4f),
+                        tint = if (note.saved) goldColor else textColor.copy(alpha = 0.4f),
                         modifier = Modifier.size(34.dp)
                     )
                 }
@@ -263,9 +258,9 @@ fun NoteItem(
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
-                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                        imageVector = if (note.liked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
                         contentDescription = "Me gusta",
-                        tint = if (isLiked) pinkColor
+                        tint = if (note.liked) pinkColor
                         else textColor.copy(alpha = 0.4f),
                         modifier = Modifier.size(28.dp)
                     )
@@ -291,9 +286,9 @@ fun formatDateTime(dateTimeStr: String): String {
 fun Preview() {
     NoteSavedList(
         notes = listOf(
-            NoteDTO(title = "sdadasdadadadadadad", content = "dsadadadadad", rating = 10),
+            NoteDTO(title = "sdadasdadadadadadad", content = "dsadadadadad", rating = 10, ownerUsername = "dad"),
             NoteDTO(rating = 5),
-            NoteDTO(type = NoteType.EVENT),
+            NoteDTO(type = NoteType.EVENT, start = "2q", end = "dad"),
             NoteDTO(),
             NoteDTO(),
             NoteDTO()
