@@ -5,7 +5,6 @@ import com.example.client.data.remote.datasource.SocialRemoteDataSource
 import com.example.client.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.UUID
 import javax.inject.Inject
 
 class SocialRepository @Inject constructor(
@@ -29,6 +28,6 @@ class SocialRepository @Inject constructor(
         }
     }
 
-    suspend fun likeNote (noteId : Int, userId : UUID)
-            = socialRemoteDataSource.likeNote(noteId,userId)
+    suspend fun likeNote (noteId : Int) : NetworkResult<Unit>
+            = socialRemoteDataSource.likeNote(noteId)
 }

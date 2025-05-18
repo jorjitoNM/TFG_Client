@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.client.R
 import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.user.RegisterUseCase
 import com.example.client.ui.common.UiEvent
-import com.example.musicapprest.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

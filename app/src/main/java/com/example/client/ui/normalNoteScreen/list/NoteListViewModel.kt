@@ -3,6 +3,7 @@ package com.example.client.ui.normalNoteScreen.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.note.NoteType
 import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
@@ -13,11 +14,11 @@ import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.noteScreen.list.NoteListState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,7 +28,8 @@ class NoteListViewModel @Inject constructor(
     private val orderNoteUseCase: OrderNoteUseCase,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
     private val getNoteSearchUseCase: GetNoteSearchUseCase,
-    private val likeNoteUseCase: LikeNoteUseCase
+    private val likeNoteUseCase: LikeNoteUseCase,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()
@@ -42,15 +44,14 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.OrderByType -> orderByType(event.type)
             is NoteListEvent.LikeNote -> likeNote(event.noteId)
             is NoteListEvent.GetNoteSearch -> searchNote(event.title)
-
         }
     }
 
     private fun likeNote(noteId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = likeNoteUseCase.invoke(noteId, UUID.fromString("11111111-1111-1111-1111-111111111111"))) {
+            when (val result = likeNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Success -> {
                     _uiState.update { it.copy( isLoading = false) }
                 }

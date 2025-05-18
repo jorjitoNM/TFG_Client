@@ -1,7 +1,8 @@
 package com.example.client.data.remote.service
 
 import com.example.client.domain.model.note.NominatimPlace
-import retrofit2.http.*
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 fun interface NominatimService {
     @GET("search")

@@ -10,4 +10,7 @@
     <string name="app_slogan">Pin Your Finds, Inspire the World.</string>
     <string name="register">Register</string>
     <string name="user_registered">You have been registered successfully, check you email for verification</string>
+    <string name="login">Login</string>
+    <string name="google_logo">Google Logo</string>
+    <string name="continue_with_google">Continue with Google</string>
 </resources>

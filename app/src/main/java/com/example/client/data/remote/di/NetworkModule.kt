@@ -2,8 +2,15 @@ package com.example.client.data.remote.di
 
 
 import com.example.client.BuildConfig
+import com.example.client.data.remote.security.AuthAuthenticator
+import com.example.client.data.remote.security.AuthInterceptor
+import com.example.client.data.remote.service.AuthenticationService
+import com.example.client.data.remote.service.NominatimService
 import com.example.client.data.remote.service.NoteService
 import com.example.client.data.remote.service.SocialService
+import com.example.client.data.remote.service.UserService
+import com.example.client.data.repositories.DataStoreRepository
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

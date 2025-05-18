@@ -1,5 +1,7 @@
 package com.example.client.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -16,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -27,17 +30,14 @@ import com.example.client.ui.login.LoginScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.noteMap.list.NoteMapScreen
+import com.example.client.ui.noteMap.search.MapSearchScreen
+import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.registerScreen.SignUpScreen
 import com.example.client.ui.savedNotes.SavedScreen
 import com.example.client.ui.startScreen.StartScreen
+import com.example.client.ui.userScreen.detail.UserScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.client.ui.noteMap.search.MapSearchScreen
-import com.example.client.ui.noteMap.search.SharedLocationViewModel
-import com.example.client.ui.userScreen.detail.UserScreen
 
 @Composable
 fun Navigation() {
@@ -99,14 +99,11 @@ fun Navigation() {
         NavHost(
             navController = navController,
             startDestination = StartDestination,
-            modifier = Modifier.padding(innerPadding)
-            startDestination = NormalNoteListDestination,
             modifier = Modifier.padding(innerPadding),
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
-
         ) {
             composable<NormalNoteListDestination> {
                 NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})
@@ -152,13 +149,6 @@ fun Navigation() {
                     showSnackbar = { showSnackbar(it) }
                 )
             }
-
-
-
-
-
-
-
         }
     }
 }

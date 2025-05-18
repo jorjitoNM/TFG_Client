@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -71,42 +72,92 @@ fun AccessButtons(
                 .fillMaxSize()
                 .weight(0.5f),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier
-                .weight(0.1f)
-                .fillMaxSize()) {}
+            Column(
+                modifier = Modifier
+                    .weight(0.1f)
+                    .fillMaxSize()
+            ) {}
             Column(
                 modifier = Modifier
                     .weight(0.8f)
                     .fillMaxSize(),
-                verticalArrangement = Arrangement.Bottom
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
-                    onClick = { navigateToSignUp() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonColors(
+                Row(modifier = Modifier.weight(0.33f)) {
+                    StartScreenActionButton(
+                        onClick = { navigateToSignUp() },
+                        ButtonColors(
+                            containerColor = Color(0xFF8490B2),
+                            contentColor = Color(0xFFE2E8F0),
+                            disabledContentColor = Color(0xFFA0AEC0),
+                            disabledContainerColor = Color(0xFFCBD5E0)
+                        ), stringResource(R.string.register)
+                    )
+                }
+                Row(modifier = Modifier.weight(0.33f)) {
+                    ContinueWithGoogleButton(onClick = {}, ButtonColors(
                         containerColor = Color(0xFF8490B2),
                         contentColor = Color(0xFFE2E8F0),
                         disabledContentColor = Color(0xFFA0AEC0),
                         disabledContainerColor = Color(0xFFCBD5E0)
+                    ), stringResource(R.string.continue_with_google)
                     )
-                ) {
-                    Text(text = stringResource(R.string.register))
                 }
-            }
-            Column(modifier = Modifier
-                .weight(0.1f)
-                .fillMaxSize()) {}
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(0.5f),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.Top
-        ) {
+                Row(modifier = Modifier.weight(0.33f)) {
+                    StartScreenActionButton(
+                        onClick = { navigateToLogin() },
+                        ButtonColors(
+                            containerColor = Color(0xFF8490B2),
+                            contentColor = Color(0xFFE2E8F0),
+                            disabledContentColor = Color(0xFFA0AEC0),
+                            disabledContainerColor = Color(0xFFCBD5E0)
+                        ),
+                        stringResource(R.string.login)
+                    )
+                }
 
+            }
+            Column(
+                modifier = Modifier
+                    .weight(0.1f)
+                    .fillMaxSize()
+            ) {}
+        }
+    }
+}
+
+@Composable
+fun StartScreenActionButton(onClick: () -> Unit, buttonColors: ButtonColors, text: String) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = buttonColors
+    ) {
+        Text(text = text)
+    }
+}
+
+@Composable
+fun ContinueWithGoogleButton (onClick: () -> Unit, buttonColors: ButtonColors, text: String) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        colors = buttonColors
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                painter = painterResource(R.drawable.google_logo),
+                contentDescription = stringResource(R.string.google_logo),
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+            )
+            Text(
+                text = text,
+                modifier = Modifier.align(Alignment.Center),
+            )
         }
     }
 }
