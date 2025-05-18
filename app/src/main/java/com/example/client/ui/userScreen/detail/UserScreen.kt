@@ -5,7 +5,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,13 +44,14 @@ import com.example.client.ui.common.UiEvent
 
 @Composable
 fun UserScreen(
+    username : String ?=null,
     showSnackbar: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.handleEvent(UserEvent.LoadUser)
+        username?.let { UserEvent.LoadUser(it) }?.let { viewModel.handleEvent(it) }
     }
 
     LaunchedEffect(uiState.aviso) {

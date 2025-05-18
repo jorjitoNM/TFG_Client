@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,22 +49,28 @@ fun NotesBottomSheet(
     notes: List<NoteDTO>,
     location: LatLng?
 ) {
+    val isDarkMode = isSystemInDarkTheme()
+    val backgroundColor = if (isDarkMode) Color(0xFF23272F) else Color.White
+    val headerColor = if (isDarkMode) Color.White else Color.Black
+    val subTextColor = if (isDarkMode) Color(0xFFB0B4BA) else Color.Gray
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .background(backgroundColor, shape = RoundedCornerShape(16.dp))
     ) {
         // Header
         Text(
             text = "Notes at this location",
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = headerColor
         )
         if (location != null) {
             Text(
                 text = "Lat: ${location.latitude.format(6)}, Lng: ${location.longitude.format(6)}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
+                color = subTextColor
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -73,20 +80,24 @@ fun NotesBottomSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(notes) { note ->
-                NoteCard(note = note)
+                NoteCard(note = note, isDarkMode = isDarkMode)
             }
         }
     }
 }
 
 @Composable
-fun NoteCard(note: NoteDTO) {
+fun NoteCard(note: NoteDTO, isDarkMode : Boolean) {
+    val cardColor = if (isDarkMode) Color(0xFF2C313A) else Color.White
+    val titleColor = if (isDarkMode) Color.White else Color.Black
+    val contentColor = if (isDarkMode) Color(0xFFB0B4BA) else Color.DarkGray
+    val dateColor = if (isDarkMode) Color(0xFF888C94) else Color.Gray
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { /* Handle click if needed */ },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
         Row(
             modifier = Modifier
@@ -111,7 +122,8 @@ fun NoteCard(note: NoteDTO) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = titleColor
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 note.content?.let {
@@ -120,7 +132,7 @@ fun NoteCard(note: NoteDTO) {
                         fontSize = 14.sp,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        color = Color.DarkGray
+                        color = contentColor
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -129,12 +141,12 @@ fun NoteCard(note: NoteDTO) {
                     Text(
                         text = "Start: ${note.start}",
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = dateColor
                     )
                     Text(
                         text = "End: ${note.end}",
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = dateColor
                     )
                 }
             }
@@ -148,8 +160,19 @@ fun FilterChip(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor = if (isSelected) Color.Blue else Color.LightGray
-    val backgroundColor = if (isSelected) Color.Blue.copy(alpha = 0.1f) else Color.White
+    val isDarkMode = isSystemInDarkTheme()
+    val borderColor = if (isSelected) Color(0xFF448AFF) else if (isDarkMode) Color(0xFF444B58) else Color.LightGray
+    val backgroundColor = when {
+        isSelected && isDarkMode -> Color(0xFF448AFF).copy(alpha = 0.15f)
+        isSelected -> Color(0xFF448AFF).copy(alpha = 0.1f)
+        isDarkMode -> Color(0xFF23272F)
+        else -> Color.White
+    }
+    val textColor = when {
+        isSelected -> Color(0xFF448AFF)
+        isDarkMode -> Color.White
+        else -> Color.Black
+    }
 
     Box(
         modifier = Modifier
@@ -166,12 +189,13 @@ fun FilterChip(
     ) {
         Text(
             text = noteType.name.lowercase().replaceFirstChar { it.uppercase() },
-            color = if (isSelected) Color.Blue else Color.Black,
+            color = textColor,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             fontSize = 14.sp
         )
     }
 }
+
 
 // Extension function to format Double with specific decimal places
 fun Double.format(digits: Int) = "%.${digits}f".format(this)
@@ -206,3 +230,4 @@ fun vectorToBitmap(@DrawableRes id: Int, context: Context): BitmapDescriptor {
     vectorDrawable.draw(canvas)
     return BitmapDescriptorFactory.fromBitmap(bitmap)
 }
+

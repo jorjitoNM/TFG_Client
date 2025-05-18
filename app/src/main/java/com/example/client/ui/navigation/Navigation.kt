@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.userScreen.detail.UserScreen
+import com.example.client.ui.userScreen.search.UserSearchScreen
 
 @Composable
 fun Navigation() {
@@ -59,6 +60,7 @@ fun Navigation() {
         val screenRoute = screen.route.toString().substringBefore("@").substringBefore("$")
         currentRoute == screenRoute
     }
+
 
     val bottomBar: @Composable () -> Unit = {
         BottomBar(
@@ -137,8 +139,22 @@ fun Navigation() {
                 val destination = backStackEntry.toRoute() as UserScreenDestination
 
                 UserScreen(
+                    username = "user1", // Solo para pruebas, esto solo sirve para reutilizar la pantalla en el buscador
                     showSnackbar = { showSnackbar(it) }
                 )
+            }
+
+            composable<UserProfileDestination> { backStackEntry ->
+                val destination = backStackEntry.toRoute() as UserProfileDestination
+                UserScreen(
+                    username = destination.userId,
+                    showSnackbar = { showSnackbar(it) }
+                )
+            }
+
+
+            composable<UserSearchDestination> {
+                UserSearchScreen(navController = navController, showSnackbar = { showSnackbar(it) })
             }
 
 

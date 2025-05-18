@@ -6,12 +6,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
 val appDestinationList = listOf(
-    NormalNoteList,NoteMap,NoteSavedList,NormalNoteDetail,MapSearch,UserScreen)
+    NormalNoteList,UserSearch,NoteMap,NoteSavedList,NormalNoteDetail,MapSearch,UserScreen,UserProfile)
 
 
 interface AppDestination{
@@ -110,6 +111,32 @@ object UserScreen : AppMainBottomDestination {
     override val isTopBarVisible: Boolean = true
     override val onBottomBar: Boolean = true
     override val icon: ImageVector = Icons.Filled.AccountCircle
+}
+
+object UserSearch : AppMainBottomDestination {
+    override val route: Any = UserSearchDestination
+    override val title: String = "Buscar"
+    override val isBottomBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+    override val onBottomBar: Boolean = true
+    override val icon: ImageVector = Icons.Default.Search // Lupa
+}
+
+object UserProfile : AppDestination {
+    override val route: Any = UserProfileDestination
+    override val title: String = "Perfil"
+    override val isBottomBarVisible: Boolean = true
+    override val isTopBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
 }
 
 

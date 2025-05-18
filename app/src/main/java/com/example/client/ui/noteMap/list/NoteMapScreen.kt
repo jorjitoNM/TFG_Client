@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,6 +41,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,6 +91,8 @@ fun NoteMapScreen(
     val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
     val initialLat = latLong?.first
     val initialLon = latLong?.second
+    val isDarkMode = isSystemInDarkTheme()
+
     var moveToCurrentLocation by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
     val cameraPositionState = rememberCameraPositionState {
@@ -116,9 +121,11 @@ fun NoteMapScreen(
     }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val mapStyleOptions = remember {
-        MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style)
-    }
+
+    val surfaceColor = if (isDarkMode) Color(0xFF23272F) else Color.White
+    val fabContainerColor = if (isDarkMode) Color(0xFF23272F) else Color.White
+    val fabContentColor = if (isDarkMode) Color.White else Color.Black
+    val bottomSheetColor = if (isDarkMode) Color(0xFF23272F) else Color.White
 
     // Bottom sheet state
     val bottomSheetState = rememberStandardBottomSheetState(
@@ -127,7 +134,9 @@ fun NoteMapScreen(
     )
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
-
+    val darkStyle = remember {
+        MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_dark)
+    }
     // Selected notes for the bottom sheet
     val selectedNotes = remember { mutableStateListOf<NoteDTO>() }
     var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
@@ -204,8 +213,14 @@ fun NoteMapScreen(
         }
     }
 
+    val filterKey = remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(uiState.selectedType) {
+        filterKey.intValue += 1
+    }
+
     // Filtrado de notas por tipo y búsqueda
-    val filteredNotes = remember(uiState.notes, uiState.selectedType, uiState.currentSearch) {
+    val filteredNotes = remember(uiState.notes, uiState.selectedType, uiState.currentSearch, filterKey.intValue) {
         uiState.notes
             .filter { note ->
                 (uiState.selectedType == null || note.type == uiState.selectedType) &&
@@ -214,7 +229,7 @@ fun NoteMapScreen(
                                 (note.content?.contains(uiState.currentSearch, ignoreCase = true) ?: false))
             }
     }
-    val notesByLocation = remember(filteredNotes) {
+    val notesByLocation = remember(filteredNotes, filterKey.intValue) {
         filteredNotes.groupBy { note -> LatLng(note.latitude, note.longitude) }
     }
 
@@ -230,7 +245,7 @@ fun NoteMapScreen(
                     onNavigateToList()
                     viewModel.handleEvent(NoteMapEvent.AvisoVisto)
                 }
-                else -> Unit
+
             }
         }
     }
@@ -245,7 +260,7 @@ fun NoteMapScreen(
         },
         sheetPeekHeight = 0.dp,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        sheetContainerColor = Color.White,
+        sheetContainerColor = bottomSheetColor,
         sheetShadowElevation = 8.dp
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -255,8 +270,9 @@ fun NoteMapScreen(
                 properties = MapProperties(
                     mapType = MapType.NORMAL,
                     isMyLocationEnabled = uiState.hasLocationPermission,
-//                    mapStyleOptions = mapStyleOptions
-                ),
+                    mapStyleOptions = if (isDarkMode) darkStyle else null
+                )
+                ,
                 cameraPositionState = cameraPositionState,
                 onMapLoaded = {
                     if (uiState.currentLocation == null && !cameraPositionState.isMoving && uiState.cameraLatLng == null) {
@@ -281,7 +297,7 @@ fun NoteMapScreen(
                 }
 
             ) {
-
+                key(filterKey.intValue) {
                 notesByLocation.forEach { (location, notes) ->
                     val markerState = rememberMarkerState(position = location)
                     val note = notes.first()
@@ -312,6 +328,7 @@ fun NoteMapScreen(
                     )
                 }
             }
+            }
 
             // Floating search bar on top of everything
             Box(
@@ -321,7 +338,7 @@ fun NoteMapScreen(
             ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    color = Color.White,
+                    color = surfaceColor,
                     shadowElevation = 8.dp
                 ) {
                     Column(
@@ -378,6 +395,7 @@ fun NoteMapScreen(
                             ),
                             shape = RoundedCornerShape(28.dp),
                             colors = TextFieldDefaults.colors(
+
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
@@ -397,7 +415,8 @@ fun NoteMapScreen(
                                     onClick = {
                                         val newType = if (uiState.selectedType == type) null else type
                                         viewModel.handleEvent(NoteMapEvent.FilterByType(newType))
-                                    }
+                                    },
+
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                             }
@@ -415,8 +434,8 @@ fun NoteMapScreen(
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.BottomStart),
-                    containerColor = Color.White,
-                    contentColor = Color.Black
+                    containerColor = fabContainerColor,
+                    contentColor =  fabContentColor
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
@@ -453,4 +472,5 @@ fun NoteMapScreen(
             }
         }
     }
+
 }

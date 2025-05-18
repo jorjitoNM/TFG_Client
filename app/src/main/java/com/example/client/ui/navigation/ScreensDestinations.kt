@@ -17,6 +17,10 @@ object NoteSavedListDestination
 object MapSearchDestination
 @Serializable
 object UserScreenDestination
+@Serializable
+object UserSearchDestination
+@Serializable
+data class UserProfileDestination(val userId: String)
 
 
 

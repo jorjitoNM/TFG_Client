@@ -2,7 +2,9 @@ package com.example.client.ui.userScreen.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.client.R
 import com.example.client.common.NetworkResult
+import com.example.client.common.StringProvider
 import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val getUserUseCase: GetUserUseCase
+    private val getUserUseCase: GetUserUseCase,
+    val stringProvider: StringProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserState())
@@ -22,15 +25,15 @@ class UserViewModel @Inject constructor(
 
     fun handleEvent(event: UserEvent) {
         when (event) {
-            is UserEvent.LoadUser -> loadUser()
+            is UserEvent.LoadUser -> loadUser(event.userId)
             is UserEvent.AvisoVisto -> avisoVisto()
         }
     }
 
-    private fun loadUser() {
+    private fun loadUser(username:String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            when (val result = getUserUseCase()) {
+            when (val result = getUserUseCase(username)) {
                 is NetworkResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
@@ -40,7 +43,7 @@ class UserViewModel @Inject constructor(
                 is NetworkResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        aviso = UiEvent.ShowSnackbar(result.message)
+                        aviso = UiEvent.ShowSnackbar(stringProvider.getString(R.string.error_loading_user))
                     )
                 }
                 is NetworkResult.Loading -> {

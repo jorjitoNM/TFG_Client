@@ -5,4 +5,5 @@ import javax.inject.Inject
 
 class UserRemoteDataSource @Inject constructor(private val userService: UserService):BaseApiResponse() {
     suspend fun getUser(username: String) = safeApiCall { userService.getUser(username) }
+    suspend fun getAllUserStartsWithText(text: String) = safeApiCall { userService.getAllUserStartsWithText(text) }
 }
