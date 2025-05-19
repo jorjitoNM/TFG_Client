@@ -55,10 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import com.example.client.R
-import androidx.navigation.compose.*
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.FilterChip
@@ -67,7 +64,6 @@ import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.getMarkerColor
 import com.example.client.ui.common.getMarkerIconRes
 import com.example.client.ui.common.vectorToBitmap
-import com.example.client.ui.navigation.NoteMapDestination
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -292,7 +288,7 @@ fun NoteMapScreen(
                         )
                     }
                 },
-                onMapClick = { latLng ->
+                onMapClick = { _ ->
                     // Limpiar selección
                     selectedNotes.clear()
                     selectedLocation = null
