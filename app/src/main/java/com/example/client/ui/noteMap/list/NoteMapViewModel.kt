@@ -54,17 +54,38 @@ class NoteMapViewModel @Inject constructor(
     }
 
     private fun filterByType(noteType: NoteType?) {
-        _uiState.update { it.copy(selectedType = noteType, isLoading = true) }
+        _uiState.update { it.copy(isLoading = true) }
         if (noteType == null) {
-            // Si no hay tipo seleccionado, carga todas las notas
-            getNotes()
-            _uiState.update { it.copy(selectedType = null) }
+            viewModelScope.launch {
+                when (val result = getNotesUseCase()) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                notes = result.data,
+                                selectedType = null,
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Loading -> {
+                        _uiState.update { it.copy(isLoading = true) }
+                    }
+                }
+            }
         } else {
             viewModelScope.launch {
                 when (val result = orderNoteByTypUseCase(noteType)) {
                     is NetworkResult.Success -> {
                         _uiState.update {
-                            it.copy(notes = result.data, isLoading = false)
+                            it.copy(notes = result.data, selectedType = noteType, isLoading = false)
                         }
                     }
                     is NetworkResult.Error -> {
@@ -82,6 +103,7 @@ class NoteMapViewModel @Inject constructor(
             }
         }
     }
+
 
 
 
