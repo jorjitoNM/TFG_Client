@@ -31,4 +31,6 @@ class SocialRepository @Inject constructor(
 
     suspend fun likeNote (noteId : Int, userId : UUID)
             = socialRemoteDataSource.likeNote(noteId,userId)
+
+
 }

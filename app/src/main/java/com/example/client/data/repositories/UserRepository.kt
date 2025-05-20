@@ -18,5 +18,11 @@ class UserRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
-
+    suspend fun getMyNotes()= withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getMyNotes("user1")
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
 }

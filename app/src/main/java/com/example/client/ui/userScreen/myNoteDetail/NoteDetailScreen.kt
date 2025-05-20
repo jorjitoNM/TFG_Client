@@ -1,4 +1,4 @@
-package com.example.client.ui.normalNoteScreen.detail
+package com.example.client.ui.userScreen.myNoteDetail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -89,9 +89,11 @@ fun NoteDetailScreen(
                 onContentChange = { viewModel.handleEvent(NoteDetailEvent.UpdateEditedContent(it)) },
                 onPrivacyChange = { viewModel.handleEvent(NoteDetailEvent.UpdateEditedPrivacy(it)) },
                 onRatingChange = { viewModel.handleEvent(NoteDetailEvent.RateNote(it)) },
+                onEditClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
                 onSaveClick = { viewModel.handleEvent(NoteDetailEvent.UpdateNote) },
                 onCancelClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
                 onBackClick = onNavigateBack,
+                onDeleteClick = { viewModel.handleEvent(NoteDetailEvent.DeleteNote(it)) }
             )
         }
     }
@@ -104,9 +106,11 @@ fun NoteDetailContent(
     onContentChange: (String) -> Unit = {},
     onPrivacyChange: (NotePrivacy) -> Unit = {},
     onRatingChange: (Int) -> Unit = {},
+    onEditClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
+    onDeleteClick: (Int) -> Unit = {}
 ) {
     val note = state.note ?: return
 
@@ -281,7 +285,29 @@ fun NoteDetailContent(
                                 }
                             }
                         }
+                    } else {
+                        Row {
+                            Button(
+                                onClick = {onDeleteClick(note.id)},
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError
+                                ),
+                                modifier = Modifier.padding(end = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Delete")
+                            }
 
+                            Button(onClick = onEditClick) {
+                                Text("Edit")
+                            }
+                        }
                     }
                 }
             }

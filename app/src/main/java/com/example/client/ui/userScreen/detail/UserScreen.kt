@@ -517,6 +517,6 @@ fun Preview() {
         ),
         user = UserDTO(),
         onTabSelected = {},
-        selectedTab = UserTab.NOTES
+        selectedTab = UserTab.FAVORITES
     )
 }
