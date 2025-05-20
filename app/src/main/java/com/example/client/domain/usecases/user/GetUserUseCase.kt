@@ -4,5 +4,5 @@ import com.example.client.data.repositories.UserRepository
 import javax.inject.Inject
 
 class GetUserUseCase @Inject constructor(private val userRepository: UserRepository){
-    suspend operator fun invoke(username:String) = userRepository.getUser(username)
+    suspend operator fun invoke() = userRepository.getUser()
 }

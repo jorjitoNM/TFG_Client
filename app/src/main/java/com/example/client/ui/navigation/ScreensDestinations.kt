@@ -19,8 +19,6 @@ object MapSearchDestination
 object UserScreenDestination
 @Serializable
 object UserSearchDestination
-@Serializable
-data class UserProfileDestination(val userId: String)
 
 
 

@@ -27,7 +27,7 @@ import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.savedNotes.SavedScreen
-import com.example.musicapprest.ui.common.BottomBar
+import com.example.client.ui.common.BottomBar
 import kotlinx.coroutines.launch
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -134,25 +134,10 @@ fun Navigation() {
                 )
             }
 
-            composable<UserScreenDestination> { backStackEntry ->
-                // Supón que tienes el username en el argumento
-                val destination = backStackEntry.toRoute() as UserScreenDestination
-
-                UserScreen(
-                    username = "user1", // Solo para pruebas, esto solo sirve para reutilizar la pantalla en el buscador
-                    showSnackbar = { showSnackbar(it) }
+            composable<UserScreenDestination> {
+                UserScreen(showSnackbar = { showSnackbar(it) }
                 )
             }
-
-            composable<UserProfileDestination> { backStackEntry ->
-                val destination = backStackEntry.toRoute() as UserProfileDestination
-                UserScreen(
-                    username = destination.userId,
-                    showSnackbar = { showSnackbar(it) }
-                )
-            }
-
-
             composable<UserSearchDestination> {
                 UserSearchScreen(navController = navController, showSnackbar = { showSnackbar(it) })
             }

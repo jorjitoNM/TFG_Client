@@ -1,8 +1,6 @@
 package com.example.client.ui.userScreen.detail
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 
-import androidx.compose.runtime.*
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,15 +42,15 @@ import com.example.client.ui.common.UiEvent
 
 @Composable
 fun UserScreen(
-    username : String ?=null,
     showSnackbar: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        username?.let { UserEvent.LoadUser(it) }?.let { viewModel.handleEvent(it) }
+        viewModel.handleEvent(UserEvent.LoadUser)
     }
+
 
     LaunchedEffect(uiState.aviso) {
         uiState.aviso?.let { event ->

@@ -11,9 +11,9 @@ class UserRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val userRemoteDataSource: UserRemoteDataSource
     ) {
-    suspend fun getUser(user:String) = withContext(dispatcher) {
+    suspend fun getUser() = withContext(dispatcher) {
         try {
-            userRemoteDataSource.getUser(user ?:"user1")
+            userRemoteDataSource.getUser("user1")
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }

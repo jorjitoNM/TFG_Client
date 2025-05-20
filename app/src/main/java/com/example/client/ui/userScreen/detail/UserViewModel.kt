@@ -17,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase,
-    val stringProvider: StringProvider
+    private val stringProvider: StringProvider
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserState())
@@ -25,15 +25,15 @@ class UserViewModel @Inject constructor(
 
     fun handleEvent(event: UserEvent) {
         when (event) {
-            is UserEvent.LoadUser -> loadUser(event.userId)
+            is UserEvent.LoadUser -> loadUser()
             is UserEvent.AvisoVisto -> avisoVisto()
         }
     }
 
-    private fun loadUser(username:String) {
+    private fun loadUser() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            when (val result = getUserUseCase(username)) {
+            when (val result = getUserUseCase()) {
                 is NetworkResult.Success -> {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,

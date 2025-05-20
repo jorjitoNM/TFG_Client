@@ -49,7 +49,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.client.data.model.UserDTO
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.navigation.UserProfileDestination
 
 @Composable
 fun UserSearchScreen(
@@ -134,7 +133,7 @@ fun UserSearchScreen(
             ) {
                 items(uiState.users) { user ->
                     UserCard(user = user, onClick = {
-                        navController.navigate(UserProfileDestination(user.username))
+
                     })
                 }
             }
