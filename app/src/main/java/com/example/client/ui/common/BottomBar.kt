@@ -1,6 +1,5 @@
 package com.example.client.ui.common
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -17,6 +16,7 @@ import com.example.client.ui.navigation.AppMainBottomDestination
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,7 +24,8 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.dp
 
 import androidx.compose.ui.platform.LocalDensity
-
+import kotlin.math.roundToInt
+import androidx.compose.animation.core.animateFloatAsState
 
 @Composable
 fun BottomBar(
@@ -34,7 +35,6 @@ fun BottomBar(
 ) {
     val blue = Color(0xFF1565C0)
     val white = Color.White
-    val density = LocalDensity.current
 
     if (isVisible) {
         val state = navController.currentBackStackEntryAsState()
@@ -59,6 +59,13 @@ fun BottomBar(
                         )
                     },
                     label = {
+                        val progress by animateFloatAsState(
+                            targetValue = if (selected) 1f else 0f,
+                            animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                            label = "UnderlineProgress"
+                        )
+
+                        val density = LocalDensity.current
                         SubcomposeLayout { constraints ->
                             val textMeasurables = subcompose("text") {
                                 Text(
@@ -74,21 +81,24 @@ fun BottomBar(
 
                             val indicatorShape = RoundedCornerShape(2.dp)
 
+                            // Animación del progreso (de 0 a 1)
+
+                            val indicatorWidthPx = (textWidth * progress).roundToInt()
 
                             val indicatorMeasurables = subcompose("indicator") {
-                                AnimatedVisibility(visible = selected) {
+                                if (indicatorWidthPx > 0) {
                                     Box(
                                         Modifier
                                             .padding(top = 2.dp)
                                             .height(3.dp)
-                                            .width(with(density) { textWidth.toDp() })
+                                            .width(with(density) { indicatorWidthPx.toDp() })
                                             .clip(indicatorShape)
-                                            .background(white)
+                                            .background(Color.White)
                                     )
                                 }
                             }
                             val indicatorPlaceables = indicatorMeasurables.map {
-                                it.measure(constraints.copy(minWidth = textWidth, maxWidth = textWidth))
+                                it.measure(constraints.copy(minWidth = indicatorWidthPx, maxWidth = indicatorWidthPx))
                             }
                             val indicatorBoxHeight = indicatorPlaceables.maxOfOrNull { it.height } ?: 0
 
