@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "142010296157",
+    "project_id": "nomada-bb607",
+    "storage_bucket": "nomada-bb607.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:142010296157:android:8e74ad4cb716d0ef842ab4",
+        "android_client_info": {
+          "package_name": "com.example.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCIVD6GQozyF5K3kW0-YW90IHj_nQbHYQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

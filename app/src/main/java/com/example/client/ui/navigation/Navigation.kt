@@ -1,5 +1,7 @@
 package com.example.client.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -16,15 +18,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.client.R
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
+import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.noteMap.list.NoteMapScreen
-import com.example.client.ui.noteScreen.detail.NoteDetailScreen
-import com.example.client.ui.noteScreen.list.NoteListScreen
+import com.example.client.ui.noteMap.search.MapSearchScreen
+import com.example.client.ui.noteMap.search.SharedLocationViewModel
+import com.example.client.ui.userScreen.detail.UserScreen
 import com.example.musicapprest.ui.common.BottomBar
 import kotlinx.coroutines.launch
 
@@ -33,6 +40,7 @@ fun Navigation() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val sharedLocationViewModel: SharedLocationViewModel = hiltViewModel()
 
     val showSnackbar = { message: String ->
         scope.launch {
@@ -86,18 +94,52 @@ fun Navigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = NoteListDestination,
-            modifier = Modifier.padding(innerPadding)
+            startDestination = NormalNoteListDestination,
+            modifier = Modifier.padding(innerPadding),
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+
         ) {
-            composable<NoteListDestination> {
-                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {})
+            composable<NormalNoteListDestination> {
+                NoteListScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateToDetail = { navController.navigate(NormalNoteDetailDestination(it)) })
             }
-            composable<NoteDetailDestination> {
-                NoteDetailScreen()
+            composable<NormalNoteDetailDestination> { backStackEntry ->
+                val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
+                NoteDetailScreen(
+                    noteId = destination.noteId,
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
-                NoteMapScreen(showSnackbar = { showSnackbar(it) })
+                NoteMapScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateToList = { navController.navigate(MapSearchDestination) },
+                    sharedLocationViewModel = sharedLocationViewModel
+                )
             }
+
+            composable<MapSearchDestination> {
+                MapSearchScreen(
+                    onNavigateBack = { navController.navigateUp() },
+                    navController = navController,
+                    sharedLocationViewModel = sharedLocationViewModel,
+                    showSnackbar = { showSnackbar(it) }
+                )
+            }
+
+            composable<UserScreenDestination> { backStackEntry ->
+                // Supón que tienes el username en el argumento
+                val destination = backStackEntry.toRoute() as UserScreenDestination
+
+                UserScreen(
+                    showSnackbar = { showSnackbar(it) }
+                )
+            }
+
         }
     }
 }
