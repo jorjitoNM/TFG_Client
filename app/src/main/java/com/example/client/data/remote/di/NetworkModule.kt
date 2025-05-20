@@ -3,8 +3,6 @@ package com.example.client.data.remote.di
 
 import com.example.client.BuildConfig
 import com.example.client.data.remote.service.NoteService
-import com.example.client.ui.noteScreen.list.NoteDTO
-import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

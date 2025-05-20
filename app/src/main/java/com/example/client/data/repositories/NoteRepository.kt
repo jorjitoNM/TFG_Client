@@ -1,8 +1,9 @@
-package com.example.client.data.repositories
+package com.example.client.data.remote
 
 import com.example.client.common.NetworkResult
+import com.example.client.data.model.NoteDTO
 import com.example.client.data.remote.datasource.NoteRemoteDataSource
-import com.example.client.ui.noteScreen.list.NoteDTO
+import com.example.client.domain.model.note.Note
 import com.example.musicapprest.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -13,17 +14,16 @@ class NoteRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
     suspend fun getNotes() = withContext(dispatcher) {
-        try {
+        try{
             noteRemoteDataSource.getNotes()
-        } catch (e: Exception) {
+        } catch (e:Exception){
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
-
     suspend fun getNote(id: Int) = withContext(dispatcher) {
-        try {
+        try{
             noteRemoteDataSource.getNote(id)
-        } catch (e: Exception) {
+        } catch (e:Exception){
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
@@ -39,31 +39,6 @@ class NoteRepository @Inject constructor(
     suspend fun updateNote(note: NoteDTO, username: String) = withContext(dispatcher) {
         try {
             noteRemoteDataSource.updateNote(note, username)
-        } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
-
-    suspend fun favNote(id: Int, username: String) = withContext(dispatcher) {
-        try {
-            noteRemoteDataSource.favNote(id, username)
-        } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
-
-    suspend fun orderNote(asc: Boolean) = withContext(dispatcher) {
-        try {
-            noteRemoteDataSource.orderNote(asc)
-        } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-
-    }
-
-    suspend fun deleteNote(idNote: Int) = withContext(dispatcher) {
-        try {
-            noteRemoteDataSource.deleteNote(idNote)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }

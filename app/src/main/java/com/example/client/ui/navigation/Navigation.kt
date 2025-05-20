@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.client.R
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.noteScreen.detail.NoteDetailScreen
 import com.example.client.ui.noteScreen.list.NoteListScreen
 import com.example.musicapprest.ui.common.BottomBar
@@ -44,7 +45,7 @@ fun Navigation() {
 
     val state by navController.currentBackStackEntryAsState()
 
-    val screen = appDestinationList_Adrian.find { screen ->
+    val screen = appDestinationList.find { screen ->
         val currentRoute = state?.destination?.route?.substringBefore("/")
         val screenRoute = screen.route.toString().substringBefore("@").substringBefore("$")
         currentRoute == screenRoute
@@ -53,7 +54,7 @@ fun Navigation() {
     val bottomBar: @Composable () -> Unit = {
         BottomBar(
             navController = navController,
-            screens = appDestinationList_Adrian,
+            screens = appDestinationList,
             isVisible = screen?.isBottomBarVisible ?: false
         )
     }
@@ -93,6 +94,9 @@ fun Navigation() {
             }
             composable<NoteDetailDestination> {
                 NoteDetailScreen()
+            }
+            composable<NoteMapDestination> {
+                NoteMapScreen(showSnackbar = { showSnackbar(it) })
             }
         }
     }
