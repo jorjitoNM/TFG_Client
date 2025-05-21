@@ -5,4 +5,5 @@
     <string name="event_dates">Event Dates:</string>
     <string name="no_notes_found">No notes found</string>
     <string name="error_loading_user">User not found</string>
+    <string name="google_maps_key">AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ</string>
 </resources>
