@@ -1,14 +1,23 @@
 package com.example.client.ui.noteMap.search
 
 
+import android.content.Intent
+import android.net.Uri
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,44 +30,66 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.LocationOn
+
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.client.R
 import com.example.client.domain.model.GooglePlaceUi
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.navigation.NoteMapDestination
+import kotlinx.coroutines.delay
+
 
 @Composable
 fun MapSearchScreen(
     viewModel: MapSearchViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
-    showSnackbar: (String) -> Unit,
     navController: NavController,
+    showSnackbar: (String) -> Unit,
     sharedLocationViewModel: SharedLocationViewModel
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,15 +107,12 @@ fun MapSearchScreen(
                     viewModel.handleEvent(MapSearchEvent.AvisoVisto)
                 }
                 is UiEvent.PopBackStack -> {
+                    onNavigateBack()
                     viewModel.handleEvent(MapSearchEvent.AvisoVisto)
                 }
             }
         }
     }
-
-
-
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -102,7 +130,8 @@ fun MapSearchScreen(
             ResultsSection(
                 state = state,
                 sharedLocationViewModel = sharedLocationViewModel,
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -152,7 +181,8 @@ private fun SearchBarSection(
 private fun ResultsSection(
     state: MapSearchState,
     sharedLocationViewModel: SharedLocationViewModel,
-    navController: NavController
+    navController: NavController,
+    viewModel: MapSearchViewModel
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -161,7 +191,8 @@ private fun ResultsSection(
             else -> PlacesList(
                 places = state.results,
                 sharedLocationViewModel = sharedLocationViewModel,
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -180,12 +211,311 @@ private fun EmptyState() {
         Text("No se encontraron resultados", color = Color.Gray)
     }
 }
+@Composable
+fun ExpandableAddress(
+    address: String,
+    secondaryTextColor: Color,
+    collapsedMaxLines: Int = 2,
+    viewModel: MapSearchViewModel,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var isOverflow by remember { mutableStateOf(false) }
+    var copied by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // Mostrar snackbar cuando copied cambia a true
+    LaunchedEffect(copied) {
+        if (copied) {
+            viewModel.handleEvent(MapSearchEvent.ShowSnackbar("Dirección copiada al portapapeles"))
+            // Reinicia el estado después de un pequeño delay para evitar repeticiones accidentales
+            delay(800)
+            copied = false
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = "Ubicación",
+                tint = secondaryTextColor,
+                modifier = Modifier
+                    .padding(top = 2.dp, end = 6.dp)
+                    .size(20.dp)
+            )
+            Column(modifier = Modifier.weight(1f).padding(top = 2.dp)) {
+                Text(
+                    text = address,
+                    color = secondaryTextColor,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                    maxLines = if (expanded) Int.MAX_VALUE else collapsedMaxLines,
+                    overflow = TextOverflow.Ellipsis,
+                    onTextLayout = { result -> isOverflow = result.hasVisualOverflow },
+                    modifier = Modifier.animateContentSize()
+                )
+                if (isOverflow || expanded) {
+                    TextButton(
+                        onClick = {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("Dirección", address)
+                            clipboard.setPrimaryClip(clip)
+                            copied = true
+                        },
+                        contentPadding = PaddingValues(0.dp),
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text(
+                            text = if (expanded) "Ver menos" else "Ver más",
+                            color = secondaryTextColor,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+            }
+        }
+        if (address.isNotBlank()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = {
+                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        val clip = android.content.ClipData.newPlainText("Dirección", address)
+                        clipboard.setPrimaryClip(clip)
+                        copied = true
+                    },
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.copy_icon),
+                        contentDescription = "Copiar dirección",
+                        tint = secondaryTextColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        text = "Copiar dirección",
+                        color = secondaryTextColor,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PlaceCard(
+    place: GooglePlaceUi,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    viewModel : MapSearchViewModel
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedPhotoReference by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val isDarkMode = isSystemInDarkTheme()
+    val textColor = if (isDarkMode) Color.White else Color.Black
+    val secondaryTextColor = if (isDarkMode) Color.LightGray else Color.DarkGray
+    val dividerColor = if (isDarkMode) Color(0xFF444444) else Color(0xFFE0E0E0)
+    val openColor = Color(0xFF4CAF50)
+    val closedColor = Color.Red
+    val apiKey = stringResource(R.string.google_maps_key) // <-- Obtén tu API key aquí
+    // Dialog para la imagen ampliada
+    if (selectedPhotoReference != null) {
+        PlaceImageDialog(
+            place = place,
+            selectedPhotoReference = selectedPhotoReference!!,
+            onDismiss = { selectedPhotoReference = null },
+            apiKey = apiKey,
+            secondaryTextColor = secondaryTextColor,
+            viewModel = viewModel
+        )
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .animateContentSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        color = if (isDarkMode) Color(0xFF333333) else Color(0xFFF0F0F0),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.LocationOn,
+                    contentDescription = null,
+                    tint = textColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Content
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = place.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = textColor,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = place.address,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = secondaryTextColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                if (place.openingHours != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = place.openingHours,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (place.openingHours.contains("Abierto", ignoreCase = true))
+                            openColor else closedColor
+                    )
+                }
+            }
+
+            // Expand/Collapse icon
+            IconButton(onClick = { expanded = !expanded }) {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp
+                    else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (expanded) "Colapsar" else "Expandir",
+                    tint = secondaryTextColor
+                )
+            }
+        }
+
+        // Expanded content
+        AnimatedVisibility(visible = expanded) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 64.dp, end = 16.dp, bottom = 16.dp)
+            ) {
+                // Photos gallery
+                if (place.photos.isNotEmpty()) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        items(place.photos) { photo ->
+                            AsyncImage(
+                                model = getGooglePhotoUrl(
+                                    photo.photoReference,
+                                    apiKey,
+                                    maxWidth = 200 // Miniatura
+                                ),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .padding(end = 8.dp)
+                                    .clickable { selectedPhotoReference = photo.photoReference }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                // Website
+                // Phone number
+                if (!place.phoneNumber.isNullOrBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Phone,
+                            contentDescription = "Teléfono",
+                            tint = secondaryTextColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = place.phoneNumber,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline
+                            ),
+                            modifier = Modifier.clickable {
+                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${place.phoneNumber}"))
+                                context.startActivity(intent)
+                            }
+                        )
+                    }
+                }
+
+
+                // Rating
+                if (place.rating != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Rating",
+                            tint = Color(0xFFFFC107),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "${place.rating} (${place.userRatingsTotal ?: 0} reseñas)",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = textColor
+                        )
+                    }
+                }
+            }
+        }
+
+        // Divider
+        Divider(
+            color = dividerColor,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+
 
 @Composable
 private fun PlacesList(
     places: List<GooglePlaceUi>,
     sharedLocationViewModel: SharedLocationViewModel,
-    navController: NavController
+    navController: NavController,
+    viewModel: MapSearchViewModel
 ) {
     LazyColumn(
         modifier = Modifier
@@ -198,7 +528,8 @@ private fun PlacesList(
                 onClick = {
                     sharedLocationViewModel.setLocation(place.lat, place.lng)
                     navController.navigate(NoteMapDestination)
-                }
+                },
+                viewModel = viewModel
             )
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -206,74 +537,131 @@ private fun PlacesList(
 }
 
 @Composable
-fun PlaceCard(
+fun PlaceImageDialog(
     place: GooglePlaceUi,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    selectedPhotoReference: String,
+    onDismiss: () -> Unit,
+    apiKey: String,
+    secondaryTextColor: Color,
+    viewModel: MapSearchViewModel
 ) {
-    val isDark = isSystemInDarkTheme()
-    val cardColor = if (isDark) Color(0xFF23272F) else Color(0xFFF5F7FA)
+    val isDarkMode = isSystemInDarkTheme()
+    val dialogBackground = if (isDarkMode) Color(0xFF232323) else Color.White
+    val headerBackground = if (isDarkMode) Color(0xFF444444) else Color(0xFFE0E0E0)
+    val titleColor = if (isDarkMode) Color.White else Color.Black
 
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(10.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+            usePlatformDefaultWidth = false
+        )
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.7f))
         ) {
-            if (place.photoUrl != null) {
-                AsyncImage(
-                    model = place.photoUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(
-                            color = if (isDark) Color(0xFF344055) else Color(0xFFE3F0FF),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .align(Alignment.Center)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(dialogBackground)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.align(Alignment.CenterStart)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(headerBackground),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.LocationOn,
+                                    contentDescription = null,
+                                    tint = titleColor,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = place.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = titleColor,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .align(Alignment.TopEnd)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Cerrar",
+                                tint = titleColor
+                            )
+                        }
+                    }
+                    AsyncImage(
+                        model = getGooglePhotoUrl(
+                            selectedPhotoReference,
+                            apiKey,
+                            maxWidth = 3000
+                        ),
                         contentDescription = null,
-                        tint = if (isDark) Color(0xFF8AB4F8) else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(28.dp)
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(dialogBackground)
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        ExpandableAddress(
+                            address = place.address,
+                            secondaryTextColor = secondaryTextColor,
+                            viewModel = viewModel
+                        )
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = place.name,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = if (isDark) Color(0xFFE3F0FF) else Color(0xFF202124)
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = place.address,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isDark) Color(0xFFB0B8C1) else Color(0xFF6B7280),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

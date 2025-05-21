@@ -15,7 +15,7 @@ interface GooglePlacesService {
     @GET("place/details/json")
     suspend fun getPlaceDetails(
         @Query("place_id") placeId: String,
-        @Query("fields") fields: String = "name,formatted_address,geometry,photos",
+        @Query("fields") fields: String = "name,formatted_address,geometry,photos,rating,user_ratings_total,opening_hours,formatted_phone_number,website",
         @Query("key") apiKey: String
     ): PlaceDetailsResponse
 }

@@ -4,6 +4,7 @@ package com.example.client.ui.noteMap.list
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -89,12 +92,22 @@ fun NoteMapScreen(
 
     ) {
     val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
+    val sharedNoteType by sharedLocationViewModel.selectedNoteType.collectAsState()
+
     val initialLat = latLong?.first
     val initialLon = latLong?.second
     val isDarkMode = isSystemInDarkTheme()
 
+
     var moveToCurrentLocation by remember { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(sharedNoteType) {
+        // Solo actualiza si el filtro cambió y no es igual al actual
+        if (sharedNoteType != uiState.selectedType) {
+            viewModel.handleEvent(NoteMapEvent.FilterByType(sharedNoteType))
+        }
+    }
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
             LatLng(initialLat ?: 0.0, initialLon ?: 0.0),
@@ -104,7 +117,6 @@ fun NoteMapScreen(
     var cameraMoved by remember { mutableStateOf(false) }
     val defaultLocation = LatLng( 0.0,  0.0)
     val defaultZoom =  2f
-    Timber.d("initialLat: $initialLat, initialLon: $initialLon")
     // Al cargar, mueve la cámara si hay coordenadas iniciales
     LaunchedEffect(initialLat, initialLon) {
         if (!cameraMoved && initialLat != null && initialLon != null) {
@@ -119,6 +131,8 @@ fun NoteMapScreen(
             cameraMoved = true
         }
     }
+
+
 
 
     val scope = rememberCoroutineScope()
@@ -365,7 +379,7 @@ fun NoteMapScreen(
                                     viewModel.handleEvent(NoteMapEvent.NavigateToSearch)
                                 },
                             enabled = false, // Deshabilita edición directa aquí
-                            placeholder = { Text("Buscar notas...") },
+                            placeholder = { Text("Buscar lugares...") },
                             singleLine = true,
                             leadingIcon = {
                                 Icon(
@@ -419,8 +433,8 @@ fun NoteMapScreen(
                                     onClick = {
                                         val newType = if (uiState.selectedType == type) null else type
                                         viewModel.handleEvent(NoteMapEvent.FilterByType(newType))
+                                        sharedLocationViewModel.setNoteType(newType)
                                     },
-
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                             }
@@ -441,9 +455,10 @@ fun NoteMapScreen(
                     containerColor = fabContainerColor,
                     contentColor =  fabContentColor
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "My Location"
+                    Image(
+                        painter = painterResource(id = R.drawable.google_map_icon),
+                        contentDescription = "Google Maps Pin",
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }

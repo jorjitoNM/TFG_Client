@@ -45,12 +45,7 @@ fun Navigation() {
     val sharedLocationViewModel: SharedLocationViewModel = hiltViewModel()
 
     val showSnackbar = { message: String ->
-        scope.launch {
-            snackbarHostState.showSnackbar(
-                message,
-                duration = SnackbarDuration.Short
-            )
-        }
+        scope.launch { snackbarHostState.showSnackbar(message) }
     }
 
     val state by navController.currentBackStackEntryAsState()
@@ -141,13 +136,6 @@ fun Navigation() {
             composable<UserSearchDestination> {
                 UserSearchScreen(navController = navController, showSnackbar = { showSnackbar(it) })
             }
-
-
-
-
-
-
-
         }
     }
 }
