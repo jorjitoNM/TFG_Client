@@ -136,9 +136,7 @@ fun NoteMapScreen(
     )
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
-    val lightStyle = remember {
-        MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_light)
-    }
+
 
     val darkStyle = remember {
         MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_dark)
@@ -276,7 +274,7 @@ fun NoteMapScreen(
                 properties = MapProperties(
                     mapType = MapType.NORMAL,
                     isMyLocationEnabled = uiState.hasLocationPermission,
-                    mapStyleOptions = if (isDarkMode) darkStyle else lightStyle
+                    mapStyleOptions = if (isDarkMode) darkStyle else null
                 )
                 ,
                 cameraPositionState = cameraPositionState,

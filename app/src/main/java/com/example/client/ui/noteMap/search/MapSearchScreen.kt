@@ -69,17 +69,22 @@ fun MapSearchScreen(
     }
 
     LaunchedEffect(state.aviso) {
-        when (val event = state.aviso) {
-            is UiEvent.PopBackStack -> {
-                onNavigateBack()
-                viewModel.handleEvent(MapSearchEvent.AvisoVisto)
-            }
-            is UiEvent.ShowSnackbar -> {
-                showSnackbar(event.message)
-                viewModel.handleEvent(MapSearchEvent.AvisoVisto)
+        state.aviso?.let {
+            when (it) {
+                is UiEvent.ShowSnackbar -> {
+                    showSnackbar(it.message)
+                    viewModel.handleEvent(MapSearchEvent.AvisoVisto)
+                }
+                is UiEvent.PopBackStack -> {
+                    viewModel.handleEvent(MapSearchEvent.AvisoVisto)
+                }
             }
         }
     }
+
+
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
