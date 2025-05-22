@@ -7,5 +7,5 @@ import javax.inject.Inject
 class InsertCachedUserUseCase @Inject constructor(
     private val repository: CachedUserRepository
 ) {
-    suspend operator fun invoke(user: UserDTO) = repository.insertUser(user)
+    suspend operator fun invoke(user: UserDTO, userLogged: String) = repository.insertOrUpdateRecentUser(user, userLogged)
 }

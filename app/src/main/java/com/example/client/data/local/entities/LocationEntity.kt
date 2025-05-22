@@ -9,5 +9,7 @@ data class LocationEntity(
     val name: String,
     val address: String,
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
+    val userLogged : String,
+    val timestamp: Long = System.currentTimeMillis(),
 )

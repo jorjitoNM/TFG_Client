@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetCachedLocationsUseCase @Inject constructor(
     private val repository: CachedLocationRepository
 ) {
-    suspend operator fun invoke() = repository.getLocations()
+    suspend operator fun invoke(userLogged : String) = repository.getRecentsLocations(userLogged)
 }

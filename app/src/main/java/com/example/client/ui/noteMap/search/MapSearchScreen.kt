@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -69,7 +68,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 
@@ -135,7 +133,6 @@ fun MapSearchScreen(
                 state = state,
                 sharedLocationViewModel = sharedLocationViewModel,
                 navController = navController,
-                viewModel = viewModel
             )
         }
     }
@@ -171,7 +168,6 @@ private fun SearchBarSection(
             trailingIcon = {
                 Icon(Icons.Default.Search, "Search Icon")
             },
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             shape = RoundedCornerShape(28.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
@@ -186,7 +182,6 @@ private fun ResultsSection(
     state: MapSearchState,
     sharedLocationViewModel: SharedLocationViewModel,
     navController: NavController,
-    viewModel: MapSearchViewModel
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -196,7 +191,6 @@ private fun ResultsSection(
                 places = state.results,
                 sharedLocationViewModel = sharedLocationViewModel,
                 navController = navController,
-                viewModel = viewModel
             )
         }
     }
@@ -220,7 +214,6 @@ fun ExpandableAddress(
     address: String,
     secondaryTextColor: Color,
     collapsedMaxLines: Int = 2,
-    viewModel: MapSearchViewModel,
 ) {
     val expanded by remember { mutableStateOf(false) }
     var isOverflow by remember { mutableStateOf(false) }
@@ -332,7 +325,6 @@ fun PlaceCard(
     place: Location,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    viewModel : MapSearchViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
     var selectedPhotoReference by remember { mutableStateOf<String?>(null) }
@@ -352,7 +344,6 @@ fun PlaceCard(
             onDismiss = { selectedPhotoReference = null },
             apiKey = apiKey,
             secondaryTextColor = secondaryTextColor,
-            viewModel = viewModel
         )
     }
 
@@ -532,7 +523,6 @@ private fun PlacesList(
     places: List<Location>,
     sharedLocationViewModel: SharedLocationViewModel,
     navController: NavController,
-    viewModel: MapSearchViewModel
 ) {
     LazyColumn(
         modifier = Modifier
@@ -546,7 +536,6 @@ private fun PlacesList(
                     sharedLocationViewModel.setLocation(place.lat, place.lng)
                     navController.navigate(NoteMapDestination)
                 },
-                viewModel = viewModel
             )
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -560,7 +549,6 @@ fun PlaceImageDialog(
     onDismiss: () -> Unit,
     apiKey: String,
     secondaryTextColor: Color,
-    viewModel: MapSearchViewModel
 ) {
     val isDarkMode = isSystemInDarkTheme()
     val dialogBackground = if (isDarkMode) Color(0xFF232323) else Color.White
@@ -656,7 +644,6 @@ fun PlaceImageDialog(
                         ExpandableAddress(
                             address = place.address,
                             secondaryTextColor = secondaryTextColor,
-                            viewModel = viewModel
                         )
                     }
                 }

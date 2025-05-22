@@ -11,11 +11,13 @@ fun LocationEntity.toLocation() = Location(
     lng = longitude
 )
 
-fun Location.toEntity() = LocationEntity(
+fun Location.toEntity(userLogged: String, timestamp: Long = System.currentTimeMillis()) = LocationEntity(
     name = name,
     address = address,
     latitude = lat,
-    longitude = lng
+    longitude = lng,
+    timestamp = timestamp,
+    userLogged = userLogged
 )
 
 
@@ -24,7 +26,9 @@ fun UserEntity.toUserDTO()= UserDTO(
     rol = rol
 )
 
-fun UserDTO.toEntity() = UserEntity(
+fun UserDTO.toEntity(userLogged: String, timestamp: Long = System.currentTimeMillis()) = UserEntity(
     username = username,
-    rol = rol
+    timestamp = timestamp,
+    rol = rol,
+    userLogged = userLogged
 )

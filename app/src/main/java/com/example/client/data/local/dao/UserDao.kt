@@ -8,12 +8,12 @@ import com.example.client.data.local.entities.UserEntity
 
 @Dao
 interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertUser (user: UserEntity)
+    @Query("SELECT * FROM users WHERE userLogged = :userLogged ORDER BY timestamp DESC")
+    suspend fun getRecentUsers(userLogged: String): List<UserEntity>
 
-    @Query("SELECT * FROM users WHERE username = :username")
-    suspend fun getUser(username : String): UserEntity
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUser(user: UserEntity)
 
-    @Query("SELECT * FROM users")
-    suspend fun getUsers(): List<UserEntity>
+    @Query("DELETE FROM users WHERE username = :username AND userLogged = :userLogged")
+    suspend fun deleteUserByUsername(username: String, userLogged: String)
 }

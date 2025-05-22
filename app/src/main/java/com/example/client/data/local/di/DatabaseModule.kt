@@ -21,7 +21,8 @@ object DatabaseModule {
             appContext,
             AppDatabase::class.java,
             Constantes.APP_DB
-        ).createFromAsset(Constantes.DB_ASSETS).fallbackToDestructiveMigration()
+        )
+            .fallbackToDestructiveMigration()
             .build()
 
     @Provides
@@ -29,5 +30,4 @@ object DatabaseModule {
 
     @Provides
     fun provideLocationDao(appDatabase: AppDatabase) = appDatabase.locationDao
-
 }

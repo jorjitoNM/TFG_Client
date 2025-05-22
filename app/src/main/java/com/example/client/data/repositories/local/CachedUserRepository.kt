@@ -14,31 +14,32 @@ import javax.inject.Inject
 class CachedUserRepository @Inject constructor(
     private val userDao: UserDao,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
-){
-    suspend fun getUsers() = withContext(dispatcher) {
+) {
+    suspend fun getRecentUsers(userLogged: String) = withContext(dispatcher) {
         try {
-           val users = userDao.getUsers().map { it.toUserDTO() }
+            val users = userDao.getRecentUsers(userLogged).map { it.toUserDTO() }
             NetworkResult.Success(users)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
 
-    suspend fun getUser (username : String) = withContext(dispatcher) {
+    suspend fun insertOrUpdateRecentUser(user: UserDTO, userLogged: String) = withContext(dispatcher) {
         try {
-            val user = userDao.getUser(username).toUserDTO()
-            NetworkResult.Success(user)
+            userDao.insertUser(user.toEntity(userLogged = userLogged, timestamp = System.currentTimeMillis()))
+            NetworkResult.Success(Unit)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
 
-    suspend fun insertUser (user : UserDTO) =withContext(dispatcher) {
+    suspend fun deleteRecentUser(username: String, userLogged: String) = withContext(dispatcher) {
         try {
-            userDao.insertUser(user.toEntity())
+            userDao.deleteUserByUsername(username, userLogged)
             NetworkResult.Success(Unit)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
 }
+

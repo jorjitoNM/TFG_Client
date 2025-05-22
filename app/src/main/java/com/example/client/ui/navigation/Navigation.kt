@@ -134,7 +134,7 @@ fun Navigation() {
                 )
             }
             composable<UserSearchDestination> {
-                UserSearchScreen(navController = navController, showSnackbar = { showSnackbar(it) })
+                UserSearchScreen( showSnackbar = { showSnackbar(it) })
             }
         }
     }

@@ -14,6 +14,9 @@ interface LocationDao {
     @Query("SELECT * FROM locations WHERE id = :id")
     suspend fun getLocation(id: Int): LocationEntity
 
-    @Query("SELECT * FROM locations")
-    suspend fun getLocations(): List<LocationEntity>
+    @Query("SELECT * FROM locations WHERE userLogged = :userLogged ORDER BY timestamp DESC")
+    suspend fun getLocations(userLogged : String): List<LocationEntity>
+
+    @Query("DELETE FROM locations WHERE id = :id AND userLogged = :userLogged")
+    suspend fun deleteLocation(id: Int, userLogged: String)
 }

@@ -8,5 +8,5 @@ data class UserSearchState(
     val isLoading: Boolean = false,
     val aviso: UiEvent? = null,
     val searchText: String = "",
-    val showEmptyState: Boolean = false
+    val showEmptyState: Boolean = false,
 )
