@@ -5,10 +5,12 @@ import com.example.client.domain.model.google.Location
 
 
 fun LocationEntity.toLocation() = Location(
+    id = id,
     name = name,
     address = address,
     lat = latitude,
-    lng = longitude
+    lng = longitude,
+    userLogged = userLogged
 )
 
 fun Location.toEntity(userLogged: String, timestamp: Long = System.currentTimeMillis()) = LocationEntity(

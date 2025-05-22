@@ -29,7 +29,7 @@ class UserSearchViewModel @Inject constructor(
     val uiState: StateFlow<UserSearchState> = _uiState.asStateFlow()
 
     private fun getLoggedUser(): String = "user1" // O el que corresponda tras login
-
+    //aqui va el preference
     init {
         loadRecentUsers()
     }

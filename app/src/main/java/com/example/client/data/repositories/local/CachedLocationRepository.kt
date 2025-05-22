@@ -39,13 +39,4 @@ class CachedLocationRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
-
-    suspend fun getLocation(id: Int) = withContext(dispatcher) {
-        try {
-           val location = locationDao.getLocation(id).toLocation()
-            NetworkResult.Success(location)
-        } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
 }

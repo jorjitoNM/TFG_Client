@@ -8,11 +8,8 @@ import com.example.client.data.local.entities.LocationEntity
 
 @Dao
 interface LocationDao {
-    @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertLocation (location: LocationEntity)
-
-    @Query("SELECT * FROM locations WHERE id = :id")
-    suspend fun getLocation(id: Int): LocationEntity
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLocation(location: LocationEntity)
 
     @Query("SELECT * FROM locations WHERE userLogged = :userLogged ORDER BY timestamp DESC")
     suspend fun getLocations(userLogged : String): List<LocationEntity>

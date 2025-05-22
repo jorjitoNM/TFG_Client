@@ -7,6 +7,9 @@
     import com.example.client.common.StringProvider
     import com.example.client.domain.model.google.*
     import com.example.client.domain.usecases.map.*
+    import com.example.client.domain.usecases.map.local.DeleteCachedLocationUseCase
+    import com.example.client.domain.usecases.map.local.GetCachedLocationsUseCase
+    import com.example.client.domain.usecases.map.local.InsertCachedLocationUseCase
     import com.example.client.ui.common.UiEvent
     import dagger.hilt.android.lifecycle.HiltViewModel
     import kotlinx.coroutines.Job
@@ -21,6 +24,9 @@
     class MapSearchViewModel @Inject constructor(
         private val getPlaceAutoCompleteUseCase: GetPlaceAutoCompleteUseCase,
         private val getPlaceDetailsUseCase: GetPlaceDetailsUseCase,
+        private val getCachedLocationsUseCase: GetCachedLocationsUseCase,
+        private val insertCachedLocationUseCase: InsertCachedLocationUseCase,
+        private val deleteCachedLocationUseCase: DeleteCachedLocationUseCase,
         private val stringProvider: StringProvider
     ) : ViewModel() {
 
@@ -29,16 +35,22 @@
 
         private var searchJob: Job? = null
 
+        fun getLoggedUser(): String = "user3"
+
+        init {
+            val userLogged = getLoggedUser()
+            handleEvent(MapSearchEvent.LoadRecents(userLogged))
+        }
+
         fun handleEvent(event: MapSearchEvent) {
             when (event) {
                 is MapSearchEvent.UpdateSearchText -> onSearchTextChanged(event.text)
-                is MapSearchEvent.NavigateBack -> {
-                    _uiState.update { it.copy(aviso = UiEvent.PopBackStack) }
-                }
-                is MapSearchEvent.AvisoVisto -> {
-                    _uiState.update { it.copy(aviso = null) }
-                }
+                is MapSearchEvent.NavigateBack -> _uiState.update { it.copy(aviso = UiEvent.PopBackStack) }
+                is MapSearchEvent.AvisoVisto -> _uiState.update { it.copy(aviso = null) }
                 is MapSearchEvent.ShowSnackbar -> showSnackbar(event.message)
+                is MapSearchEvent.LoadRecents -> loadRecents(event.userLogged)
+                is MapSearchEvent.InsertRecent -> insertRecent(event.location, event.userLogged)
+                is MapSearchEvent.DeleteRecent -> deleteRecent(event.id, event.userLogged)
             }
         }
 
@@ -55,7 +67,7 @@
                     val apiKey = stringProvider.getString(R.string.google_maps_key)
                     when (val autoResult = getPlaceAutoCompleteUseCase(text, apiKey)) {
                         is NetworkResult.Success -> {
-                            val predictions = autoResult.data.predictions.take(5)
+                            val predictions = autoResult.data.predictions.take(7)
                             val results = predictions.mapNotNull { prediction ->
                                 getLocationForPrediction(prediction, apiKey)
                             }
@@ -82,6 +94,8 @@
                     }
                 }
             } else {
+                val userLogged = getLoggedUser()
+                handleEvent(MapSearchEvent.LoadRecents(userLogged))
                 _uiState.update {
                     it.copy(
                         results = emptyList(),
@@ -91,6 +105,7 @@
                 }
             }
         }
+
         private suspend fun getLocationForPrediction(prediction: Prediction, apiKey: String): Location? {
             return when (val detailsResult = getPlaceDetailsUseCase(prediction.placeId, apiKey)) {
                 is NetworkResult.Success -> {
@@ -135,16 +150,44 @@
                     _uiState.update { it.copy(isLoading = true) }
                     null
                 }
-
-
             }
         }
 
+
+        private fun loadRecents(userLogged: String) {
+            viewModelScope.launch {
+                when (val result = getCachedLocationsUseCase(userLogged)) {
+                    is NetworkResult.Success -> _uiState.update { it.copy(recents = result.data) }
+                    is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message)) }
+                    is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+
+        private fun insertRecent(location: Location, userLogged: String) {
+            viewModelScope.launch {
+                when (val result = insertCachedLocationUseCase(location, userLogged)) {
+                    is NetworkResult.Success -> loadRecents(userLogged)
+                    is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message)) }
+                    is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+
+
+        private fun deleteRecent(id: Int, userLogged: String) {
+            viewModelScope.launch {
+                when (val result = deleteCachedLocationUseCase(id, userLogged)) {
+                    is NetworkResult.Success -> loadRecents(userLogged)
+                    is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message)) }
+                    is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+
+
     }
 
-     fun getGooglePhotoUrl(photoReference: String, apiKey: String, maxWidth: Int = 400): String =
+    fun getGooglePhotoUrl(photoReference: String, apiKey: String, maxWidth: Int = 400): String =
         "https://maps.googleapis.com/maps/api/place/photo?maxwidth=$maxWidth&photoreference=$photoReference&key=$apiKey"
-
-
-
 

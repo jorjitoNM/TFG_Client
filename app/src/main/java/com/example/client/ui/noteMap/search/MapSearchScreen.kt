@@ -68,6 +68,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 
@@ -133,6 +134,16 @@ fun MapSearchScreen(
                 state = state,
                 sharedLocationViewModel = sharedLocationViewModel,
                 navController = navController,
+                onInsertRecent = { location ->
+                    viewModel.handleEvent(
+                        MapSearchEvent.InsertRecent(location, viewModel.getLoggedUser())
+                    )
+                },
+                onDeleteRecent = { location ->
+                    viewModel.handleEvent(
+                        MapSearchEvent.DeleteRecent(location.id, location.userLogged)
+                    )
+                }
             )
         }
     }
@@ -182,19 +193,33 @@ private fun ResultsSection(
     state: MapSearchState,
     sharedLocationViewModel: SharedLocationViewModel,
     navController: NavController,
+    onInsertRecent: (Location) -> Unit,
+    onDeleteRecent: (Location) -> Unit // <--- Añade esto
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             state.isLoading -> LoadingIndicator()
             state.showEmptyState -> EmptyState()
+            state.searchText.isBlank() -> RecentsList(
+                recents = state.recents,
+                onRecentClick = { place ->
+                    onInsertRecent(place)
+                    sharedLocationViewModel.setLocation(place.lat, place.lng)
+                    navController.navigate(NoteMapDestination)
+                },
+                onDeleteRecent = onDeleteRecent
+            )
             else -> PlacesList(
                 places = state.results,
                 sharedLocationViewModel = sharedLocationViewModel,
                 navController = navController,
+                onInsertRecent = onInsertRecent,
+                isSearchTextBlank = state.searchText.isBlank()
             )
         }
     }
 }
+
 
 @Composable
 private fun LoadingIndicator() {
@@ -523,6 +548,8 @@ private fun PlacesList(
     places: List<Location>,
     sharedLocationViewModel: SharedLocationViewModel,
     navController: NavController,
+    onInsertRecent: (Location) -> Unit,
+    isSearchTextBlank: Boolean
 ) {
     LazyColumn(
         modifier = Modifier
@@ -533,6 +560,7 @@ private fun PlacesList(
             PlaceCard(
                 place = place,
                 onClick = {
+                        onInsertRecent(place)
                     sharedLocationViewModel.setLocation(place.lat, place.lng)
                     navController.navigate(NoteMapDestination)
                 },
@@ -651,6 +679,143 @@ fun PlaceImageDialog(
         }
     }
 }
+
+@Composable
+fun RecentPlaceCard(
+    place: Location,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val isDarkMode = isSystemInDarkTheme()
+    val textColor = if (isDarkMode) Color.White else Color.Black
+    val secondaryTextColor = if (isDarkMode) Color.LightGray else Color.DarkGray
+    val dividerColor = if (isDarkMode) Color(0xFF444444) else Color(0xFFE0E0E0)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Icono de mapa
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(
+                    color = if (isDarkMode) Color(0xFF333333) else Color(0xFFF0F0F0),
+                    shape = CircleShape
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = null,
+                tint = textColor,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        // Nombre y dirección
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onClick() }
+        ) {
+            Text(
+                text = place.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = textColor,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = place.address,
+                style = MaterialTheme.typography.bodyMedium,
+                color = secondaryTextColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // Botón de eliminar a la derecha
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier.size(40.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Eliminar lugar",
+                tint = if (isDarkMode) Color.LightGray else Color.DarkGray
+            )
+        }
+    }
+    Divider(
+        color = dividerColor,
+        thickness = 1.dp,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun RecentsList(
+    recents: List<Location>,
+    onRecentClick: (Location) -> Unit,
+    onDeleteRecent: (Location) -> Unit
+) {
+    if (recents.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.LocationOn, // Icono de lugar
+                    contentDescription = "Sin lugares recientes",
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                    modifier = Modifier.size(80.dp)
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "No hay búsquedas recientes",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.95f)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Cuando busques o selecciones lugares aparecerán aquí.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            }
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            items(recents) { place ->
+                RecentPlaceCard(
+                    place = place,
+                    onClick = { onRecentClick(place) },
+                    onDelete = { onDeleteRecent(place) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
 
 
 
