@@ -1,7 +1,6 @@
 package com.example.client.data.remote.service
 
-import com.example.client.domain.model.AutocompleteResponse
-import com.example.client.domain.model.PlaceDetailsResponse
+import com.example.client.domain.model.google.*
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -10,7 +9,7 @@ interface GooglePlacesService {
     suspend fun getAutocomplete(
         @Query("input") input: String,
         @Query("key") apiKey: String
-    ): AutocompleteResponse
+    ):  AutocompleteResponse
 
     @GET("place/details/json")
     suspend fun getPlaceDetails(

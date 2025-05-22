@@ -1,11 +1,16 @@
 package com.example.client.ui.noteMap.search
 
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +36,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Phone
@@ -78,7 +82,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.client.R
-import com.example.client.domain.model.GooglePlaceUi
+import com.example.client.domain.model.google.*
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.navigation.NoteMapDestination
 import kotlinx.coroutines.delay
@@ -218,17 +222,15 @@ fun ExpandableAddress(
     collapsedMaxLines: Int = 2,
     viewModel: MapSearchViewModel,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val expanded by remember { mutableStateOf(false) }
     var isOverflow by remember { mutableStateOf(false) }
     var copied by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    // Mostrar snackbar cuando copied cambia a true
+    // Temporizador para ocultar el mensaje tras 3 segundos
     LaunchedEffect(copied) {
         if (copied) {
-            viewModel.handleEvent(MapSearchEvent.ShowSnackbar("Dirección copiada al portapapeles"))
-            // Reinicia el estado después de un pequeño delay para evitar repeticiones accidentales
-            delay(800)
+            delay(3000)
             copied = false
         }
     }
@@ -259,8 +261,8 @@ fun ExpandableAddress(
                 if (isOverflow || expanded) {
                     TextButton(
                         onClick = {
-                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                            val clip = android.content.ClipData.newPlainText("Dirección", address)
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Dirección", address)
                             clipboard.setPrimaryClip(clip)
                             copied = true
                         },
@@ -285,8 +287,8 @@ fun ExpandableAddress(
             ) {
                 TextButton(
                     onClick = {
-                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        val clip = android.content.ClipData.newPlainText("Dirección", address)
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clip = ClipData.newPlainText("Dirección", address)
                         clipboard.setPrimaryClip(clip)
                         copied = true
                     },
@@ -306,13 +308,28 @@ fun ExpandableAddress(
                     )
                 }
             }
+            // Mensaje animado debajo del botón
+            AnimatedVisibility(
+                visible = copied,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Text(
+                    text = "¡Copiado al portapapeles!",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(end = 8.dp, top = 2.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
 fun PlaceCard(
-    place: GooglePlaceUi,
+    place: Location,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     viewModel : MapSearchViewModel
@@ -326,7 +343,7 @@ fun PlaceCard(
     val dividerColor = if (isDarkMode) Color(0xFF444444) else Color(0xFFE0E0E0)
     val openColor = Color(0xFF4CAF50)
     val closedColor = Color.Red
-    val apiKey = stringResource(R.string.google_maps_key) // <-- Obtén tu API key aquí
+    val apiKey = stringResource(R.string.google_maps_key)
     // Dialog para la imagen ampliada
     if (selectedPhotoReference != null) {
         PlaceImageDialog(
@@ -512,7 +529,7 @@ fun PlaceCard(
 
 @Composable
 private fun PlacesList(
-    places: List<GooglePlaceUi>,
+    places: List<Location>,
     sharedLocationViewModel: SharedLocationViewModel,
     navController: NavController,
     viewModel: MapSearchViewModel
@@ -538,7 +555,7 @@ private fun PlacesList(
 
 @Composable
 fun PlaceImageDialog(
-    place: GooglePlaceUi,
+    place: Location,
     selectedPhotoReference: String,
     onDismiss: () -> Unit,
     apiKey: String,

@@ -2,6 +2,7 @@ package com.example.client.ui.userScreen.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,9 +23,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,9 +41,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -135,6 +140,7 @@ fun UserSearchScreen(
                     UserCard(user = user, onClick = {
 
                     })
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
@@ -142,56 +148,85 @@ fun UserSearchScreen(
 }
 
 @Composable
-fun UserCard(user: UserDTO, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
+fun UserCard(
+    user: UserDTO,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val isDarkMode = isSystemInDarkTheme()
+    val textColor = if (isDarkMode) Color.White else Color.Black
+    val dividerColor = if (isDarkMode) Color(0xFF444444) else Color(0xFFE0E0E0)
+    val iconBackground = if (isDarkMode) Color(0xFF333333) else Color(0xFFF0F0F0)
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp).clickable { onClick() }
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icono redondo (imagen de usuario)
+            // Icono de usuario
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                    .size(48.dp)
+                    .background(
+                        color = iconBackground,
+                        shape = CircleShape
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "User",
-                    tint = Color.White,
-                    modifier = Modifier.size(32.dp)
+                    contentDescription = "Usuario",
+                    tint = textColor,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = user.username,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Check premium si es premium
-            if (user.rol == "PREMIUM") {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Premium",
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(24.dp)
+            // Contenido principal
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = user.username,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = textColor,
+                    fontWeight = FontWeight.Medium
                 )
+
+                // Solo si es premium, muestra el rol destacado
+                if (user.rol == "PREMIUM") {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background( Color(0xFF4CAF50))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "PREMIUM",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    }
+                }
+
             }
         }
+
+        Divider(
+            color = dividerColor,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
+
 

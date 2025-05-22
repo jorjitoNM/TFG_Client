@@ -5,8 +5,7 @@
     import com.example.client.R
     import com.example.client.common.StringProvider
     import com.example.client.data.remote.service.GooglePlacesService
-    import com.example.client.domain.model.GooglePlaceUi
-    import com.example.client.domain.model.PlacePhoto
+    import com.example.client.domain.model.google.*
     import com.example.client.ui.common.UiEvent
     import dagger.hilt.android.lifecycle.HiltViewModel
     import kotlinx.coroutines.Job
@@ -91,7 +90,7 @@
                                 else null
                             }
 
-                            GooglePlaceUi(
+                            Location(
                                 name = result.name ?: "",
                                 address = result.formattedAddress ?: "",
                                 lat = result.geometry?.location?.lat ?: 0.0,
