@@ -1,5 +1,6 @@
 package com.example.client.ui.addNoteScreen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,18 +19,19 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,6 +40,9 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddNoteScreen(
@@ -46,6 +51,8 @@ fun AddNoteScreen(
     onNavigateBack: () -> Unit,
 ) {
     val uiState = addNoteViewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
     LaunchedEffect(uiState.value.aviso) {
         uiState.value.aviso?.let {
@@ -64,7 +71,8 @@ fun AddNoteScreen(
             note = uiState.value.note,
             onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
             onSave = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            fusedLocationClient = fusedLocationClient
         )
     } else {
         Box(
@@ -75,16 +83,45 @@ fun AddNoteScreen(
         }
     }
 }
+
+@SuppressLint("MissingPermission")
 @Composable
 fun AddNoteContent(
     note: NoteDTO,
     onEdit: (note: NoteDTO) -> Unit,
     onSave: () -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    fusedLocationClient: FusedLocationProviderClient
 ) {
     val noteState = remember { mutableStateOf(note) }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    noteState.value = noteState.value.copy(
+                        latitude = it.latitude,
+                        longitude = it.longitude
+                    )
+                    onEdit(noteState.value)
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "Añadir Nota",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
         TextField(
             value = noteState.value.title,
             onValueChange = {
@@ -94,7 +131,6 @@ fun AddNoteContent(
             label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(8.dp))
         TextField(
             value = noteState.value.content,
             onValueChange = {
@@ -104,7 +140,6 @@ fun AddNoteContent(
             label = { Text("Contenido") },
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(8.dp))
         DropdownMenuField(
             label = "Privacidad",
             options = NotePrivacy.values().toList(),
@@ -114,40 +149,6 @@ fun AddNoteContent(
                 onEdit(noteState.value)
             }
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = noteState.value.rating.toString(),
-            onValueChange = {
-                val newRating = it.toIntOrNull() ?: noteState.value.rating
-                noteState.value = noteState.value.copy(rating = newRating)
-                onEdit(noteState.value)
-            },
-            label = { Text("Calificación") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = noteState.value.latitude.toString(),
-            onValueChange = {
-                val newLatitude = it.toDoubleOrNull() ?: noteState.value.latitude
-                noteState.value = noteState.value.copy(latitude = newLatitude)
-                onEdit(noteState.value)
-            },
-            label = { Text("Latitud") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = noteState.value.longitude.toString(),
-            onValueChange = {
-                val newLongitude = it.toDoubleOrNull() ?: noteState.value.longitude
-                noteState.value = noteState.value.copy(longitude = newLongitude)
-                onEdit(noteState.value)
-            },
-            label = { Text("Longitud") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
         DropdownMenuField(
             label = "Tipo",
             options = NoteType.entries,
@@ -215,5 +216,5 @@ fun <T> DropdownMenuField(
 @Composable
 fun AddNoteScreenPreview ()  {
     AddNoteContent(NoteDTO(1,"asd","asd",NotePrivacy.FOLLOWERS,4,"juan",50,"ayer",1.6,5.6,NoteType.FOOD,null,null),
-        {},{},{})
+        {},{}, {}, LocationServices.getFusedLocationProviderClient(LocalContext.current))
 }
