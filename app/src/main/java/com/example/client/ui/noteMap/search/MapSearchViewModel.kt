@@ -156,13 +156,35 @@
 
         private fun loadRecents(userLogged: String) {
             viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, showEmptyStateDelayed = false) }
                 when (val result = getCachedLocationsUseCase(userLogged)) {
-                    is NetworkResult.Success -> _uiState.update { it.copy(recents = result.data) }
-                    is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message)) }
-                    is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
+                    is NetworkResult.Success -> {
+                        if (result.data.isEmpty()) {
+                            _uiState.update {
+                                it.copy(
+                                    recents = result.data,
+                                    isLoading = false,
+                                    showEmptyState = false,
+                                    showEmptyStateDelayed = true
+                                )
+                            }
+                        } else {
+                            _uiState.update {
+                                it.copy(
+                                    recents = result.data,
+                                    isLoading = false,
+                                    showEmptyState = false,
+                                    showEmptyStateDelayed = false
+                                )
+                            }
+                        }
+                    }
+                    is NetworkResult.Error -> _uiState.update { it.copy(isLoading = false, aviso = UiEvent.ShowSnackbar(result.message), showEmptyStateDelayed = false) }
+                    is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true, showEmptyStateDelayed = false) }
                 }
             }
         }
+
 
         private fun insertRecent(location: Location, userLogged: String) {
             viewModelScope.launch {

@@ -207,7 +207,8 @@ private fun ResultsSection(
                     sharedLocationViewModel.setLocation(place.lat, place.lng)
                     navController.navigate(NoteMapDestination)
                 },
-                onDeleteRecent = onDeleteRecent
+                onDeleteRecent = onDeleteRecent,
+                showEmptyDelayed = state.showEmptyStateDelayed
             )
             else -> PlacesList(
                 places = state.results,
@@ -765,21 +766,12 @@ fun RecentPlaceCard(
 @Composable
 fun RecentsList(
     recents: List<Location>,
+    showEmptyDelayed: Boolean,
     onRecentClick: (Location) -> Unit,
     onDeleteRecent: (Location) -> Unit
 ) {
-    var showEmpty by remember { mutableStateOf(false) }
 
-    LaunchedEffect(recents) {
-        if (recents.isEmpty()) {
-            showEmpty = false
-            delay(100)
-            showEmpty = true
-        } else {
-            showEmpty = false
-        }
-    }
-    if (showEmpty && recents.isEmpty()) {
+    if (showEmptyDelayed && recents.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -788,7 +780,7 @@ fun RecentsList(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.LocationOn, // Icono de lugar
+                    imageVector = Icons.Outlined.LocationOn,
                     contentDescription = "Sin lugares recientes",
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                     modifier = Modifier.size(80.dp)

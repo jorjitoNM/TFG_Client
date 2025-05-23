@@ -9,5 +9,6 @@ data class MapSearchState(
     val recents: List<Location> = emptyList(),
     val isLoading: Boolean = false,
     val showEmptyState: Boolean = false,
-    val aviso: UiEvent? = null
+    val aviso: UiEvent? = null,
+    val showEmptyStateDelayed: Boolean = false
 )
