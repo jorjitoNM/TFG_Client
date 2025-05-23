@@ -43,7 +43,12 @@ import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.launch
-
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 @Composable
 fun AddNoteScreen(
     addNoteViewModel: AddNoteViewModel = hiltViewModel(),
@@ -51,8 +56,24 @@ fun AddNoteScreen(
     onNavigateBack: () -> Unit,
 ) {
     val uiState = addNoteViewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
+        } else {
+            showSnackbar("Permiso de ubicación denegado")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!uiState.value.hasLocationPermission) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
+        }
+    }
 
     LaunchedEffect(uiState.value.aviso) {
         uiState.value.aviso?.let {
@@ -71,8 +92,7 @@ fun AddNoteScreen(
             note = uiState.value.note,
             onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
             onSave = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
-            onNavigateBack = onNavigateBack,
-            fusedLocationClient = fusedLocationClient
+            onNavigateBack = onNavigateBack
         )
     } else {
         Box(
@@ -84,32 +104,14 @@ fun AddNoteScreen(
     }
 }
 
-@SuppressLint("MissingPermission")
 @Composable
 fun AddNoteContent(
     note: NoteDTO,
     onEdit: (note: NoteDTO) -> Unit,
     onSave: () -> Unit,
-    onNavigateBack: () -> Unit,
-    fusedLocationClient: FusedLocationProviderClient
+    onNavigateBack: () -> Unit
 ) {
     val noteState = remember { mutableStateOf(note) }
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        coroutineScope.launch {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    noteState.value = noteState.value.copy(
-                        latitude = it.latitude,
-                        longitude = it.longitude
-                    )
-                    onEdit(noteState.value)
-                }
-            }
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -216,5 +218,5 @@ fun <T> DropdownMenuField(
 @Composable
 fun AddNoteScreenPreview ()  {
     AddNoteContent(NoteDTO(1,"asd","asd",NotePrivacy.FOLLOWERS,4,"juan",50,"ayer",1.6,5.6,NoteType.FOOD,null,null),
-        {},{}, {}, LocationServices.getFusedLocationProviderClient(LocalContext.current))
+        {},{}, {})
 }

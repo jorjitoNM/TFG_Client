@@ -1,11 +1,17 @@
 package com.example.client.ui.addNoteScreen
 
+import android.Manifest
+import android.app.Application
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.useCases.AddNota
 import com.example.client.ui.common.UiEvent
 import com.example.musicapprest.di.IoDispatcher
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,10 +24,16 @@ import javax.inject.Inject
 class AddNoteViewModel @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val addNota: AddNota,
+    private val application: Application
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<AddNoteState> = MutableStateFlow(AddNoteState())
     val uiState: StateFlow<AddNoteState> = _uiState
+
+
+    private val fusedLocationClient: FusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(application)
+    }
 
     fun handleEvent(event: AddNoteEvents) {
         when (event) {
@@ -30,6 +42,7 @@ class AddNoteViewModel @Inject constructor(
             is AddNoteEvents.EditNote -> {
                 _uiState.update { it.copy(note = event.note) }
             }
+            is AddNoteEvents.GetCurrentLocation -> getCurrentLocation()
         }
     }
 
@@ -62,6 +75,27 @@ class AddNoteViewModel @Inject constructor(
                 }
 
                 null -> TODO()
+            }
+        }
+    }
+    private fun getCurrentLocation() {
+        viewModelScope.launch {
+            if (ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    location?.let {
+                        _uiState.update { state ->
+                            state.copy(currentLocation = location)
+                        }
+                    }
+                }
             }
         }
     }
