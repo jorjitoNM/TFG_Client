@@ -424,11 +424,11 @@ fun NoteCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "★ ${note.rating}/10",
+                        text = "★ ${note.rating}/5",
                         style = MaterialTheme.typography.labelSmall,
                         color = when {
-                            note.rating >= 8 -> Color(0xFF4CAF50)
-                            note.rating >= 5 -> Color(0xFFFFC107)
+                            note.rating >= 4 -> Color(0xFF4CAF50)
+                            note.rating >= 2.5 -> Color(0xFFFFC107)
                             else -> Color(0xFFF44336)
                         },
                         fontWeight = FontWeight.Medium
