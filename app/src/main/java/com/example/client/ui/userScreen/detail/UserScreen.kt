@@ -1,7 +1,9 @@
 package com.example.client.ui.userScreen.detail
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,15 +22,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,15 +51,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.theme.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -330,7 +342,7 @@ fun NoteList(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(notes) { note ->
-                NoteItem(
+                NoteCard(
                     note = note,
                     onClick = { onNoteClick(note.id) },
                     onFavClick = { onFavClick(note.id) }
@@ -341,152 +353,127 @@ fun NoteList(
 }
 
 @Composable
-fun NoteItem(
+fun NoteCard(
     note: NoteDTO,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    onFavClick: (Int) -> Unit
+    onFavClick: (() -> Unit)? = null,
+    onLikeClick: (() -> Unit)? = null
 ) {
-    var isFavorite by remember { mutableStateOf(false) }
-    var isLiked by remember { mutableStateOf(false) }
-
+    val isDarkMode = isSystemInDarkTheme()
+    val textColor = if (isDarkMode) Color.White else Color.Black
+    val dividerColor = if (isDarkMode) Color(0xFF444444) else Color(0xFFE0E0E0)
     val goldColor = Color(0xFFFFD700)
     val pinkColor = Color(0xFFFF4081)
-    val textColor = MaterialTheme.colorScheme.onSurface
 
-    Card(
-        modifier = Modifier
+    Column(
+        modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
+            .clickable { onClick() }
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Icono de nota (puedes cambiar el icono según tipo)
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = when (note.type) {
+                        NoteType.EVENT -> R.drawable.ic_note_event
+                        NoteType.HISTORICAL -> R.drawable.ic_note_historical
+                        NoteType.LANDSCAPE -> R.drawable.ic_note_landscape
+                        NoteType.CULTURAL -> R.drawable.ic_note_cultural
+                        NoteType.CLASSIC -> R.drawable.ic_note_classic
+                        NoteType.FOOD -> R.drawable.ic_note_food
+                    }),
+                    contentDescription = "Tipo de nota",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Contenido principal
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = note.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor
+                    color = textColor,
+                    fontWeight = FontWeight.Medium
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
                     text = note.content ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = textColor.copy(alpha = 0.8f),
-                    maxLines = 2
+                    style = MaterialTheme.typography.bodySmall,
+                    color = textColor.copy(alpha = 0.7f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "By: ${note.ownerUsername ?: "Unknown"}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = textColor.copy(alpha = 0.6f)
+                        style = MaterialTheme.typography.labelSmall,
+                        color = textColor.copy(alpha = 0.5f)
                     )
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .background(
-                                color = when {
-                                    note.rating >= 8 -> Color(0xFF4CAF50).copy(alpha = 0.2f)
-                                    note.rating >= 5 -> Color(0xFFFFC107).copy(alpha = 0.2f)
-                                    else -> Color(0xFFF44336).copy(alpha = 0.2f)
-                                },
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "★ ${note.rating}/10",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = when {
-                                note.rating >= 8 -> Color(0xFF4CAF50)
-                                note.rating >= 5 -> Color(0xFFFFC107)
-                                else -> Color(0xFFF44336)
-                            },
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-                if (note.type == NoteType.EVENT) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Spacer(modifier = Modifier.height(8.dp))
-
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "EVENT",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        text = "★ ${note.rating}/10",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = when {
+                            note.rating >= 8 -> Color(0xFF4CAF50)
+                            note.rating >= 5 -> Color(0xFFFFC107)
+                            else -> Color(0xFFF44336)
+                        },
+                        fontWeight = FontWeight.Medium
                     )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Start: ${note.start?.let { formatDateTime(it) }}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-
-                        Text(
-                            text = "End: ${note.end?.let { formatDateTime(it) }}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
                 }
+                // Badge para eventos
+                Spacer(modifier = Modifier.height(2.dp))
+                NoteTypeBadge(type = note.type)
+
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 2.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
+
+            // Acciones: favorito y like
+            if (onFavClick != null) {
                 IconButton(
-                    onClick = {
-                        isFavorite = !isFavorite
-                        onFavClick(note.id)
-                    },
+                    onClick = onFavClick,
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         imageVector = if (note.saved) Icons.Filled.Star else Icons.Outlined.Star,
                         contentDescription = "Favorito",
                         tint = if (note.saved) goldColor else textColor.copy(alpha = 0.4f),
-                        modifier = Modifier.size(34.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
-
-                Spacer(modifier = Modifier.width(4.dp))
-
+            }
+            if (onLikeClick != null) {
                 IconButton(
-                    onClick = { isLiked = !isLiked },
+                    onClick = onLikeClick,
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
-                        imageVector = if (note.liked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                        imageVector = if (note.liked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
                         contentDescription = "Me gusta",
-                        tint = if (note.liked) pinkColor
-                        else textColor.copy(alpha = 0.4f),
-                        modifier = Modifier.size(28.dp)
+                        tint = if (note.liked) pinkColor else textColor.copy(alpha = 0.4f),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
         }
+
+        Divider(
+            color = dividerColor,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -522,4 +509,44 @@ fun Preview() {
         onTabSelected = {},
         selectedTab = UserTab.FAVORITES
     )
+}
+
+@Composable
+fun NoteTypeBadge(type: NoteType, modifier: Modifier = Modifier) {
+    val color = noteTypeBadgeColor(type)
+    val label = when (type) {
+        NoteType.CLASSIC     -> "CLÁSICA"
+        NoteType.EVENT       -> "EVENTO"
+        NoteType.FOOD        -> "GASTRO"
+        NoteType.HISTORICAL  -> "HISTÓRICA"
+        NoteType.LANDSCAPE   -> "PAISAJE"
+        NoteType.CULTURAL    -> "CULTURAL"
+    }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(color)
+            .padding(horizontal = 10.dp, vertical = 3.dp)
+    ) {
+        Text(
+            text = label,
+            color = Color.White,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1
+        )
+    }
+}
+
+
+@Composable
+fun noteTypeBadgeColor(type: NoteType): Color {
+    val isDark = isSystemInDarkTheme()
+    return when (type) {
+        NoteType.CLASSIC     -> if (isDark) ClassicDark else ClassicLight
+        NoteType.EVENT       -> if (isDark) EventDark else EventLight
+        NoteType.FOOD        -> if (isDark) FoodDark else FoodLight
+        NoteType.HISTORICAL  -> if (isDark) HistoricalDark else HistoricalLight
+        NoteType.LANDSCAPE   -> if (isDark) LandscapeDark else LandscapeLight
+        NoteType.CULTURAL    -> if (isDark) CulturalDark else CulturalLight
+    }
 }
