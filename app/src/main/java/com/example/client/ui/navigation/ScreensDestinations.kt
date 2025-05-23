@@ -16,6 +16,8 @@ object MapSearchDestination
 
 @Serializable
 object UserScreenDestination
+@Serializable
+object UserSearchDestination
 
 
 

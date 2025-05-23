@@ -13,6 +13,7 @@ import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,17 +54,38 @@ class NoteMapViewModel @Inject constructor(
     }
 
     private fun filterByType(noteType: NoteType?) {
+        _uiState.update { it.copy(isLoading = true) }
         if (noteType == null) {
-            // Si no hay tipo seleccionado, carga todas las notas
-            getNotes()
-            _uiState.update { it.copy(selectedType = null) }
+            viewModelScope.launch {
+                when (val result = getNotesUseCase()) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                notes = result.data,
+                                selectedType = null,
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Loading -> {
+                        _uiState.update { it.copy(isLoading = true) }
+                    }
+                }
+            }
         } else {
             viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true, selectedType = noteType) }
                 when (val result = orderNoteByTypUseCase(noteType)) {
                     is NetworkResult.Success -> {
                         _uiState.update {
-                            it.copy(notes = result.data, isLoading = false)
+                            it.copy(notes = result.data, selectedType = noteType, isLoading = false)
                         }
                     }
                     is NetworkResult.Error -> {
@@ -86,6 +108,7 @@ class NoteMapViewModel @Inject constructor(
 
 
 
+
     private fun updateSearchText(text: String) {
         _uiState.update { it.copy(currentSearch = text) }
     }
@@ -94,7 +117,7 @@ class NoteMapViewModel @Inject constructor(
         _uiState.update { it.copy(selectedType = noteType) }
     }
 
-    private fun saveCameraPosition(latLng: com.google.android.gms.maps.model.LatLng, zoom: Float) {
+    private fun saveCameraPosition(latLng: LatLng, zoom: Float) {
         _uiState.update { it.copy(cameraLatLng = latLng, cameraZoom = zoom) }
     }
 

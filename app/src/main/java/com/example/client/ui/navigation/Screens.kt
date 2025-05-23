@@ -6,15 +6,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
 val appDestinationList = listOf(
-    NormalNoteList, NoteMap, NormalNoteDetail, MapSearch, UserScreen
-)
+    NormalNoteList,UserSearch,NoteMap,NormalNoteDetail,MapSearch,UserScreen)
 
 
-interface AppDestination {
+interface AppDestination{
     val route: Any
     val title: String
     val scaffoldState: ScaffoldState
@@ -22,13 +27,14 @@ interface AppDestination {
             topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
             fabVisible = true
         )
-    val isBottomBarVisible: Boolean
-    val isTopBarVisible: Boolean
+    val isBottomBarVisible : Boolean
+    val isTopBarVisible : Boolean
 }
 
 interface AppMainBottomDestination : AppDestination {
     val onBottomBar: Boolean
     val icon: ImageVector
+    val iconFilled: ImageVector
 }
 
 object NormalNoteList : AppMainBottomDestination {
@@ -42,10 +48,11 @@ object NormalNoteList : AppMainBottomDestination {
         )
     override val isTopBarVisible: Boolean = true
     override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Home
+    override val icon: ImageVector = Icons.Outlined.Home
+    override val iconFilled: ImageVector = Icons.Filled.Home
 }
 
-object MapSearch : AppDestination {
+object MapSearch : AppDestination{
     override val route: Any = MapSearchDestination
     override val title: String = "Busqueda"
     override val isBottomBarVisible: Boolean = false
@@ -71,6 +78,7 @@ object NormalNoteDetail : AppDestination {
 }
 
 
+
 object NoteMap : AppMainBottomDestination {
     override val route: Any = NoteMapDestination
     override val title: String = "Mapa"
@@ -82,7 +90,8 @@ object NoteMap : AppMainBottomDestination {
         )
     override val isTopBarVisible: Boolean = false
     override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Place
+    override val icon: ImageVector = Icons.Outlined.Place
+    override val iconFilled: ImageVector = Icons.Filled.Place
 }
 
 object UserScreen : AppMainBottomDestination {
@@ -96,7 +105,24 @@ object UserScreen : AppMainBottomDestination {
         )
     override val isTopBarVisible: Boolean = true
     override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.AccountCircle
+    override val icon: ImageVector = Icons.Outlined.AccountCircle
+    override val iconFilled: ImageVector = Icons.Filled.AccountCircle
 }
+
+object UserSearch : AppMainBottomDestination {
+    override val route: Any = UserSearchDestination
+    override val title: String = "Búsqueda"
+    override val isBottomBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+    override val onBottomBar: Boolean = true
+    override val icon: ImageVector = Icons.Outlined.Search
+    override val iconFilled: ImageVector = Icons.Filled.Search
+}
+
 
 

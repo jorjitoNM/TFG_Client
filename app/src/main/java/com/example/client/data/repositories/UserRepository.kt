@@ -25,4 +25,12 @@ class UserRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
+    suspend fun getAllUserStartsWithText(text: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getAllUserStartsWithText(text)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
 }

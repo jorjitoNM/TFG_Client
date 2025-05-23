@@ -1,7 +1,5 @@
 package com.example.client.ui.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -26,14 +24,20 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.client.R
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.noteMap.list.NoteMapScreen
+import com.example.client.ui.savedNotes.SavedScreen
+import com.example.client.ui.common.BottomBar
+import kotlinx.coroutines.launch
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.userScreen.detail.UserScreen
-import com.example.musicapprest.ui.common.BottomBar
-import kotlinx.coroutines.launch
+import com.example.client.ui.userScreen.search.UserSearchScreen
 
 @Composable
 fun Navigation() {
@@ -103,16 +107,11 @@ fun Navigation() {
 
         ) {
             composable<NormalNoteListDestination> {
-                NoteListScreen(
-                    showSnackbar = { showSnackbar(it) },
-                    onNavigateToDetail = { navController.navigate(NormalNoteDetailDestination(it)) })
+                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})
             }
             composable<NormalNoteDetailDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
-                NoteDetailScreen(
-                    noteId = destination.noteId,
-                    showSnackbar = { showSnackbar(it) },
-                    onNavigateBack = { navController.navigateUp() })
+                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
                 NoteMapScreen(
@@ -131,15 +130,13 @@ fun Navigation() {
                 )
             }
 
-            composable<UserScreenDestination> { backStackEntry ->
-                // Supón que tienes el username en el argumento
-                val destination = backStackEntry.toRoute() as UserScreenDestination
-
-                UserScreen(
-                    showSnackbar = { showSnackbar(it) }
+            composable<UserScreenDestination> {
+                UserScreen(showSnackbar = { showSnackbar(it) }
                 )
             }
-
+            composable<UserSearchDestination> {
+                UserSearchScreen( showSnackbar = { showSnackbar(it) })
+            }
         }
     }
 }

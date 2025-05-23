@@ -14,4 +14,7 @@ interface UserService {
     @GET("/user/notes")
     suspend fun getMyNotes(@Query("username") username: String): Response<List<NoteDTO>>
 
+    @GET("/user/all")
+    suspend fun getAllUserStartsWithText(@Query("text") text: String): Response<List<UserDTO>>
+
 }
