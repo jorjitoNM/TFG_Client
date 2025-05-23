@@ -768,7 +768,18 @@ fun RecentsList(
     onRecentClick: (Location) -> Unit,
     onDeleteRecent: (Location) -> Unit
 ) {
-    if (recents.isEmpty()) {
+    var showEmpty by remember { mutableStateOf(false) }
+
+    LaunchedEffect(recents) {
+        if (recents.isEmpty()) {
+            showEmpty = false
+            delay(100)
+            showEmpty = true
+        } else {
+            showEmpty = false
+        }
+    }
+    if (showEmpty && recents.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
