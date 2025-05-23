@@ -13,9 +13,9 @@ class SocialRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun getNotes() = withContext(dispatcher) {
+    suspend fun getSavedNotes() = withContext(dispatcher) {
         try {
-            socialRemoteDataSource.getNotes()
+            socialRemoteDataSource.getSavedNotes()
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }

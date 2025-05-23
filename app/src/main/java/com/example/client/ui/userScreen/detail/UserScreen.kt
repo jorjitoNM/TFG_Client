@@ -207,17 +207,20 @@ fun UserContent(
         // Contenido según pestaña
         when (selectedTab) {
             UserTab.NOTES -> {
-                Text("Notas propias", modifier = Modifier.padding(16.dp))
+                NoteList(
+                    notes = notes,
+                    onNoteClick = {},
+                    onFavClick = {}
+                )
             }
             UserTab.FAVORITES -> {
-                NoteSavedList(
+                NoteList(
                     notes = notes,
                     onNoteClick = {},
                     onFavClick = {}
                 )
             }
             UserTab.LIKES -> {
-                Text("Notas con likes", modifier = Modifier.padding(16.dp))
             }
         }
     }
@@ -315,7 +318,7 @@ fun TabButton(
 }
 
 @Composable
-fun NoteSavedList(
+fun NoteList(
     notes: List<NoteDTO>,
     onNoteClick: (Int) -> Unit,
     onFavClick: (Int) -> Unit

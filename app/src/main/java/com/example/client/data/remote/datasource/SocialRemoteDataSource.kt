@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SocialRemoteDataSource @Inject constructor(private val socialService: SocialService) :
     BaseApiResponse() {
 
-    suspend fun getNotes() = safeApiCall { socialService.getNotes() }
+    suspend fun getSavedNotes() = safeApiCall { socialService.getNotesSaved() }
 
     suspend fun favNote(id: Int, username: String) =
         safeApiCall { socialService.favNote(id, username) }

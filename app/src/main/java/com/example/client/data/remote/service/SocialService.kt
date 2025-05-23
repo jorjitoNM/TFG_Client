@@ -18,7 +18,7 @@ interface SocialService {
     ): Response<Unit>
 
     @GET("notes/saveds?username=user1")
-    suspend fun getNotes(): Response<List<NoteDTO>>
+    suspend fun getNotesSaved(): Response<List<NoteDTO>>
 
     @FormUrlEncoded
     @POST("/social/like")

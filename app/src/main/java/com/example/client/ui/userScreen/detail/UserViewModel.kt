@@ -3,7 +3,7 @@ package com.example.client.ui.userScreen.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.usecases.note.GetMyNote
+import com.example.client.domain.usecases.note.GetMyNoteUseCase
 import com.example.client.domain.usecases.social.GetNoteSavedUseCase
 import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.ui.common.UiEvent
@@ -19,7 +19,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase,
     private val getNoteSavedUseCase: GetNoteSavedUseCase,
-    private val getMyNote: GetMyNote,
+    private val getMyNote: GetMyNoteUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserState())
@@ -31,11 +31,10 @@ class UserViewModel @Inject constructor(
             is UserEvent.AvisoVisto -> avisoVisto()
             is UserEvent.SelectTab -> {
                 _uiState.value = _uiState.value.copy(selectedTab = event.tab)
-                if (event.tab== UserTab.FAVORITES) {
-                    getSavedNotes()
-
-                }else {
-                    _uiState.value = _uiState.value.copy(notes = emptyList())
+                when (event.tab) {
+                    UserTab.NOTES -> getMyNotes()
+                    UserTab.FAVORITES -> getSavedNotes()
+                    UserTab.LIKES -> { /* Lógica para likes */ }
                 }
             }
 
@@ -53,6 +52,7 @@ class UserViewModel @Inject constructor(
                         user = result.data,
                         selectedTab = UserTab.NOTES
                     )
+                    getMyNotes()
                 }
                 is NetworkResult.Error -> {
                     _uiState.value = _uiState.value.copy(
@@ -72,7 +72,7 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = getMyNote()) {
+            when (val result = getNoteSavedUseCase()) {
                 is NetworkResult.Success -> {
                     _uiState.update {
                         it.copy(
@@ -105,7 +105,7 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = getNoteSavedUseCase()) {
+            when (val result = getMyNote()) {
                 is NetworkResult.Success -> {
                     _uiState.update {
                         it.copy(
