@@ -87,7 +87,7 @@ fun AccessButtons(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(modifier = Modifier.weight(0.33f)) {
-                    StartScreenActionButton(
+                    AuthenticationActionButton(
                         onClick = { navigateToSignUp() },
                         ButtonColors(
                             containerColor = Color(0xFF8490B2),
@@ -107,7 +107,7 @@ fun AccessButtons(
                     )
                 }
                 Row(modifier = Modifier.weight(0.33f)) {
-                    StartScreenActionButton(
+                    AuthenticationActionButton(
                         onClick = { navigateToLogin() },
                         ButtonColors(
                             containerColor = Color(0xFF8490B2),
@@ -130,7 +130,7 @@ fun AccessButtons(
 }
 
 @Composable
-fun StartScreenActionButton(onClick: () -> Unit, buttonColors: ButtonColors, text: String) {
+fun AuthenticationActionButton(onClick: () -> Unit, buttonColors: ButtonColors, text: String) {
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
