@@ -1,6 +1,6 @@
 package com.example.client.data.remote.datasource
 
-import com.example.client.data.remote.service.*
+import com.example.client.data.remote.service.GooglePlacesService
 import javax.inject.Inject
 
 class GooglePlacesRemoteDataSource @Inject constructor(private val googlePlacesService: GooglePlacesService) :

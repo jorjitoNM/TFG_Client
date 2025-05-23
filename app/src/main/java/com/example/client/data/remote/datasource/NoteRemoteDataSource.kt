@@ -21,11 +21,12 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
         safeApiCall { noteService.rateNote(id, rating) }
 
 
-    suspend fun orderNote(asc : Boolean) = safeApiCall { noteService.orderNote(asc) }
-    suspend fun deleteNote(idNote:Int)=safeApiCall { noteService.deleteNote(idNote) }
+    suspend fun orderNote(asc: Boolean) = safeApiCall { noteService.orderNote(asc) }
+    suspend fun deleteNote(idNote: Int) = safeApiCall { noteService.deleteNote(idNote) }
 
     suspend fun filterNoteByType(noteType: NoteType) = withContext(
-        Dispatchers.IO) {
+        Dispatchers.IO
+    ) {
         try {
             val response = noteService.filterNoteByType(noteType)
             if (response.isSuccessful) {

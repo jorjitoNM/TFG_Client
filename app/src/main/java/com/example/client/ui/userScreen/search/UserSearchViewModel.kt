@@ -5,14 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.usecases.user.GetAllUserStartsWithTextUseCase
-import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.domain.usecases.user.local.DeleteCachedUserUseCase
 import com.example.client.domain.usecases.user.local.GetCachedUsersUseCase
 import com.example.client.domain.usecases.user.local.InsertCachedUserUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

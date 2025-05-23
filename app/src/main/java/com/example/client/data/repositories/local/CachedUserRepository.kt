@@ -2,7 +2,6 @@ package com.example.client.data.repositories.local
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.local.dao.UserDao
-import com.example.client.data.local.entities.UserEntity
 import com.example.client.data.local.entities.toEntity
 import com.example.client.data.local.entities.toUserDTO
 import com.example.client.data.model.UserDTO

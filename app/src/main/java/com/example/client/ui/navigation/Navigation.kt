@@ -1,5 +1,7 @@
 package com.example.client.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -23,19 +25,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.client.R
+import com.example.client.ui.common.BottomBar
 import com.example.client.ui.common.TopBar
-import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
-
-import com.example.client.ui.common.BottomBar
-import kotlinx.coroutines.launch
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.userScreen.detail.UserScreen
 import com.example.client.ui.userScreen.search.UserSearchScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun Navigation() {

@@ -12,6 +12,12 @@ class SocialRemoteDataSource @Inject constructor(private val socialService: Soci
     suspend fun favNote(id: Int, username: String) =
         safeApiCall { socialService.favNote(id, username) }
 
-    suspend fun likeNote (noteId : Int, userId : UUID)
-            = safeApiCall { socialService.likeNote(noteId,userId) }
+    suspend fun likeNote(noteId: Int, userId: UUID) =
+        safeApiCall { socialService.likeNote(noteId, userId) }
+
+    suspend fun delFavNote(noteId: Int) =
+        safeApiCallNoBody { socialService.deleteSavedNote(noteId) }
+
+    suspend fun delLikeNote(noteId: Int) =
+        safeApiCallNoBody { socialService.deleteLikeNote(noteId) }
 }

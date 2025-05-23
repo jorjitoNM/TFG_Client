@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.client.R
 import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
-import com.example.client.domain.model.google.*
-import com.example.client.domain.usecases.map.*
+import com.example.client.domain.model.google.Location
+import com.example.client.domain.model.google.PlacePhoto
+import com.example.client.domain.model.google.Prediction
+import com.example.client.domain.usecases.map.GetPlaceAutoCompleteUseCase
+import com.example.client.domain.usecases.map.GetPlaceDetailsUseCase
 import com.example.client.domain.usecases.map.local.DeleteCachedLocationUseCase
 import com.example.client.domain.usecases.map.local.GetCachedLocationsUseCase
 import com.example.client.domain.usecases.map.local.InsertCachedLocationUseCase

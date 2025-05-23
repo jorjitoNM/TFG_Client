@@ -1,6 +1,7 @@
 package com.example.client.data.remote.service
 
-import com.example.client.domain.model.google.*
+import com.example.client.domain.model.google.AutocompleteResponse
+import com.example.client.domain.model.google.PlaceDetailsResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
