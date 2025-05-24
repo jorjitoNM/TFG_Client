@@ -1,10 +1,10 @@
-package com.example.client.data.remote
+package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.remote.datasource.NoteRemoteDataSource
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.note.NoteType
-import com.example.musicapprest.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -44,13 +44,6 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    suspend fun favNote(id: Int, username: String) = withContext(dispatcher) {
-        try {
-            noteRemoteDataSource.favNote(id,username)
-        } catch (e: Exception){
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
 
     suspend fun orderNote(asc: Boolean) = withContext(dispatcher) {
         try {
@@ -65,6 +58,15 @@ class NoteRepository @Inject constructor(
         try{
             noteRemoteDataSource.filterNoteByType(noteType)
         }catch (e: Exception){
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+
+    }
+
+    suspend fun deleteNote(idNote: Int) = withContext(dispatcher) {
+        try {
+            noteRemoteDataSource.deleteNote(idNote)
+        } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
