@@ -23,8 +23,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -95,15 +93,17 @@ fun AddNoteContent(
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
-            value = noteState.value.content,
-            onValueChange = {
-                noteState.value = noteState.value.copy(content = it)
-                onEdit(noteState.value)
-            },
-            label = { Text("Contenido") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        noteState.value.content?.let {
+            TextField(
+                value = it,
+                onValueChange = {
+                    noteState.value = noteState.value.copy(content = it)
+                    onEdit(noteState.value)
+                },
+                label = { Text("Contenido") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         DropdownMenuField(
             label = "Privacidad",

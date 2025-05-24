@@ -1,5 +1,7 @@
 package com.example.client.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -23,9 +25,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.client.R
+import com.example.client.ui.addNoteScreen.AddNoteScreen
 import com.example.client.ui.common.BottomBar
 import com.example.client.ui.common.TopBar
-import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.noteMap.list.NoteMapScreen
@@ -114,7 +116,8 @@ fun Navigation() {
                 NoteMapScreen(
                     showSnackbar = { showSnackbar(it) },
                     onNavigateToList = { navController.navigate(MapSearchDestination) },
-                    sharedLocationViewModel = sharedLocationViewModel
+                    sharedLocationViewModel = sharedLocationViewModel,
+                    onAddNoteClick = { navController.navigate(AddNoteDestination) }
                 )
             }
 
@@ -133,6 +136,12 @@ fun Navigation() {
             }
             composable<UserSearchDestination> {
                 UserSearchScreen( showSnackbar = { showSnackbar(it) })
+            }
+
+            composable <AddNoteDestination> {
+                AddNoteScreen(
+                    showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() }
+                )
             }
         }
     }

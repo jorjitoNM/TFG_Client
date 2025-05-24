@@ -3,9 +3,9 @@ package com.example.client.ui.addNoteScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.useCases.AddNota
+import com.example.client.di.IoDispatcher
+import com.example.client.domain.usecases.AddNota
 import com.example.client.ui.common.UiEvent
-import com.example.musicapprest.di.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
