@@ -27,11 +27,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,18 +41,18 @@ import com.example.client.ui.common.UiEvent
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-
 @Composable
 fun AddNoteScreen(
     addNoteViewModel: AddNoteViewModel = hiltViewModel(),
     showSnackbar: (String) -> Unit = {},
     onNavigateBack: () -> Unit,
 ) {
-    val uiState = addNoteViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by addNoteViewModel.uiState.collectAsStateWithLifecycle()
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
+        addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
         if (isGranted) {
             addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
         } else {
@@ -63,28 +61,30 @@ fun AddNoteScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (!uiState.value.hasLocationPermission) {
+        addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
+
+        if (!uiState.hasLocationPermission) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
         }
     }
 
-    LaunchedEffect(uiState.value.aviso) {
-        uiState.value.aviso?.let {
+    LaunchedEffect(uiState.uiEvent) {
+        uiState.uiEvent?.let {
             when (it) {
                 is UiEvent.ShowSnackbar -> {
                     showSnackbar(it.message)
                     addNoteViewModel.handleEvent(AddNoteEvents.UiNoteEventsDone)
                 }
-                is UiEvent.PopBackStack -> {}
+                is UiEvent.PopBackStack -> onNavigateBack()
             }
         }
     }
 
-    if (!uiState.value.isLoading) {
+    if (!uiState.isLoading) {
         AddNoteContent(
-            note = uiState.value.note,
+            note = uiState.note,
             onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
             onSave = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
             onNavigateBack = onNavigateBack
