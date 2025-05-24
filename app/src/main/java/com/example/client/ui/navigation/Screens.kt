@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 
 val appDestinationList = listOf(
-    NormalNoteList,UserSearch,NoteMap,NormalNoteDetail,MapSearch,UserScreen)
+    NormalNoteList,UserSearch,NoteMap,NormalNoteDetail,MapSearch,UserScreen, AddNote)
 
 
 interface AppDestination{
@@ -121,6 +121,18 @@ object UserSearch : AppMainBottomDestination {
     override val onBottomBar: Boolean = true
     override val icon: ImageVector = Icons.Outlined.Search
     override val iconFilled: ImageVector = Icons.Filled.Search
+}
+
+object AddNote: AppDestination {
+    override val route: Any = AddNoteDestination
+    override val title: String = "Añadir Nota"
+    override val isBottomBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = false
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
 }
 
 

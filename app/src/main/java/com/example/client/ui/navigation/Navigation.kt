@@ -1,7 +1,5 @@
 package com.example.client.ui.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -27,6 +25,7 @@ import androidx.navigation.toRoute
 import com.example.client.R
 import com.example.client.ui.common.BottomBar
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.noteMap.list.NoteMapScreen
@@ -78,6 +77,7 @@ fun Navigation() {
         if (screen?.scaffoldState?.fabVisible == true) {
             FloatingActionButton(
                 onClick = {
+                    navController.navigate("addNote") // Navega a AddNoteScreen
                 },
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding16)),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,

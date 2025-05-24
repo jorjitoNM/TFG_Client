@@ -88,8 +88,10 @@ fun NoteMapScreen(
     viewModel: NoteMapViewModel = hiltViewModel(),
     sharedLocationViewModel: SharedLocationViewModel,
     onNavigateToList: () -> Unit,
+    onAddNoteClick: () -> Unit
 
-    ) {
+
+) {
     val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
     val sharedNoteType by sharedLocationViewModel.selectedNoteType.collectAsState()
 
@@ -315,36 +317,36 @@ fun NoteMapScreen(
 
             ) {
                 key(filterKey.intValue) {
-                notesByLocation.forEach { (location, notes) ->
-                    val markerState = rememberMarkerState(position = location)
-                    val note = notes.first()
-                    val noteType = note.type
-                    val isSelected = selectedLocation == location
+                    notesByLocation.forEach { (location, notes) ->
+                        val markerState = rememberMarkerState(position = location)
+                        val note = notes.first()
+                        val noteType = note.type
+                        val isSelected = selectedLocation == location
 
-                    val iconBitmapDescriptor = when {
-                        notes.size > 1 && isSelected ->
-                            BitmapDescriptorFactory.defaultMarker(210f) // Gris aproximado
-                        notes.size > 1 ->
-                            vectorToBitmap(R.drawable.ic_note_multinote, context)
-                        isSelected ->
-                            BitmapDescriptorFactory.defaultMarker(getMarkerColor(noteType))
-                        else ->
-                            vectorToBitmap(getMarkerIconRes(noteType), context)
-                    }
-
-                    Marker(
-                        state = markerState,
-                        icon = iconBitmapDescriptor,
-                        onClick = {
-                            selectedNotes.clear()
-                            selectedNotes.addAll(notes)
-                            selectedLocation = location
-                            scope.launch { bottomSheetState.expand() }
-                            false
+                        val iconBitmapDescriptor = when {
+                            notes.size > 1 && isSelected ->
+                                BitmapDescriptorFactory.defaultMarker(210f) // Gris aproximado
+                            notes.size > 1 ->
+                                vectorToBitmap(R.drawable.ic_note_multinote, context)
+                            isSelected ->
+                                BitmapDescriptorFactory.defaultMarker(getMarkerColor(noteType))
+                            else ->
+                                vectorToBitmap(getMarkerIconRes(noteType), context)
                         }
-                    )
+
+                        Marker(
+                            state = markerState,
+                            icon = iconBitmapDescriptor,
+                            onClick = {
+                                selectedNotes.clear()
+                                selectedNotes.addAll(notes)
+                                selectedLocation = location
+                                scope.launch { bottomSheetState.expand() }
+                                false
+                            }
+                        )
+                    }
                 }
-            }
             }
 
             // Floating search bar on top of everything
@@ -487,6 +489,16 @@ fun NoteMapScreen(
                     modifier = Modifier
                         .align(Alignment.Center)
                 )
+            }
+            FloatingActionButton(
+                onClick = onAddNoteClick,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Añadir Nota")
             }
         }
     }
