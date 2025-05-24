@@ -27,9 +27,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,6 +43,7 @@ import com.example.client.ui.common.UiEvent
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+
 @Composable
 fun AddNoteScreen(
     addNoteViewModel: AddNoteViewModel = hiltViewModel(),
@@ -63,7 +66,19 @@ fun AddNoteScreen(
     LaunchedEffect(Unit) {
         addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
 
-        if (!uiState.hasLocationPermission) {
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
+        } else {
+            showSnackbar("Permiso de ubicación denegado")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!uiState.value.hasLocationPermission) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
@@ -72,6 +87,7 @@ fun AddNoteScreen(
 
     LaunchedEffect(uiState.uiEvent) {
         uiState.uiEvent?.let {
+
             when (it) {
                 is UiEvent.ShowSnackbar -> {
                     showSnackbar(it.message)
@@ -130,6 +146,7 @@ fun AddNoteContent(
         )
 
         Spacer(modifier = Modifier.height(8.dp))
+
         noteState.value.content?.let {
             TextField(
                 value = it,

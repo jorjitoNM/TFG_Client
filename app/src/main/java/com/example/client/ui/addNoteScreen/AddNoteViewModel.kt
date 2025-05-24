@@ -45,6 +45,7 @@ class AddNoteViewModel @Inject constructor(
             }
             is AddNoteEvents.GetCurrentLocation -> getCurrentLocation()
             is AddNoteEvents.CheckLocationPermission -> checkLocationPermission()
+
         }
     }
 
@@ -77,6 +78,27 @@ class AddNoteViewModel @Inject constructor(
                 }
 
                 null -> TODO()
+            }
+        }
+    }
+    private fun getCurrentLocation() {
+        viewModelScope.launch {
+            if (ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    location?.let {
+                        _uiState.update { state ->
+                            state.copy(currentLocation = location)
+                        }
+                    }
+                }
             }
         }
     }
