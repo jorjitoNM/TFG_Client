@@ -6,10 +6,10 @@ import com.example.client.domain.model.note.NoteType
 data class NoteDTO(
     val id: Int = 0,
     val title: String = "",
-    val content: String = "",
+    val content: String? = null,
     val privacy: NotePrivacy = NotePrivacy.PUBLIC,
     val rating: Int = 0,
-    val ownerUsername: String = "",
+    val ownerUsername: String? = null,
     val likes: Int = 0,
     val created: String = "",
     val latitude: Double = 0.0,
@@ -17,4 +17,6 @@ data class NoteDTO(
     val type: NoteType = NoteType.CLASSIC,
     val start: String? = null,
     val end: String? = null,
+    val saved : Boolean = false,
+    val liked : Boolean = false
 )

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
@@ -52,7 +51,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.noteScreen.list.formatDateTime
+import com.example.client.ui.normalNoteScreen.list.formatDateTime
 
 @Composable
 fun NoteDetailScreen(
@@ -89,11 +88,9 @@ fun NoteDetailScreen(
                 onContentChange = { viewModel.handleEvent(NoteDetailEvent.UpdateEditedContent(it)) },
                 onPrivacyChange = { viewModel.handleEvent(NoteDetailEvent.UpdateEditedPrivacy(it)) },
                 onRatingChange = { viewModel.handleEvent(NoteDetailEvent.RateNote(it)) },
-                onEditClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
                 onSaveClick = { viewModel.handleEvent(NoteDetailEvent.UpdateNote) },
                 onCancelClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
                 onBackClick = onNavigateBack,
-                onDeleteClick = { /* Implement if needed */ }
             )
         }
     }
@@ -106,11 +103,9 @@ fun NoteDetailContent(
     onContentChange: (String) -> Unit = {},
     onPrivacyChange: (NotePrivacy) -> Unit = {},
     onRatingChange: (Int) -> Unit = {},
-    onEditClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {}
 ) {
     val note = state.note ?: return
 
@@ -285,29 +280,7 @@ fun NoteDetailContent(
                                 }
                             }
                         }
-                    } else {
-                        Row {
-                            Button(
-                                onClick = onDeleteClick,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError
-                                ),
-                                modifier = Modifier.padding(end = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete",
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Delete")
-                            }
 
-                            Button(onClick = onEditClick) {
-                                Text("Edit")
-                            }
-                        }
                     }
                 }
             }

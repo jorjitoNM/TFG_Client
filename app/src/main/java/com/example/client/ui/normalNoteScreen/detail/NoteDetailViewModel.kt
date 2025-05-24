@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NotePrivacy
-import com.example.client.domain.useCases.GetNoteUseCase
-import com.example.client.domain.useCases.RateNoteUseCase
-import com.example.client.domain.useCases.UpdateNoteUseCase
+import com.example.client.domain.usecases.note.GetNoteUseCase
+import com.example.client.domain.usecases.note.RateNoteUseCase
+import com.example.client.domain.usecases.note.UpdateNoteUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

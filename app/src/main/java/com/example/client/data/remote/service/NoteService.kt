@@ -4,6 +4,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PATCH
@@ -30,12 +31,6 @@ interface NoteService {
         @Query("rating") rating: Int,
     ): Response<NoteDTO>
 
-    @POST("notes/saveds")
-    suspend fun favNote(
-        @Query("noteId") noteId: Int,
-        @Query("username") username: String
-    ): Response<Unit>
-
     @GET("notes/sorted")
     suspend fun orderNote(
         @Query("ascending") asc: Boolean
@@ -46,6 +41,10 @@ interface NoteService {
     suspend fun filterNoteByType(
         @Query("type") noteType: NoteType,
     ): Response<List<NoteDTO>>
+
+    @DELETE("notes/{id}")
+    suspend fun deleteNote(@Path("id") id: Int):Response<Unit>
+
 
     @POST("notes/addNota")
     suspend fun addNote(
