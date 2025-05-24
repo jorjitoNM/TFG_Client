@@ -57,6 +57,12 @@ import com.example.client.ui.common.UiEvent
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+
 @Composable
 fun UserScreen(
     showSnackbar: (String) -> Unit,
@@ -115,6 +121,13 @@ fun UserContent(
     selectedTab: UserTab,
     onTabSelected: (UserTab) -> Unit
 ) {
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        imageUri = uri
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -138,15 +151,26 @@ fun UserContent(
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .clickable { pickImageLauncher.launch("image/*") },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Foto de perfil",
-                        modifier = Modifier.size(110.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    if (imageUri != null) {
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = "Imagen seleccionada",
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.size(110.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
