@@ -50,7 +50,22 @@ fun AddNoteScreen(
     showSnackbar: (String) -> Unit = {},
     onNavigateBack: () -> Unit,
 ) {
-    val uiState = addNoteViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by addNoteViewModel.uiState.collectAsStateWithLifecycle()
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
+        if (isGranted) {
+            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
+        } else {
+            showSnackbar("Permiso de ubicación denegado")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
+
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -70,21 +85,22 @@ fun AddNoteScreen(
         }
     }
 
-    LaunchedEffect(uiState.value.aviso) {
-        uiState.value.aviso?.let {
+    LaunchedEffect(uiState.uiEvent) {
+        uiState.uiEvent?.let {
+
             when (it) {
                 is UiEvent.ShowSnackbar -> {
                     showSnackbar(it.message)
                     addNoteViewModel.handleEvent(AddNoteEvents.UiNoteEventsDone)
                 }
-                is UiEvent.PopBackStack -> {}
+                is UiEvent.PopBackStack -> onNavigateBack()
             }
         }
     }
 
-    if (!uiState.value.isLoading) {
+    if (!uiState.isLoading) {
         AddNoteContent(
-            note = uiState.value.note,
+            note = uiState.note,
             onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
             onSave = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
             onNavigateBack = onNavigateBack
@@ -128,6 +144,9 @@ fun AddNoteContent(
             label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         noteState.value.content?.let {
             TextField(
                 value = it,
@@ -139,6 +158,8 @@ fun AddNoteContent(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+        Spacer(modifier = Modifier.height(8.dp))
+
         DropdownMenuField(
             label = "Privacidad",
             options = NotePrivacy.values().toList(),

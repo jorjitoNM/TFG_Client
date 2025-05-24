@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.model.NoteDTO
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.usecases.AddNota
 import com.example.client.ui.common.UiEvent
@@ -43,6 +44,8 @@ class AddNoteViewModel @Inject constructor(
                 _uiState.update { it.copy(note = event.note) }
             }
             is AddNoteEvents.GetCurrentLocation -> getCurrentLocation()
+            is AddNoteEvents.CheckLocationPermission -> checkLocationPermission()
+
         }
     }
 
@@ -51,6 +54,8 @@ class AddNoteViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             val currentState = _uiState.value
             val currentNote = currentState.note
+            currentNote.latitude = currentState.currentLocation?.latitude ?: 0.0
+            currentNote.longitude = currentState.currentLocation?.longitude ?: 0.0
 
             when (val result = addNota(currentNote, "user1")) {
                 is NetworkResult.Error -> _uiState.update {
@@ -61,14 +66,12 @@ class AddNoteViewModel @Inject constructor(
                 }
 
                 is NetworkResult.Loading -> _uiState.update {
-                    it.copy(
-                        isLoading = true
-                    )
+                    it.copy(isLoading = true)
                 }
 
                 is NetworkResult.Success -> _uiState.update {
                     it.copy(
-                        note = result.data,
+                        note = NoteDTO(), 
                         isLoading = false,
                         uiEvent = UiEvent.ShowSnackbar("Nota añadida correctamente")
                     )
@@ -95,6 +98,59 @@ class AddNoteViewModel @Inject constructor(
                             state.copy(currentLocation = location)
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun checkLocationPermission() {
+        val hasPermission = ActivityCompat.checkSelfPermission(
+            application,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+
+        _uiState.update { it.copy(hasLocationPermission = hasPermission) }
+    }
+
+    private fun getCurrentLocation() {
+        viewModelScope.launch {
+            if (ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+                        _uiState.update { state ->
+                            state.copy(currentLocation = location)
+                        }
+                    } else {
+                        _uiState.update { state ->
+                            state.copy(
+                                uiEvent = UiEvent.ShowSnackbar("No se pudo obtener la ubicación actual")
+                            )
+                        }
+                    }
+                }.addOnFailureListener {
+                    _uiState.update { state ->
+                        state.copy(
+                            uiEvent = UiEvent.ShowSnackbar("Error al obtener la ubicación: ${it.message}")
+                        )
+                    }
+                }
+            } else {
+                _uiState.update { state ->
+                    state.copy(
+                        uiEvent = UiEvent.ShowSnackbar("Permisos de ubicación no otorgados")
+                    )
                 }
             }
         }
