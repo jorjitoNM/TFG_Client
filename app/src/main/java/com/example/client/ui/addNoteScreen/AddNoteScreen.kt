@@ -128,15 +128,17 @@ fun AddNoteContent(
             label = { Text("Título") },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
-            value = noteState.value.content,
-            onValueChange = {
-                noteState.value = noteState.value.copy(content = it)
-                onEdit(noteState.value)
-            },
-            label = { Text("Contenido") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        noteState.value.content?.let {
+            TextField(
+                value = it,
+                onValueChange = {
+                    noteState.value = noteState.value.copy(content = it)
+                    onEdit(noteState.value)
+                },
+                label = { Text("Contenido") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         DropdownMenuField(
             label = "Privacidad",
             options = NotePrivacy.values().toList(),
