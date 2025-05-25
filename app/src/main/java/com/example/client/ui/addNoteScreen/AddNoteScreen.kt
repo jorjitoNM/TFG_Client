@@ -64,18 +64,19 @@ fun AddNoteScreen(
         addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
 
 
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
-        } else {
-            showSnackbar("Permiso de ubicación denegado")
+        val requestPermissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
+            } else {
+                showSnackbar("Permiso de ubicación denegado")
+            }
         }
     }
 
     LaunchedEffect(Unit) {
-        if (!uiState.value.hasLocationPermission) {
+        if (!uiState.hasLocationPermission) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
@@ -90,6 +91,7 @@ fun AddNoteScreen(
                     showSnackbar(it.message)
                     addNoteViewModel.handleEvent(AddNoteEvents.UiNoteEventsDone)
                 }
+
                 is UiEvent.PopBackStack -> onNavigateBack()
             }
         }
@@ -231,7 +233,21 @@ fun <T> DropdownMenuField(
 
 @Preview
 @Composable
-fun AddNoteScreenPreview ()  {
-    AddNoteContent(NoteDTO(1,"asd","asd",NotePrivacy.FOLLOWERS,4,"juan",50,"ayer",1.6,5.6,NoteType.FOOD,null,null),
-        {},{}, {})
+fun AddNoteScreenPreview() {
+    AddNoteContent(NoteDTO(
+        1,
+        "asd",
+        "asd",
+        NotePrivacy.FOLLOWERS,
+        4,
+        "juan",
+        50,
+        "ayer",
+        1.6,
+        5.6,
+        NoteType.FOOD,
+        null,
+        null
+    ),
+        {}, {}, {})
 }
