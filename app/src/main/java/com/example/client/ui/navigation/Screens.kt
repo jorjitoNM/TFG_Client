@@ -16,7 +16,7 @@ import com.example.client.ui.common.Constantes
 
 
 val appDestinationList = listOf(
-    NormalNoteList, NoteMap, NoteSavedList, SignUp, Start,NormalNoteDetail,MapSearch,UserScreen,AddNote)
+    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch)
 
 
 interface AppDestination {

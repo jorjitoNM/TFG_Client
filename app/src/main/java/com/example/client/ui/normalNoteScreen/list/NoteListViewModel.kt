@@ -31,7 +31,6 @@ class NoteListViewModel @Inject constructor(
     private val getNoteSearchUseCase: GetNoteSearchUseCase,
     private val likeNoteUseCase: LikeNoteUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
-    private val likeNoteUseCase: LikeNoteUseCase,
     private val delLikeNoteUseCase: DelLikeNoteUseCase,
     private val delFavNoteUseCase: DelFavNoteUseCase,
 ) : ViewModel() {

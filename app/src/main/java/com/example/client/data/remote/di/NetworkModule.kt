@@ -5,7 +5,6 @@ import com.example.client.BuildConfig
 import com.example.client.data.remote.security.AuthAuthenticator
 import com.example.client.data.remote.security.AuthInterceptor
 import com.example.client.data.remote.service.AuthenticationService
-import com.example.client.data.remote.service.NominatimService
 import com.example.client.data.remote.service.GooglePlacesService
 import com.example.client.data.remote.service.NoteService
 import com.example.client.data.remote.service.SocialService
@@ -21,6 +20,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)

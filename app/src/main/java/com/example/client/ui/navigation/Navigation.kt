@@ -1,5 +1,7 @@
 package com.example.client.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,11 +35,8 @@ import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.registerScreen.SignUpScreen
-import com.example.client.ui.savedNotes.SavedScreen
 import com.example.client.ui.startScreen.StartScreen
 import com.example.client.ui.userScreen.detail.UserScreen
-import com.example.musicapprest.ui.common.BottomBar
-import kotlinx.coroutines.launch
 import com.example.client.ui.userScreen.search.UserSearchScreen
 import kotlinx.coroutines.launch
 
@@ -122,9 +121,6 @@ fun Navigation() {
                     sharedLocationViewModel = sharedLocationViewModel,
                     onAddNoteClick = { navController.navigate(AddNoteDestination) }
                 )
-            }
-            composable<NoteSavedListDestination> {
-                SavedScreen(showSnackbar = { showSnackbar(it) })
             }
             composable<SignUpDestination> {
                 SignUpScreen(navigateToApp = { navController.navigate(NoteMapDestination)}, showSnackbar = { showSnackbar(it)} )
