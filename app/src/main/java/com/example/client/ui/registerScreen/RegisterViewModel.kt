@@ -31,6 +31,7 @@ class RegisterViewModel @Inject constructor(
             is RegisterEvents.UpdateEmail -> updateEmail(event.newEmail)
             is RegisterEvents.UpdateUsername -> updateUsername(event.newUsername)
             is RegisterEvents.UpdatePassword -> updatePassword(event.newPassword)
+            is RegisterEvents.EventDone -> _uiState.update { it.copy(event = null) }
         }
     }
 
@@ -38,7 +39,8 @@ class RegisterViewModel @Inject constructor(
         viewModelScope.launch(dispatcher) {
             when (val result = registerUseCase.invoke(authenticationUser)) {
                 is NetworkResult.Success -> _uiState.value =
-                    _uiState.value.copy(event = UiEvent.ShowSnackbar(stringProvider.getString(R.string.user_registered)))
+                    _uiState.value.copy(event = UiEvent.ShowSnackbar(stringProvider.getString(R.string.user_registered)),
+                        isValidated = true)
 
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(

@@ -8,4 +8,5 @@ sealed interface RegisterEvents {
     data class UpdateEmail (val newEmail : String) : RegisterEvents
     data class UpdateUsername (val newUsername : String) : RegisterEvents
     data class UpdatePassword (val newPassword : String) : RegisterEvents
+    data object EventDone : RegisterEvents
 }

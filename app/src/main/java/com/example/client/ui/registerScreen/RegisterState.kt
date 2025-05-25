@@ -5,6 +5,7 @@ import com.example.client.ui.common.UiEvent
 
 data class RegisterState (
     val credentialsUser : AuthenticationUser = AuthenticationUser(),
+    val isValidated : Boolean = false,
     val event : UiEvent? = null,
     val isLoading : Boolean = false,
 )
