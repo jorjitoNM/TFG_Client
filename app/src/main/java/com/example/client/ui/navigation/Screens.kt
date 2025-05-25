@@ -6,13 +6,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.client.ui.common.Constantes
 
 
 val appDestinationList = listOf(
-    NormalNoteList, NoteMap, NoteSavedList, SignUp, Start,NormalNoteDetail,MapSearch,UserScreen)
+    NormalNoteList, NoteMap, NoteSavedList, SignUp, Start,NormalNoteDetail,MapSearch,UserScreen,AddNote)
 
 
 interface AppDestination {
@@ -26,6 +30,7 @@ interface AppDestination {
 interface AppMainBottomDestination : AppDestination {
     val onBottomBar: Boolean
     val icon: ImageVector
+    val iconFilled: ImageVector
 }
 
 object NormalNoteList : AppMainBottomDestination {
@@ -39,7 +44,8 @@ object NormalNoteList : AppMainBottomDestination {
         )
     override val isTopBarVisible: Boolean = true
     override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Home
+    override val icon: ImageVector = Icons.Outlined.Home
+    override val iconFilled: ImageVector = Icons.Filled.Home
 }
 
 object MapSearch : AppDestination{
@@ -67,19 +73,7 @@ object NormalNoteDetail : AppDestination {
     override val isTopBarVisible: Boolean = true
 }
 
-object NoteSavedList : AppMainBottomDestination {
-    override val route: Any = NoteSavedListDestination
-    override val title: String = "Favoritos"
-    override val isBottomBarVisible: Boolean = true
-    override val scaffoldState: ScaffoldState
-        get() = ScaffoldState(
-            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
-            fabVisible = false
-        )
-    override val isTopBarVisible: Boolean = true
-    override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Star
-}
+
 
 object NoteMap : AppMainBottomDestination {
     override val route: Any = NoteMapDestination
@@ -92,7 +86,8 @@ object NoteMap : AppMainBottomDestination {
         )
     override val isTopBarVisible: Boolean = false
     override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.Place
+    override val icon: ImageVector = Icons.Outlined.Place
+    override val iconFilled: ImageVector = Icons.Filled.Place
 }
 
 object UserScreen : AppMainBottomDestination {
@@ -106,8 +101,37 @@ object UserScreen : AppMainBottomDestination {
         )
     override val isTopBarVisible: Boolean = true
     override val onBottomBar: Boolean = true
-    override val icon: ImageVector = Icons.Filled.AccountCircle
+    override val icon: ImageVector = Icons.Outlined.AccountCircle
+    override val iconFilled: ImageVector = Icons.Filled.AccountCircle
 }
+
+object UserSearch : AppMainBottomDestination {
+    override val route: Any = UserSearchDestination
+    override val title: String = "Búsqueda"
+    override val isBottomBarVisible: Boolean = true
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+    override val onBottomBar: Boolean = true
+    override val icon: ImageVector = Icons.Outlined.Search
+    override val iconFilled: ImageVector = Icons.Filled.Search
+}
+
+object AddNote: AppDestination {
+    override val route: Any = AddNoteDestination
+    override val title: String = "Añadir Nota"
+    override val isBottomBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = false
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+}
+
 
 
 object SignUp : AppDestination {

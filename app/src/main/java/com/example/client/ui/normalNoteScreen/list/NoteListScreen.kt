@@ -19,14 +19,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -98,9 +98,25 @@ fun NoteListScreen(
                     viewModel.handleEvent(NoteListEvent.SelectedNote(noteId))
                 },
                 onFavClick = { noteId ->
-                    viewModel.handleEvent(NoteListEvent.FavNote(noteId))
+                    val note = state.notes.find { it.id == noteId }
+                    note?.let {
+                        if (it.saved) {
+                            viewModel.handleEvent(NoteListEvent.DelFavNote(noteId))
+                        } else {
+                            viewModel.handleEvent(NoteListEvent.FavNote(noteId))
+                        }
+                    }
                 },
-                onLikeClick = { viewModel.handleEvent(NoteListEvent.LikeNote(it)) },
+                onLikeClick = { noteId ->
+                    val note = state.notes.find { it.id == noteId }
+                    note?.let {
+                        if (it.liked) {
+                            viewModel.handleEvent(NoteListEvent.DelLikeNote(noteId))
+                        } else {
+                            viewModel.handleEvent(NoteListEvent.LikeNote(noteId))
+                        }
+                    }
+                },
 
                 isFilterExpanded = isFilterExpanded,
                 onFilterExpandToggle = { isFilterExpanded = !isFilterExpanded }
@@ -501,7 +517,7 @@ fun NoteItem(
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
-                        imageVector = if (note.liked) Icons.Filled.Favorite else Icons.Outlined.Favorite,
+                        imageVector = if (note.liked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
                         contentDescription = "Like",
                         tint = if (note.liked) pinkColor else textColor.copy(alpha = 0.4f),
                         modifier = Modifier.size(28.dp)

@@ -9,10 +9,11 @@ import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.domain.usecases.note.OrderNoteUseCase
+import com.example.client.domain.usecases.social.DelFavNoteUseCase
+import com.example.client.domain.usecases.social.DelLikeNoteUseCase
 import com.example.client.domain.usecases.social.FavNoteUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.noteScreen.list.NoteListState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +31,9 @@ class NoteListViewModel @Inject constructor(
     private val getNoteSearchUseCase: GetNoteSearchUseCase,
     private val likeNoteUseCase: LikeNoteUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    private val likeNoteUseCase: LikeNoteUseCase,
+    private val delLikeNoteUseCase: DelLikeNoteUseCase,
+    private val delFavNoteUseCase: DelFavNoteUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()
@@ -44,6 +48,78 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.OrderByType -> orderByType(event.type)
             is NoteListEvent.LikeNote -> likeNote(event.noteId)
             is NoteListEvent.GetNoteSearch -> searchNote(event.title)
+            is NoteListEvent.DelFavNote -> delSavedNote(event.noteId)
+            is NoteListEvent.DelLikeNote -> delLikedNote(event.noteId)
+        }
+    }
+
+    private fun delSavedNote(noteId: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = delFavNoteUseCase.invoke(noteId)) {
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(result.message),
+                        isLoading = false
+                    )
+                }
+
+                is NetworkResult.Loading -> _uiState.update {
+                    it.copy(
+                        isLoading = true
+                    )
+                }
+
+                is NetworkResult.Success -> _uiState.update {
+                    val updatedNotes = uiState.value.notes.map { note ->
+                        if (note.id == noteId) {
+                            note.copy(saved = false)
+                        } else {
+                            note
+                        }
+                    }
+                    it.copy(
+                        isLoading = false,
+                        notes = updatedNotes
+                    )
+                }
+            }
+        }
+    }
+
+    private fun delLikedNote(noteId: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = delLikeNoteUseCase.invoke(noteId)) {
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(result.message),
+                        isLoading = false
+                    )
+                }
+
+                is NetworkResult.Loading -> _uiState.update {
+                    it.copy(
+                        isLoading = true
+                    )
+                }
+
+                is NetworkResult.Success -> {
+                    val updatedNotes = uiState.value.notes.map { note ->
+                        if (note.id == noteId) {
+                            note.copy(liked = false)
+                        } else {
+                            note
+                        }
+                    }
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            notes = updatedNotes
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -53,7 +129,14 @@ class NoteListViewModel @Inject constructor(
 
             when (val result = likeNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Success -> {
-                    _uiState.update { it.copy( isLoading = false) }
+                    val updatedNotes = uiState.value.notes.map { note ->
+                        if (note.id == noteId) {
+                            note.copy(liked = true)
+                        } else {
+                            note
+                        }
+                    }
+                    _uiState.update { it.copy(isLoading = false, notes = updatedNotes) }
                 }
 
                 is NetworkResult.Error -> {
@@ -119,7 +202,7 @@ class NoteListViewModel @Inject constructor(
         }
     }
 
-    private fun searchNote(title:Any) {
+    private fun searchNote(title: Any) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = getNoteSearchUseCase.invoke(title.toString())) {
@@ -247,8 +330,16 @@ class NoteListViewModel @Inject constructor(
                 }
 
                 is NetworkResult.Success -> _uiState.update {
+                    val updatedNotes = uiState.value.notes.map { note ->
+                        if (note.id == noteId) {
+                            note.copy(saved = true)
+                        } else {
+                            note
+                        }
+                    }
                     it.copy(
-                        isLoading = false
+                        isLoading = false,
+                        notes = updatedNotes
                     )
                 }
             }

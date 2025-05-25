@@ -6,6 +6,7 @@ import com.example.client.data.remote.security.AuthAuthenticator
 import com.example.client.data.remote.security.AuthInterceptor
 import com.example.client.data.remote.service.AuthenticationService
 import com.example.client.data.remote.service.NominatimService
+import com.example.client.data.remote.service.GooglePlacesService
 import com.example.client.data.remote.service.NoteService
 import com.example.client.data.remote.service.SocialService
 import com.example.client.data.remote.service.UserService
@@ -20,7 +21,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Qualifier
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -30,9 +30,11 @@ object NetworkModule {
     @Retention(AnnotationRetention.BINARY)
     annotation class MainRetrofit
 
+
+
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
-    annotation class NominatimRetrofit
+    annotation class GooglePlacesRetrofit
 
     @Provides
     fun provideHTTPLoggingInterceptor(): HttpLoggingInterceptor {
@@ -60,22 +62,16 @@ object NetworkModule {
             .build()
     }
 
+
+
+
     @Provides
-    @NominatimRetrofit
-    fun provideNominatimRetrofit(okHttpClient: OkHttpClient): Retrofit =
+    @GooglePlacesRetrofit
+    fun provideGooglePlacesRetrofit(okHttpClient: OkHttpClient): Retrofit =
         Retrofit.Builder()
-            .baseUrl("https://nominatim.openstreetmap.org/")
+            .baseUrl("https://maps.googleapis.com/maps/api/") // <-- Google Places base URL
             .addConverterFactory(GsonConverterFactory.create())
-            .client(
-                okHttpClient.newBuilder()
-                    .addInterceptor { chain ->
-                        val request = chain.request().newBuilder()
-                            .header("User-Agent", "TFG_Client/1.0 (saavedra.mateo.walter@gmail.com)")
-                            .build()
-                        chain.proceed(request)
-                    }
-                    .build()
-            )
+            .client(okHttpClient)
             .build()
 
 
@@ -83,14 +79,10 @@ object NetworkModule {
     fun provideNoteService(@MainRetrofit retrofit: Retrofit): NoteService =
         retrofit.create(NoteService::class.java)
 
-
     @Provides
     fun provideUserService(@MainRetrofit retrofit: Retrofit): UserService =
         retrofit.create(UserService::class.java)
 
-    @Provides
-    fun provideNominatimService(@NominatimRetrofit retrofit: Retrofit): NominatimService =
-        retrofit.create(NominatimService::class.java)
 
 
     @Provides
@@ -112,5 +104,9 @@ object NetworkModule {
     @Provides
     fun provideAuthAuthenticator(dataStoreRepository: DataStoreRepository, usersService: Lazy<AuthenticationService>): AuthAuthenticator =
         AuthAuthenticator(dataStoreRepository,usersService)
+
+    @Provides
+    fun provideGooglePlacesService(@GooglePlacesRetrofit retrofit: Retrofit): GooglePlacesService =
+        retrofit.create(GooglePlacesService::class.java)
 
 }

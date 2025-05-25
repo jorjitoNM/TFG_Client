@@ -7,11 +7,17 @@ import javax.inject.Inject
 class SocialRemoteDataSource @Inject constructor(private val socialService: SocialService) :
     BaseApiResponse() {
 
-    suspend fun getNotes() = safeApiCall { socialService.getNotes() }
+    suspend fun getSavedNotes() = safeApiCall { socialService.getNotesSaved() }
 
     suspend fun favNote(id: Int, username: String) =
         safeApiCall { socialService.favNote(id, username) }
 
     suspend fun likeNote (noteId : Int) : NetworkResult<Unit>
             = safeApiCall { socialService.likeNote(noteId) }
+
+    suspend fun delFavNote(noteId: Int) =
+        safeApiCallNoBody { socialService.deleteSavedNote(noteId) }
+
+    suspend fun delLikeNote(noteId: Int) =
+        safeApiCallNoBody { socialService.deleteLikeNote(noteId) }
 }
