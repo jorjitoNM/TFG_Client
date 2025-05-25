@@ -63,7 +63,7 @@ class RegisterViewModel @Inject constructor(
     private fun updateEmail(newEmail: String) {
         _uiState.update {
             it.copy(
-                credentialsUser = it.credentialsUser.copy(email = newEmail)
+                authenticationUser = it.authenticationUser.copy(email = newEmail)
             )
         }
     }
@@ -71,7 +71,7 @@ class RegisterViewModel @Inject constructor(
     private fun updateUsername(newUsername: String) {
         _uiState.update {
             it.copy(
-                credentialsUser = it.credentialsUser.copy(username = newUsername)
+                authenticationUser = it.authenticationUser.copy(username = newUsername)
             )
         }
     }
@@ -80,7 +80,7 @@ class RegisterViewModel @Inject constructor(
     private fun updatePassword(newPassword: String) {
         _uiState.update {
             it.copy(
-                credentialsUser = it.credentialsUser.copy(password = newPassword)
+                authenticationUser = it.authenticationUser.copy(password = newPassword)
             )
         }
     }

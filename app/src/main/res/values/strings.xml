@@ -20,4 +20,6 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="register_message">Register free now and start sharing experiences.</string>
+    <string name="login_message">Log in to Nomada</string>
+    <string name="dont_have_account">Don`t have an account yet?</string>
 </resources>

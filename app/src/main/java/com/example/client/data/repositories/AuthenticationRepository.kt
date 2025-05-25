@@ -2,6 +2,7 @@ package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.remote.datasource.AuthenticationDatasource
+import com.example.client.data.remote.security.Token
 import com.example.client.domain.model.user.AuthenticationUser
 import javax.inject.Inject
 
@@ -11,4 +12,7 @@ class AuthenticationRepository @Inject constructor(
 
     suspend fun register (authenticationUser: AuthenticationUser) : NetworkResult<Unit>
     = authenticationDatasource.register(authenticationUser)
+
+    suspend fun login(authenticationUser: AuthenticationUser): NetworkResult<Token> =
+        authenticationDatasource.login(authenticationUser)
 }

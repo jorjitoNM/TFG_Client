@@ -135,7 +135,7 @@ object AddNote: AppDestination {
 
 
 object SignUp : AppDestination {
-    override val route = SignUpDestination
+    override val route = RegisterDestination
     override val title: String = Constantes.LOGIN
     override val isBottomBarVisible: Boolean = false
     override val isTopBarVisible: Boolean = false

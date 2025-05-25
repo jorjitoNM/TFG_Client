@@ -6,4 +6,6 @@ import com.example.client.ui.common.UiEvent
 data class LoginScreenState(
     val authenticationUser: AuthenticationUser = AuthenticationUser(),
     val event : UiEvent? = null,
+    val isValidated : Boolean = false,
+    val isLoading : Boolean = false,
 )

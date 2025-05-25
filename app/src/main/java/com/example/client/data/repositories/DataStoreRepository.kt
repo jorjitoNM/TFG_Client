@@ -12,19 +12,19 @@ import javax.inject.Inject
 class DataStoreRepository @Inject constructor(@ApplicationContext private val context: Context) {
 
 
-    private val LOGIN_TOKEN = stringPreferencesKey("jwt_login")
+    private val ACCESS_TOKEN = stringPreferencesKey("jwt_access")
     private val REFRESH_TOKEN = stringPreferencesKey("jwt_refresh")
 
 
-    fun getLoginToken(): Flow<String?> {
+    fun getAccessToken(): Flow<String?> {
         return context.dataStore.data.map { preferences ->
-            preferences[LOGIN_TOKEN]
+            preferences[ACCESS_TOKEN]
         }
     }
 
-    suspend fun saveLoginToken(token: String) {
+    suspend fun saveAccessToken(token: String) {
         context.dataStore.edit { preferences ->
-            preferences[LOGIN_TOKEN] = token
+            preferences[ACCESS_TOKEN] = token
         }
     }
 

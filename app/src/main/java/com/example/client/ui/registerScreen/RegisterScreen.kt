@@ -39,9 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.R
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.startScreen.AccessButtons
 import com.example.client.ui.startScreen.AuthenticationActionButton
-import com.example.client.ui.startScreen.LogoAndSlogan
 
 @Composable
 fun SignUpScreen (
@@ -67,8 +65,8 @@ fun SignUpScreen (
     }
 
     SignUpScreenContent(
-        authenticationUser = uiState.value.credentialsUser,
-        onSignUpClick = { registerViewModel.handleEvent(RegisterEvents.Register(uiState.value.credentialsUser)) },
+        authenticationUser = uiState.value.authenticationUser,
+        onSignUpClick = { registerViewModel.handleEvent(RegisterEvents.Register(uiState.value.authenticationUser)) },
         onEmailChange = { email -> registerViewModel.handleEvent(RegisterEvents.UpdateEmail(email)) },
         onUsernameChange = { username -> registerViewModel.handleEvent(RegisterEvents.UpdateUsername(username)) },
         onPasswordChange = { password -> registerViewModel.handleEvent(RegisterEvents.UpdatePassword(password)) },
@@ -79,7 +77,7 @@ fun SignUpScreen (
 @Composable
 fun SignUpScreenContent(
     authenticationUser: AuthenticationUser,
-    onSignUpClick: (AuthenticationUser) -> Unit,
+    onSignUpClick: () -> Unit,
     onEmailChange: (String) -> Unit,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -106,7 +104,7 @@ fun SignUpScreenContent(
                 .weight(0.3f)
                 .fillMaxWidth()
         ) {
-            LogoAndRegisterMessage(modifier = Modifier.fillMaxSize())
+            LogoAndMessage(modifier = Modifier.fillMaxSize(), stringResource(R.string.register_message))
         }
         Spacer(modifier = Modifier.weight(0.05f))
         Row(
@@ -129,7 +127,7 @@ fun SignUpScreenContent(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center) {
             AuthenticationActionButton(
-                onClick = { onSignUpClick(authenticationUser) },
+                onClick = { onSignUpClick() },
                 text = stringResource(R.string.register),
                 buttonColors = ButtonColors(
                     containerColor = Color(0xFF8490B2),
@@ -165,7 +163,7 @@ fun SignUpScreenContent(
 }
 
 @Composable
-fun LogoAndRegisterMessage (modifier: Modifier = Modifier) {
+fun LogoAndMessage (modifier: Modifier = Modifier, message : String) {
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
@@ -186,7 +184,7 @@ fun LogoAndRegisterMessage (modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stringResource(R.string.register_message),
+                text = message,
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Medium,
                     color = Color.White.copy(alpha = 0.8f)

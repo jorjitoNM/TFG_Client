@@ -24,7 +24,7 @@ class AuthAuthenticator @Inject constructor(
         return runBlocking {
             val newToken = getNewToken(refreshToken)
             newToken.body()?.let {
-                dataStoreRepository.saveLoginToken(it)
+                dataStoreRepository.saveAccessToken(it)
                 response.request.newBuilder()
                     .header("Authorization", "Bearer $it")
                     .build()
