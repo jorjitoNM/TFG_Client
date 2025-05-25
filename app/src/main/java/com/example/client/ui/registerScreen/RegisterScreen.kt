@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,13 +39,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.R
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.startScreen.AccessButtons
 import com.example.client.ui.startScreen.AuthenticationActionButton
+import com.example.client.ui.startScreen.LogoAndSlogan
 
 @Composable
 fun SignUpScreen (
     registerViewModel: RegisterViewModel = hiltViewModel(),
     navigateToApp: () -> Unit,
     showSnackbar: (String) -> Unit,
+    navigateToLogin: () -> Unit,
 ) {
     val uiState = registerViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -66,10 +71,9 @@ fun SignUpScreen (
         onSignUpClick = { registerViewModel.handleEvent(RegisterEvents.Register(uiState.value.credentialsUser)) },
         onEmailChange = { email -> registerViewModel.handleEvent(RegisterEvents.UpdateEmail(email)) },
         onUsernameChange = { username -> registerViewModel.handleEvent(RegisterEvents.UpdateUsername(username)) },
-        onPasswordChange = { password -> registerViewModel.handleEvent(RegisterEvents.UpdatePassword(password)) }
+        onPasswordChange = { password -> registerViewModel.handleEvent(RegisterEvents.UpdatePassword(password)) },
+        navigateToLogin = navigateToLogin
     )
-
-
 }
 
 @Composable
@@ -79,6 +83,7 @@ fun SignUpScreenContent(
     onEmailChange: (String) -> Unit,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    navigateToLogin: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -96,23 +101,19 @@ fun SignUpScreenContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.weight(0.1f))
-        Image(
-            painter = painterResource(R.drawable.app_logo_v1),
-            modifier = Modifier
-                .weight(0.2f)
-                .fillMaxWidth(),
-            contentScale = ContentScale.Fit,
-            contentDescription = stringResource(R.string.app_logo)
-        )
-        Row(modifier = Modifier.weight(0.1f))  {
-
-        }
-
-        Column(
+        Row(
             modifier = Modifier
                 .weight(0.3f)
+                .fillMaxWidth()
+        ) {
+            LogoAndRegisterMessage(modifier = Modifier.fillMaxSize())
+        }
+        Spacer(modifier = Modifier.weight(0.05f))
+        Row(
+            modifier = Modifier
+                .weight(0.35f)
                 .fillMaxWidth(),
-            verticalArrangement = Arrangement.Center
+            verticalAlignment = Alignment.Top
         ) {
             RegisterFields(
                 modifier = Modifier.fillMaxWidth(),
@@ -122,18 +123,22 @@ fun SignUpScreenContent(
                 authenticationUser = authenticationUser
             )
         }
-
-        AuthenticationActionButton(
-            onClick = { onSignUpClick(authenticationUser) },
-            text = stringResource(R.string.register),
-            buttonColors = ButtonColors(
-                containerColor = Color(0xFF8490B2),
-                contentColor = Color(0xFFE2E8F0),
-                disabledContentColor = Color(0xFFA0AEC0),
-                disabledContainerColor = Color(0xFFCBD5E0)
-            ),
-        )
-
+        Row(modifier = Modifier
+            .weight(0.12f)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center) {
+            AuthenticationActionButton(
+                onClick = { onSignUpClick(authenticationUser) },
+                text = stringResource(R.string.register),
+                buttonColors = ButtonColors(
+                    containerColor = Color(0xFF8490B2),
+                    contentColor = Color(0xFFE2E8F0),
+                    disabledContentColor = Color(0xFFA0AEC0),
+                    disabledContainerColor = Color(0xFFCBD5E0)
+                ),
+            )
+        }
         Row(
             modifier = Modifier
                 .weight(0.08f)
@@ -152,8 +157,41 @@ fun SignUpScreenContent(
                 color = Color(0xFF8490B2),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { /* Handle navigation to login */ },
+                modifier = Modifier.clickable { navigateToLogin() },
                 textDecoration = TextDecoration.Underline
+            )
+    }
+}
+}
+
+@Composable
+fun LogoAndRegisterMessage (modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .weight(0.6f)
+                .fillMaxSize(), horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(R.drawable.app_logo_v1),
+                contentDescription = stringResource(R.string.app_logo)
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .weight(0.4f)
+                .fillMaxSize(),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.register_message),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White.copy(alpha = 0.8f)
+                ),
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -175,6 +213,7 @@ fun RegisterFields(
             value = authenticationUser.username,
             onValueChange = onUsernameChange,
             modifier = Modifier.fillMaxWidth(),
+            label = { Text(text = stringResource(R.string.username), color = Color(0xFF8490B2)) },
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
@@ -184,17 +223,20 @@ fun RegisterFields(
                 focusedIndicatorColor = Color.White,
                 unfocusedIndicatorColor = Color(0xFF8490B2),
                 focusedPlaceholderColor = Color(0xFF8490B2),
-                unfocusedPlaceholderColor = Color(0xFF8490B2)
+                unfocusedPlaceholderColor = Color(0xFF8490B2),
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color(0xFF8490B2)
             ),
-            placeholder = { stringResource(R.string.username) },
+            placeholder = { Text(stringResource(R.string.username), color = Color(0xFF8490B2)) },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         )
 
         OutlinedTextField(
             value = authenticationUser.email,
             onValueChange = onEmailChange,
             modifier = Modifier.fillMaxWidth(),
+            label = { Text(text = stringResource(R.string.email), color = Color(0xFF8490B2)) },
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
@@ -204,9 +246,11 @@ fun RegisterFields(
                 focusedIndicatorColor = Color.White,
                 unfocusedIndicatorColor = Color(0xFF8490B2),
                 focusedPlaceholderColor = Color(0xFF8490B2),
-                unfocusedPlaceholderColor = Color(0xFF8490B2)
+                unfocusedPlaceholderColor = Color(0xFF8490B2),
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color(0xFF8490B2)
             ),
-            placeholder = { stringResource(R.string.email) },
+            placeholder = { Text(stringResource(R.string.email), color = Color(0xFF8490B2)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
@@ -218,6 +262,7 @@ fun RegisterFields(
             value = authenticationUser.password,
             onValueChange = onPasswordChange,
             modifier = Modifier.fillMaxWidth(),
+            label = { Text(text = stringResource(R.string.password), color = Color(0xFF8490B2)) },
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
@@ -227,9 +272,11 @@ fun RegisterFields(
                 focusedIndicatorColor = Color.White,
                 unfocusedIndicatorColor = Color(0xFF8490B2),
                 focusedPlaceholderColor = Color(0xFF8490B2),
-                unfocusedPlaceholderColor = Color(0xFF8490B2)
+                unfocusedPlaceholderColor = Color(0xFF8490B2),
+                focusedLabelColor = Color.White,
+                unfocusedLabelColor = Color(0xFF8490B2)
             ),
-            placeholder = { stringResource(R.string.password) },
+            placeholder = { Text(stringResource(R.string.password), color = Color(0xFF8490B2)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -244,5 +291,5 @@ fun RegisterFields(
 @Preview
 @Composable
 fun SignUpScreenPreview () {
-    SignUpScreenContent(AuthenticationUser(),{},{},{},{})
+    SignUpScreenContent(AuthenticationUser(),{},{},{},{},{})
 }

@@ -62,17 +62,6 @@ fun AddNoteScreen(
 
     LaunchedEffect(Unit) {
         addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
-
-
-        val requestPermissionLauncher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            if (isGranted) {
-                addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
-            } else {
-                showSnackbar("Permiso de ubicación denegado")
-            }
-        }
     }
 
     LaunchedEffect(Unit) {

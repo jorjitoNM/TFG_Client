@@ -9,6 +9,7 @@ import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.user.RegisterUseCase
 import com.example.client.ui.common.UiEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
     private val stringProvider: StringProvider,

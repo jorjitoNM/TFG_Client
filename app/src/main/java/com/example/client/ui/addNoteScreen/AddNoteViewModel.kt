@@ -81,27 +81,6 @@ class AddNoteViewModel @Inject constructor(
             }
         }
     }
-    private fun getCurrentLocation() {
-        viewModelScope.launch {
-            if (ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    location?.let {
-                        _uiState.update { state ->
-                            state.copy(currentLocation = location)
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     private fun checkLocationPermission() {
         val hasPermission = ActivityCompat.checkSelfPermission(

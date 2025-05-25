@@ -1,5 +1,6 @@
 package com.example.client.ui.startScreen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -102,15 +104,6 @@ fun AccessButtons(
                     )
                 }
                 Row(modifier = Modifier.weight(0.33f)) {
-                    ContinueWithGoogleButton(onClick = {}, ButtonColors(
-                        containerColor = Color(0xFF8490B2),
-                        contentColor = Color(0xFFE2E8F0),
-                        disabledContentColor = Color(0xFFA0AEC0),
-                        disabledContainerColor = Color(0xFFCBD5E0)
-                    ), stringResource(R.string.continue_with_google)
-                    )
-                }
-                Row(modifier = Modifier.weight(0.33f)) {
                     AuthenticationActionButton(
                         onClick = { navigateToLogin() },
                         ButtonColors(
@@ -122,7 +115,15 @@ fun AccessButtons(
                         stringResource(R.string.login)
                     )
                 }
-
+                Row(modifier = Modifier.weight(0.33f)) {
+                    ContinueWithGoogleButton(onClick = {}, ButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color(0xFFE2E8F0),
+                        disabledContentColor = Color(0xFFA0AEC0),
+                        disabledContainerColor = Color(0xFFCBD5E0)
+                    ), stringResource(R.string.continue_with_google)
+                    )
+                }
             }
             Column(
                 modifier = Modifier
@@ -144,19 +145,22 @@ fun  AuthenticationActionButton(onClick: () -> Unit, buttonColors: ButtonColors,
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContinueWithGoogleButton (onClick: () -> Unit, buttonColors: ButtonColors, text: String) {
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        colors = buttonColors
+        colors = buttonColors,
+        border = BorderStroke(1.dp, Color(0xFF8490B2))
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Icon(
                 painter = painterResource(R.drawable.google_logo),
                 contentDescription = stringResource(R.string.google_logo),
                 modifier = Modifier
-                    .align(Alignment.CenterStart)
+                    .align(Alignment.CenterStart),
+                tint = null
             )
             Text(
                 text = text,
@@ -190,7 +194,7 @@ fun LogoAndSlogan(modifier: Modifier = Modifier) {
                 text = stringResource(R.string.app_real_name),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = Color.White
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -200,14 +204,14 @@ fun LogoAndSlogan(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .weight(0.2f)
                 .fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = stringResource(R.string.app_slogan),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.8f)
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )

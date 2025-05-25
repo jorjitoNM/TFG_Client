@@ -30,8 +30,6 @@ object NetworkModule {
     @Retention(AnnotationRetention.BINARY)
     annotation class MainRetrofit
 
-
-
     @Qualifier
     @Retention(AnnotationRetention.BINARY)
     annotation class GooglePlacesRetrofit
@@ -63,8 +61,6 @@ object NetworkModule {
     }
 
 
-
-
     @Provides
     @GooglePlacesRetrofit
     fun provideGooglePlacesRetrofit(okHttpClient: OkHttpClient): Retrofit =
@@ -84,14 +80,13 @@ object NetworkModule {
         retrofit.create(UserService::class.java)
 
 
-
     @Provides
     fun provideSocialService(@MainRetrofit retrofit: Retrofit): SocialService =
         retrofit.create(SocialService::class.java)
 
 
     @Provides
-    fun provideAuthenticationService(retrofit: Retrofit): AuthenticationService =
+    fun provideAuthenticationService(@MainRetrofit retrofit: Retrofit): AuthenticationService =
         retrofit.create(AuthenticationService::class.java)
 
 

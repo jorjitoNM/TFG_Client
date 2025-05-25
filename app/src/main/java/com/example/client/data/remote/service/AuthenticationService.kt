@@ -1,6 +1,5 @@
 package com.example.client.data.remote.service
 
-import androidx.room.Dao
 import com.example.client.data.remote.security.Token
 import com.example.client.domain.model.user.AuthenticationUser
 import retrofit2.Response
@@ -9,7 +8,6 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 
-@Dao
 interface AuthenticationService {
 
     @POST("login")
