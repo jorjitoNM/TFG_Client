@@ -1,6 +1,8 @@
 package com.example.client.ui.addNoteScreen
 
-import android.annotation.SuppressLint
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,11 +29,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,9 +41,6 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 
 @Composable
 fun AddNoteScreen(
@@ -65,20 +63,10 @@ fun AddNoteScreen(
 
     LaunchedEffect(Unit) {
         addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
-
-
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
-        } else {
-            showSnackbar("Permiso de ubicación denegado")
-        }
     }
 
     LaunchedEffect(Unit) {
-        if (!uiState.value.hasLocationPermission) {
+        if (!uiState.hasLocationPermission) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
             addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
@@ -93,6 +81,7 @@ fun AddNoteScreen(
                     showSnackbar(it.message)
                     addNoteViewModel.handleEvent(AddNoteEvents.UiNoteEventsDone)
                 }
+
                 is UiEvent.PopBackStack -> onNavigateBack()
             }
         }
@@ -162,7 +151,7 @@ fun AddNoteContent(
 
         DropdownMenuField(
             label = "Privacidad",
-            options = NotePrivacy.values().toList(),
+            options = NotePrivacy.entries,
             selectedOption = noteState.value.privacy,
             onOptionSelected = {
                 noteState.value = noteState.value.copy(privacy = it)
@@ -232,9 +221,24 @@ fun <T> DropdownMenuField(
     }
 }
 
-@Preview
+
 @Composable
-fun AddNoteScreenPreview ()  {
-    AddNoteContent(NoteDTO(1,"asd","asd",NotePrivacy.FOLLOWERS,4,"juan",50,"ayer",1.6,5.6,NoteType.FOOD,null,null),
-        {},{}, {})
+@Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
+fun AddNoteScreenPreview() {
+    AddNoteContent(NoteDTO(
+        1,
+        "asd",
+        "asd",
+        NotePrivacy.FOLLOWERS,
+        4,
+        "juan",
+        50,
+        "ayer",
+        1.6,
+        5.6,
+        NoteType.EVENT,
+        "212",
+        "null"
+    ),
+        {}, {}, {})
 }
