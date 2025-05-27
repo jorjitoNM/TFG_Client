@@ -42,7 +42,7 @@ class RegisterViewModel @Inject constructor(
             when (val result = registerUseCase.invoke(authenticationUser)) {
                 is NetworkResult.Success -> _uiState.value =
                     _uiState.value.copy(event = UiEvent.ShowSnackbar(stringProvider.getString(R.string.user_registered)),
-                        isValidated = true)
+                        isRegistered = true)
 
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(

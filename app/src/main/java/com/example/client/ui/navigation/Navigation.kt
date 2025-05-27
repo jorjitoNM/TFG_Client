@@ -123,8 +123,7 @@ fun Navigation() {
                 )
             }
             composable<RegisterDestination> {
-                SignUpScreen(navigateToApp = { navController.navigate(NoteMapDestination)},
-                    showSnackbar = { showSnackbar(it)},
+                SignUpScreen(showSnackbar = { showSnackbar(it)},
                     navigateToLogin =  { navController.navigate(LoginDestination) },
                     onNavigateBack = { navController.popBackStack() })
             }
@@ -139,7 +138,6 @@ fun Navigation() {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-
             composable<MapSearchDestination> {
                 MapSearchScreen(
                     onNavigateBack = { navController.navigateUp() },
