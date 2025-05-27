@@ -1,4 +1,4 @@
-package com.example.client.domain.usecases.note
+package com.example.client.domain.useCases.note
 
 import com.example.client.data.repositories.UserRepository
 import javax.inject.Inject

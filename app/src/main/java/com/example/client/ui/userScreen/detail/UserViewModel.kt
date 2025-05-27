@@ -3,7 +3,7 @@ package com.example.client.ui.userScreen.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.usecases.note.GetMyNoteUseCase
+import com.example.client.domain.useCases.note.GetMyNoteUseCase
 import com.example.client.domain.usecases.social.DelFavNoteUseCase
 import com.example.client.domain.usecases.social.DelLikeNoteUseCase
 import com.example.client.domain.usecases.social.FavNoteUseCase
