@@ -12,7 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -47,6 +52,7 @@ fun SignUpScreen (
     navigateToApp: () -> Unit,
     showSnackbar: (String) -> Unit,
     navigateToLogin: () -> Unit,
+    onNavigateBack : () -> Unit,
 ) {
     val uiState = registerViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -70,7 +76,8 @@ fun SignUpScreen (
         onEmailChange = { email -> registerViewModel.handleEvent(RegisterEvents.UpdateEmail(email)) },
         onUsernameChange = { username -> registerViewModel.handleEvent(RegisterEvents.UpdateUsername(username)) },
         onPasswordChange = { password -> registerViewModel.handleEvent(RegisterEvents.UpdatePassword(password)) },
-        navigateToLogin = navigateToLogin
+        navigateToLogin = navigateToLogin,
+        onNavigateBack = onNavigateBack,
     )
 }
 
@@ -82,8 +89,16 @@ fun SignUpScreenContent(
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     navigateToLogin: () -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
+        IconButton(onClick = {onNavigateBack()}) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.navigate_back),
+                tint = Color.White
+            )
+        }
         Image(
             painter = painterResource(R.drawable.start_screen_background_big),
             contentScale = ContentScale.FillHeight,
@@ -289,5 +304,5 @@ fun RegisterFields(
 @Preview
 @Composable
 fun SignUpScreenPreview () {
-    SignUpScreenContent(AuthenticationUser(),{},{},{},{},{})
+    SignUpScreenContent(AuthenticationUser(),{},{},{},{},{},{})
 }

@@ -22,7 +22,10 @@ val appDestinationList = listOf(
 interface AppDestination {
     val route: Any
     val title: String
-    val scaffoldState: ScaffoldState
+    val scaffoldState: ScaffoldState get() = ScaffoldState(
+        topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+        fabVisible = false
+    )
     val isBottomBarVisible: Boolean
     val isTopBarVisible: Boolean
 }
@@ -139,19 +142,11 @@ object SignUp : AppDestination {
     override val title: String = Constantes.LOGIN
     override val isBottomBarVisible: Boolean = false
     override val isTopBarVisible: Boolean = false
-    override val scaffoldState = ScaffoldState(
-        topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
-        fabVisible = false,
-    )
 }
 
 object Start : AppDestination {
     override val route = StartDestination
     override val title: String = Constantes.START
-    override val scaffoldState: ScaffoldState = ScaffoldState(
-        topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
-        fabVisible = false,
-    )
     override val isBottomBarVisible: Boolean = false
     override val isTopBarVisible: Boolean = false
 }
@@ -159,10 +154,6 @@ object Start : AppDestination {
 object Login : AppDestination {
     override val route = LoginDestination
     override val title: String = Constantes.LOGIN
-    override val scaffoldState: ScaffoldState = ScaffoldState(
-        topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
-        fabVisible = false,
-    )
     override val isBottomBarVisible: Boolean = false
     override val isTopBarVisible: Boolean = false
 }

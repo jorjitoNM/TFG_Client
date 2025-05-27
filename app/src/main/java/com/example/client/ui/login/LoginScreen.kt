@@ -12,7 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -46,6 +50,7 @@ fun LoginScreen (
     showSnackbar: (String) -> Unit,
     navigateToApp : () -> Unit,
     navigateToRegister : () -> Unit,
+    onNavigateBack : () -> Unit,
 ) {
     val uiState = loginScreenViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -65,10 +70,11 @@ fun LoginScreen (
 
     LoginScreenContent(
         authenticationUser = uiState.value.authenticationUser,
-        onEmailChange = { email -> loginScreenViewModel.handleEvent(LoginScreenEvents.UpdateEmail(email)) },
+        onUsernameChange = { username -> loginScreenViewModel.handleEvent(LoginScreenEvents.UpdateUsername(username)) },
         onPasswordChange = { password -> loginScreenViewModel.handleEvent(LoginScreenEvents.UpdatePassword(password)) },
         navigateToRegister = navigateToRegister,
-        onLoginClick = { loginScreenViewModel.handleEvent(LoginScreenEvents.Login(uiState.value.authenticationUser))}
+        onLoginClick = { loginScreenViewModel.handleEvent(LoginScreenEvents.Login(uiState.value.authenticationUser))},
+        onNavigateBack = onNavigateBack,
     )
 
 }
@@ -76,13 +82,21 @@ fun LoginScreen (
 @Composable
 fun LoginScreenContent (
     authenticationUser: AuthenticationUser,
-    onEmailChange: (String) -> Unit,
+    onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     navigateToRegister : () -> Unit,
     onLoginClick: () -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
+        IconButton(onClick = {onNavigateBack()}) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.navigate_back),
+                tint = Color.White
+            )
+        }
         Image(
             painter = painterResource(R.drawable.start_screen_background_big),
             contentScale = ContentScale.FillHeight,
@@ -114,7 +128,7 @@ fun LoginScreenContent (
         ) {
             LoginFields(
                 modifier = Modifier.fillMaxWidth(),
-                onEmailChange = onEmailChange,
+                onUsernameChange = onUsernameChange,
                 onPasswordChange = onPasswordChange,
                 authenticationUser = authenticationUser
             )
@@ -163,7 +177,7 @@ fun LoginScreenContent (
 @Composable
 fun LoginFields(
     modifier: Modifier,
-    onEmailChange: (String) -> Unit,
+    onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     authenticationUser: AuthenticationUser
 ) {
@@ -173,9 +187,9 @@ fun LoginFields(
     ) {
         OutlinedTextField(
             value = authenticationUser.email,
-            onValueChange = onEmailChange,
+            onValueChange = onUsernameChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(text = stringResource(R.string.email), color = Color(0xFF8490B2)) },
+            label = { Text(text = stringResource(R.string.username), color = Color(0xFF8490B2)) },
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
@@ -189,12 +203,9 @@ fun LoginFields(
                 focusedLabelColor = Color.White,
                 unfocusedLabelColor = Color(0xFF8490B2)
             ),
-            placeholder = { Text(stringResource(R.string.email), color = Color(0xFF8490B2)) },
+            placeholder = { Text(stringResource(R.string.username), color = Color(0xFF8490B2)) },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next
-            )
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         )
 
         OutlinedTextField(
@@ -229,5 +240,5 @@ fun LoginFields(
 @Preview
 @Composable
 fun LoginScreenPreview () {
-    LoginScreenContent(AuthenticationUser(),{},{},{},{})
+    LoginScreenContent(AuthenticationUser(),{},{},{},{},{})
 }

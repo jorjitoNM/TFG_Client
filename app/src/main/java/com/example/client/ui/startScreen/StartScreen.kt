@@ -220,6 +220,7 @@ fun LogoAndSlogan(modifier: Modifier = Modifier) {
 }
 
 @Preview
+
 @Composable
 fun StartScreenPreview() {
     StartScreen(navigateToLogin = {}, navigateToSignUp = {})

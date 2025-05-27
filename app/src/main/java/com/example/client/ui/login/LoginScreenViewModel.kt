@@ -8,6 +8,7 @@ import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.authentication.SaveTokenUseCase
 import com.example.client.domain.usecases.user.LoginUseCase
 import com.example.client.ui.common.UiEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class LoginScreenViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
@@ -27,7 +29,7 @@ class LoginScreenViewModel @Inject constructor(
     fun handleEvent (event : LoginScreenEvents) {
         when (event) {
             is LoginScreenEvents.Login -> login(event.authenticationUser)
-            is LoginScreenEvents.UpdateEmail -> updateEmail(event.newEmail)
+            is LoginScreenEvents.UpdateUsername -> updateUsername(event.newUsername)
             is LoginScreenEvents.UpdatePassword -> updatePassword(event.newPassword)
             is LoginScreenEvents.EventDone -> _uiState.update { it.copy(event = null) }
         }
@@ -61,10 +63,10 @@ class LoginScreenViewModel @Inject constructor(
         }
     }
 
-    private fun updateEmail(newEmail: String) {
+    private fun updateUsername(newUsername: String) {
         _uiState.update {
             it.copy(
-                authenticationUser = it.authenticationUser.copy(email = newEmail)
+                authenticationUser = it.authenticationUser.copy(username = newUsername)
             )
         }
     }
