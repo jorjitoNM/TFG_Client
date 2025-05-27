@@ -3,8 +3,8 @@ package com.example.client.data.repositories
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.remote.datasource.NoteRemoteDataSource
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.note.NoteType
-import com.example.musicapprest.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -14,17 +14,16 @@ class NoteRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
     suspend fun getNotes() = withContext(dispatcher) {
-        try {
+        try{
             noteRemoteDataSource.getNotes()
-        } catch (e: Exception) {
+        } catch (e:Exception){
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
-
     suspend fun getNote(id: Int) = withContext(dispatcher) {
-        try {
+        try{
             noteRemoteDataSource.getNote(id)
-        } catch (e: Exception) {
+        } catch (e:Exception){
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
@@ -55,14 +54,6 @@ class NoteRepository @Inject constructor(
 
     }
 
-    suspend fun favNote(id: Int, username: String) = withContext(dispatcher) {
-        try {
-            noteRemoteDataSource.favNote(id,username)
-        } catch (e: Exception){
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
-
     suspend fun filterNoteByType(noteType: NoteType)= withContext(dispatcher){
         try{
             noteRemoteDataSource.filterNoteByType(noteType)
@@ -75,6 +66,14 @@ class NoteRepository @Inject constructor(
     suspend fun deleteNote(idNote: Int) = withContext(dispatcher) {
         try {
             noteRemoteDataSource.deleteNote(idNote)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun addNote(note: NoteDTO, username: String) = withContext(dispatcher) {
+        try {
+            noteRemoteDataSource.addNote(note,username)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }

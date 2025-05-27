@@ -12,10 +12,12 @@ data class NoteDTO(
     val ownerUsername: String? = null,
     val likes: Int = 0,
     val created: String = "",
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
+    var latitude: Double = 0.0,
+    var longitude: Double = 0.0,
     val type: NoteType = NoteType.CLASSIC,
     val start: String? = null,
-    val end: String? = null,
     val photos : List<String> = emptyList()
+    val end: String? = null,
+    val saved : Boolean = false,
+    val liked : Boolean = false
 )

@@ -2,6 +2,6 @@ package com.example.client.ui.common
 
 
 object Constantes {
-    //Firestore
-    const val NOTE_IMAGES_COLLECTION = "note_images"
+    const val APP_DB = "app_db"
+    const val DB_ASSETS = "database/database.db"
 }

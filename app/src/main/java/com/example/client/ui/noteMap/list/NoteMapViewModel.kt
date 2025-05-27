@@ -1,16 +1,19 @@
 package com.example.client.ui.noteMap.list
 
-import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.domain.model.note.NoteType
+import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
+import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteMapViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
+    private val getNoteSearchUseCase: GetNoteSearchUseCase,
+    private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
     private val application: Application
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteMapState())
@@ -36,67 +41,151 @@ class NoteMapViewModel @Inject constructor(
             is NoteMapEvent.AvisoVisto -> avisoVisto()
             is NoteMapEvent.GetCurrentLocation -> getCurrentLocation()
             is NoteMapEvent.CheckLocationPermission -> checkLocationPermission()
+            is NoteMapEvent.SearchNote -> searchNote(event.query)
+            is NoteMapEvent.SaveCameraPosition -> saveCameraPosition(event.latLng, event.zoom)
+            is NoteMapEvent.UpdateSelectedType -> updateSelectedType(event.noteType)
+            is NoteMapEvent.UpdateSearchText -> updateSearchText(event.text)
+            is NoteMapEvent.FilterByType -> filterByType(event.noteType)
+            is NoteMapEvent.NavigateToSearch -> {
+                _uiState.update { it.copy(aviso = UiEvent.PopBackStack) }
+            }
 
         }
     }
 
-    private fun getNotes() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-
-            when (val result = getNotesUseCase()) {
-                is NetworkResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            notes = result.data,
-                            isLoading = false
-                        )
+    private fun filterByType(noteType: NoteType?) {
+        _uiState.update { it.copy(isLoading = true) }
+        if (noteType == null) {
+            viewModelScope.launch {
+                when (val result = getNotesUseCase()) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                notes = result.data,
+                                selectedType = null,
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Loading -> {
+                        _uiState.update { it.copy(isLoading = true) }
                     }
                 }
-
-                is NetworkResult.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            aviso = UiEvent.ShowSnackbar(result.message),
-                            isLoading = false
-                        )
+            }
+        } else {
+            viewModelScope.launch {
+                when (val result = orderNoteByTypUseCase(noteType)) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(notes = result.data, selectedType = noteType, isLoading = false)
+                        }
                     }
-                }
-
-                is NetworkResult.Loading -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true
-                        )
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is NetworkResult.Loading -> {
+                        _uiState.update { it.copy(isLoading = true) }
                     }
                 }
             }
         }
     }
 
+
+
+
+
+
+    private fun updateSearchText(text: String) {
+        _uiState.update { it.copy(currentSearch = text) }
+    }
+
+    private fun updateSelectedType(noteType: NoteType?) {
+        _uiState.update { it.copy(selectedType = noteType) }
+    }
+
+    private fun saveCameraPosition(latLng: LatLng, zoom: Float) {
+        _uiState.update { it.copy(cameraLatLng = latLng, cameraZoom = zoom) }
+    }
+
+    private fun searchNote(query: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = getNoteSearchUseCase(query)) {
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(notes = result.data, isLoading = false)
+                    }
+                }
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"),
+                            isLoading = false
+                        )
+                    }
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+    }
+
+    private fun getNotes() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = getNotesUseCase()) {
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(notes = result.data, isLoading = false)
+                    }
+                }
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message ?: "Unknown error"),
+                            isLoading = false
+                        )
+                    }
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+    }
+
     private fun checkLocationPermission() {
-        val hasPermission = ActivityCompat.checkSelfPermission(
-            application,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+        val hasPermission =
+            ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                    PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                    PackageManager.PERMISSION_GRANTED
 
         _uiState.update { it.copy(hasLocationPermission = hasPermission) }
     }
 
     private fun getCurrentLocation() {
         viewModelScope.launch {
-            if (ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+            if (
+                ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
             ) {
                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                     location?.let {

@@ -7,4 +7,6 @@
     <string name="error_uploading_images">We could not save your image correctly, please, try again</string>
     <string name="fb_storage_images_url">note_images</string>
     <string name="load_image">Load images</string>
+    <string name="error_loading_user">User not found</string>
+    <string name="google_maps_key">AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ</string>
 </resources>
