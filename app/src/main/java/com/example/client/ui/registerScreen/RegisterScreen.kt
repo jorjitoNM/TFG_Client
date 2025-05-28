@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,7 +48,6 @@ import com.example.client.ui.startScreen.AuthenticationActionButton
 @Composable
 fun SignUpScreen (
     registerViewModel: RegisterViewModel = hiltViewModel(),
-    navigateToApp: () -> Unit,
     showSnackbar: (String) -> Unit,
     navigateToLogin: () -> Unit,
     onNavigateBack : () -> Unit,
@@ -65,9 +63,9 @@ fun SignUpScreen (
         }
     }
 
-    LaunchedEffect(uiState.value.isValidated) {
-        if (uiState.value.isValidated)
-            navigateToApp()
+    LaunchedEffect(uiState.value.isRegistered) {
+        if (uiState.value.isRegistered)
+            navigateToLogin()
     }
 
     SignUpScreenContent(
@@ -92,19 +90,18 @@ fun SignUpScreenContent(
     onNavigateBack: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        IconButton(onClick = {onNavigateBack()}) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.navigate_back),
-                tint = Color.White
-            )
-        }
         Image(
             painter = painterResource(R.drawable.start_screen_background_big),
             contentScale = ContentScale.FillHeight,
             contentDescription = stringResource(R.string.start_Screen_background),
             modifier = Modifier.fillMaxSize()
         )
+        IconButton(onClick = {onNavigateBack()}, modifier = Modifier.padding(16.dp)) {            Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = stringResource(R.string.navigate_back),
+            tint = Color.White
+        )
+        }
     }
 
     Column(

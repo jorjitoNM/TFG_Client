@@ -90,19 +90,18 @@ fun LoginScreenContent (
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
-        IconButton(onClick = {onNavigateBack()}) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(R.string.navigate_back),
-                tint = Color.White
-            )
-        }
         Image(
             painter = painterResource(R.drawable.start_screen_background_big),
             contentScale = ContentScale.FillHeight,
             contentDescription = stringResource(R.string.start_Screen_background),
             modifier = Modifier.fillMaxSize()
         )
+        IconButton(onClick = {onNavigateBack()}, modifier = Modifier.padding(16.dp)) {            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.navigate_back),
+                tint = Color.White
+            )
+        }
     }
 
     Column(
@@ -186,7 +185,7 @@ fun LoginFields(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         OutlinedTextField(
-            value = authenticationUser.email,
+            value = authenticationUser.username,
             onValueChange = onUsernameChange,
             modifier = Modifier.fillMaxWidth(),
             label = { Text(text = stringResource(R.string.username), color = Color(0xFF8490B2)) },
