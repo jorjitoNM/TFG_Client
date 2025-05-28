@@ -21,6 +21,11 @@ object UserSearchDestination
 @Serializable
 object AddNoteDestination
 
+@Serializable
+object RegisterDestination
 
+@Serializable
+object StartDestination
 
-
+@Serializable
+object LoginDestination

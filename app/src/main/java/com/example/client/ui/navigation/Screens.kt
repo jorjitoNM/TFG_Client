@@ -12,22 +12,22 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.client.ui.common.Constantes
 
 
 val appDestinationList = listOf(
-    NormalNoteList,UserSearch,NoteMap,NormalNoteDetail,MapSearch,UserScreen, AddNote)
+    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch)
 
 
-interface AppDestination{
+interface AppDestination {
     val route: Any
     val title: String
-    val scaffoldState: ScaffoldState
-        get() = ScaffoldState(
-            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
-            fabVisible = true
-        )
-    val isBottomBarVisible : Boolean
-    val isTopBarVisible : Boolean
+    val scaffoldState: ScaffoldState get() = ScaffoldState(
+        topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+        fabVisible = false
+    )
+    val isBottomBarVisible: Boolean
+    val isTopBarVisible: Boolean
 }
 
 interface AppMainBottomDestination : AppDestination {
@@ -137,3 +137,23 @@ object AddNote: AppDestination {
 
 
 
+object SignUp : AppDestination {
+    override val route = RegisterDestination
+    override val title: String = Constantes.LOGIN
+    override val isBottomBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = false
+}
+
+object Start : AppDestination {
+    override val route = StartDestination
+    override val title: String = Constantes.START
+    override val isBottomBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = false
+}
+
+object Login : AppDestination {
+    override val route = LoginDestination
+    override val title: String = Constantes.LOGIN
+    override val isBottomBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = false
+}

@@ -28,11 +28,14 @@ import com.example.client.R
 import com.example.client.ui.addNoteScreen.AddNoteScreen
 import com.example.client.ui.common.BottomBar
 import com.example.client.ui.common.TopBar
+import com.example.client.ui.login.LoginScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.noteMap.search.MapSearchScreen
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
+import com.example.client.ui.registerScreen.SignUpScreen
+import com.example.client.ui.startScreen.StartScreen
 import com.example.client.ui.userScreen.detail.UserScreen
 import com.example.client.ui.userScreen.search.UserSearchScreen
 import kotlinx.coroutines.launch
@@ -97,13 +100,12 @@ fun Navigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = NormalNoteListDestination,
+            startDestination = StartDestination,
             modifier = Modifier.padding(innerPadding),
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
-
         ) {
             composable<NormalNoteListDestination> {
                 NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})
@@ -118,6 +120,23 @@ fun Navigation() {
                     onNavigateToList = { navController.navigate(MapSearchDestination) },
                     sharedLocationViewModel = sharedLocationViewModel,
                     onAddNoteClick = { navController.navigate(AddNoteDestination) }
+                )
+            }
+            composable<RegisterDestination> {
+                SignUpScreen(navigateToApp = { navController.navigate(NoteMapDestination)},
+                    showSnackbar = { showSnackbar(it)},
+                    navigateToLogin =  { navController.navigate(LoginDestination) },
+                    onNavigateBack = { navController.popBackStack() })
+            }
+            composable<StartDestination> {
+                StartScreen( navigateToSignUp = { navController.navigate(RegisterDestination)},
+                    navigateToLogin = { navController.navigate(LoginDestination)})
+            }
+            composable<LoginDestination> {
+                LoginScreen( navigateToApp = { navController.navigate(NoteMapDestination)},
+                    showSnackbar = { showSnackbar(it)},
+                    navigateToRegister = { navController.navigate(RegisterDestination)},
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

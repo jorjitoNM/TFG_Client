@@ -4,6 +4,23 @@
     <string name="rating">Rating:</string>
     <string name="event_dates">Event Dates:</string>
     <string name="no_notes_found">No notes found</string>
+    <string name="app_logo">App logo</string>
+    <string name="start_Screen_background">Start screen background</string>
+    <string name="app_real_name">Nomada</string>
+    <string name="app_slogan">Pin Your Finds, Inspire the World.</string>
+    <string name="register">Register</string>
+    <string name="user_registered">You have been registered successfully, check you email for verification</string>
+    <string name="login">Log in</string>
+    <string name="google_logo">Google Logo</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="username">Username</string>
     <string name="error_loading_user">User not found</string>
     <string name="google_maps_key">AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="register_message">Register free now and start sharing experiences.</string>
+    <string name="login_message">Log in to Nomada</string>
+    <string name="dont_have_account">Don`t have an account yet?</string>
+    <string name="navigate_back">Navigate back</string>
 </resources>

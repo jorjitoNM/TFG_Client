@@ -5,7 +5,6 @@ import com.example.client.data.remote.datasource.SocialRemoteDataSource
 import com.example.client.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.UUID
 import javax.inject.Inject
 
 class SocialRepository @Inject constructor(
@@ -29,14 +28,6 @@ class SocialRepository @Inject constructor(
         }
     }
 
-    suspend fun likeNote(noteId: Int, userId: UUID) = withContext(dispatcher) {
-        try {
-            socialRemoteDataSource.likeNote(noteId, userId)
-        } catch (e: Exception) {
-            NetworkResult.Error(e.message ?: e.toString())
-        }
-    }
-
     suspend fun delLikeNote(noteId: Int) = withContext(dispatcher) {
         try {
             socialRemoteDataSource.delLikeNote(noteId)
@@ -52,4 +43,6 @@ class SocialRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
+    suspend fun likeNote (noteId : Int) : NetworkResult<Unit>
+            = socialRemoteDataSource.likeNote(noteId)
 }
