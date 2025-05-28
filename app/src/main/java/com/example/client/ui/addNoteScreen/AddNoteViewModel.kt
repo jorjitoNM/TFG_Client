@@ -54,7 +54,7 @@ class AddNoteViewModel @Inject constructor(
             currentNote.latitude = currentState.currentLocation?.latitude ?: 0.0
             currentNote.longitude = currentState.currentLocation?.longitude ?: 0.0
 
-            when (val result = addNota(currentNote, "user1")) {
+            when (val result = addNota(currentNote)) {
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(
                         uiEvent = UiEvent.ShowSnackbar(result.message),

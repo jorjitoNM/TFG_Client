@@ -20,9 +20,9 @@ class SocialRepository @Inject constructor(
         }
     }
 
-    suspend fun favNote(id: Int, username: String) = withContext(dispatcher) {
+    suspend fun favNote(id: Int) = withContext(dispatcher) {
         try {
-            socialRemoteDataSource.favNote(id, username)
+            socialRemoteDataSource.favNote(id)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }

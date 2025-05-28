@@ -13,11 +13,10 @@ interface SocialService {
 
     @POST("social/saveds")
     suspend fun favNote(
-        @Query("noteId") noteId: Int,
-        @Query("username") username: String
+        @Query("noteId") noteId: Int
     ): Response<Unit>
 
-    @GET("notes/saveds?username=user1")
+    @GET("notes/saveds")
     suspend fun getNotesSaved(): Response<List<NoteDTO>>
 
     @DELETE("notes/saveds")

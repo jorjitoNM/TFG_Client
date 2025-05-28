@@ -9,10 +9,10 @@ import retrofit2.http.Query
 
 interface UserService {
     @GET("/user")
-    suspend fun getUser(@Query("username") username: String): Response<UserDTO>
+    suspend fun getUser(): Response<UserDTO>
 
     @GET("/user/notes")
-    suspend fun getMyNotes(@Query("username") username: String): Response<List<NoteDTO>>
+    suspend fun getMyNotes(): Response<List<NoteDTO>>
 
     @GET("/user/all")
     suspend fun getAllUserStartsWithText(@Query("text") text: String): Response<List<UserDTO>>

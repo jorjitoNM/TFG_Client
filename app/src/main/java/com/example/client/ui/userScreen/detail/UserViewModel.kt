@@ -167,7 +167,7 @@ class UserViewModel @Inject constructor(
     private fun favNote(noteId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            when (val result = favNoteUseCase.invoke(noteId, "user1")) {
+            when (val result = favNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(
                         aviso = UiEvent.ShowSnackbar(result.message),
