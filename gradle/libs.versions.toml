@@ -31,6 +31,10 @@ accompanist = "0.32.0"
 
 firebaseBom = "33.10.0"
 crashlytics = "3.0.2"
+googleGmsGoogleServices = "4.4.2"
+firebaseMessaging = "24.1.1"
+firebaseMessagingKtx = "24.1.1"
+
 
 
 
@@ -94,6 +98,9 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = {module= "com.google.firebase:firebase-firestore"}
 firebase-crashlytics = {module = "com.google.firebase:firebase-crashlytics" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -104,3 +111,4 @@ kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 room = { id="androidx.room", version.ref = "roomRuntime" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 crashlytics = {id= "com.google.firebase.crashlytics", version.ref = "crashlytics"}
+googleGmsGoogleServices = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
