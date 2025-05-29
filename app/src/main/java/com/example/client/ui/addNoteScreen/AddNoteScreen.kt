@@ -357,7 +357,7 @@ fun AddNoteScreenPreview() {
                 created = "2025-05-26",
                 latitude = 40.4168,
                 longitude = -3.7038,
-                type = NoteType.CLASSIC,
+                type = NoteType.EVENT,
                 start = "313212",
                 end = "3232324",
             ),
