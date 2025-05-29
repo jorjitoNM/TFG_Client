@@ -107,6 +107,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.adaptive.android)
+    implementation(libs.firebase.storage.ktx)
 
 
 

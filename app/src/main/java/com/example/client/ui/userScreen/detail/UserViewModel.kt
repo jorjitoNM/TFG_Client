@@ -1,13 +1,18 @@
 package com.example.client.ui.userScreen.detail
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.model.UserDTO
+import com.example.client.di.IoDispatcher
+import com.example.client.domain.useCases.user.LoadProfileImageUseCase
 import com.example.client.domain.usecases.note.GetMyNote
 import com.example.client.domain.usecases.social.GetNoteSavedUseCase
 import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +25,8 @@ class UserViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase,
     private val getNoteSavedUseCase: GetNoteSavedUseCase,
     private val getMyNote: GetMyNote,
+    private val loadProfileImageUseCase: LoadProfileImageUseCase,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserState())
@@ -40,6 +47,54 @@ class UserViewModel @Inject constructor(
             }
 
             UserEvent.GetMyNote -> getMyNotes()
+            is UserEvent.LoadProfileImage -> loadProfileImage(event.imagesUris)
+
+
+        }
+    }
+
+    private fun loadProfileImage(imagesUris: Uri) {
+        viewModelScope.launch(dispatcher) {
+            loadProfileImageUseCase.invoke(imagesUris).collect { result ->
+                when (result) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                user = _uiState.value.user.let { user ->
+                                    UserDTO(
+                                        user.id,
+                                        user.username,
+                                        user.password,
+                                        user.email,
+                                        user.rol,
+                                        user.notes,
+                                        user.followers,
+                                        user.following,
+                                        user.profilePhoto,
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+                    }
+
+                    is NetworkResult.Loading -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 

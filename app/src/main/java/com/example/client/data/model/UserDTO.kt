@@ -11,4 +11,5 @@ data class UserDTO(
     val notes: List<NoteDTO> = emptyList(),
     val followers: List<UserDTO> = emptyList(),
     val following: List<UserDTO> = emptyList(),
+    val profilePhoto: String = "",
 )

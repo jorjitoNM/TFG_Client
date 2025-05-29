@@ -70,6 +70,13 @@ fun UserScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            viewModel.handleEvent(UserEvent.LoadProfileImage(it))
+        }
+    }
     LaunchedEffect(Unit) {
         viewModel.handleEvent(UserEvent.LoadUser)
     }
@@ -106,7 +113,9 @@ fun UserScreen(
                 selectedTab = uiState.selectedTab,
                 onTabSelected = { tab ->
                     viewModel.handleEvent(UserEvent.SelectTab(tab))
-                }
+                },
+                profileImageUri = uiState.profileImageUri,
+                onProfileImageSelected = { pickImageLauncher.launch("image/*") }
 
             )
         }
@@ -119,7 +128,9 @@ fun UserContent(
     notes: List<NoteDTO>,
     user: UserDTO,
     selectedTab: UserTab,
-    onTabSelected: (UserTab) -> Unit
+    onTabSelected: (UserTab) -> Unit,
+    profileImageUri: Uri?,
+    onProfileImageSelected: () -> Unit
 ) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -152,13 +163,13 @@ fun UserContent(
                         .size(120.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .clickable { pickImageLauncher.launch("image/*") },
+                        .clickable(onClick = onProfileImageSelected),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (imageUri != null) {
+                    if (profileImageUri != null) {
                         AsyncImage(
-                            model = imageUri,
-                            contentDescription = "Imagen seleccionada",
+                            model = profileImageUri,
+                            contentDescription = "Foto de perfil",
                             modifier = Modifier
                                 .size(120.dp)
                                 .clip(CircleShape)
@@ -168,7 +179,7 @@ fun UserContent(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = "Foto de perfil",
                             modifier = Modifier.size(110.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -541,6 +552,8 @@ fun Preview() {
         ),
         user = UserDTO(),
         onTabSelected = {},
-        selectedTab = UserTab.FAVORITES
+        selectedTab = UserTab.FAVORITES,
+        profileImageUri = null,
+        onProfileImageSelected = {}
     )
 }
