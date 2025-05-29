@@ -7,4 +7,5 @@ sealed interface LoginScreenEvents {
     data class UpdateUsername (val newUsername : String) : LoginScreenEvents
     data class UpdatePassword (val newPassword : String) : LoginScreenEvents
     data object EventDone : LoginScreenEvents
+    data object LoginWithBiometrics : LoginScreenEvents
 }

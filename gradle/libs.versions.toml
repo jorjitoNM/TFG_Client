@@ -31,6 +31,10 @@ accompanist = "0.32.0"
 
 firebaseBom = "33.10.0"
 crashlytics = "3.0.2"
+biometricKtx = "1.4.0-alpha02"
+securityCryptoKtx = "1.1.0-alpha07"
+securityCrypto = "1.1.0-alpha07"
+appcompat = "1.7.0"
 
 
 
@@ -54,10 +58,10 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
-
+material = { group = "com.google.android.material", name = "material", version = "1.12.0" }
 # para compose collectaslyfecyle
 androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android" }
-androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose"}
+androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose" }
 
 
@@ -92,8 +96,12 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 
 #Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-firestore = {module= "com.google.firebase:firebase-firestore"}
-firebase-crashlytics = {module = "com.google.firebase:firebase-crashlytics" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometricKtx" }
+androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -101,6 +109,6 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 jetbrainsKotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-room = { id="androidx.room", version.ref = "roomRuntime" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
-crashlytics = {id= "com.google.firebase.crashlytics", version.ref = "crashlytics"}
+room = { id = "androidx.room", version.ref = "roomRuntime" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
