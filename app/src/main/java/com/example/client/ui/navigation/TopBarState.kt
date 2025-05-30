@@ -13,4 +13,5 @@ data class TopBarState(
     val arrangement: Arrangement.Horizontal = Arrangement.Center,
     val actions : @Composable RowScope.() -> Unit = {},
     val showNavigationIcon : Boolean = true,
+    val showScreenName :  Boolean = true,
 )

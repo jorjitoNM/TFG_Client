@@ -3,6 +3,7 @@ package com.example.client.ui.normalNoteScreen.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.note.NoteType
 import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
@@ -14,11 +15,11 @@ import com.example.client.domain.usecases.social.FavNoteUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,6 +30,7 @@ class NoteListViewModel @Inject constructor(
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
     private val getNoteSearchUseCase: GetNoteSearchUseCase,
     private val likeNoteUseCase: LikeNoteUseCase,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val delLikeNoteUseCase: DelLikeNoteUseCase,
     private val delFavNoteUseCase: DelFavNoteUseCase,
 ) : ViewModel() {
@@ -121,13 +123,10 @@ class NoteListViewModel @Inject constructor(
     }
 
     private fun likeNote(noteId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = likeNoteUseCase.invoke(
-                noteId,
-                UUID.fromString("11111111-1111-1111-1111-111111111111")
-            )) {
+            when (val result = likeNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Success -> {
                     val updatedNotes = uiState.value.notes.map { note ->
                         if (note.id == noteId) {
@@ -213,7 +212,6 @@ class NoteListViewModel @Inject constructor(
                     )
 
                 }
-
                 is NetworkResult.Success -> {
                     val notes = result.data.toList()
                     _uiState.update { it.copy(notes = notes) }
@@ -315,7 +313,7 @@ class NoteListViewModel @Inject constructor(
     private fun favNote(noteId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            when (val result = favNoteUseCase.invoke(noteId, "user1")) {
+            when (val result = favNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(
                         aviso = UiEvent.ShowSnackbar(result.message),
