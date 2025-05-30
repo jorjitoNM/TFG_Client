@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NoteType
-import com.example.client.domain.usecases.note.GetNoteSearchUseCase
-import com.example.client.domain.usecases.note.GetNotesUseCase
-import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
-import com.example.client.domain.usecases.note.OrderNoteUseCase
+import com.example.client.domain.useCases.note.GetNoteSearchUseCase
+import com.example.client.domain.useCases.note.GetNotesUseCase
+import com.example.client.domain.useCases.note.OrderNoteByTypUseCase
+import com.example.client.domain.useCases.note.OrderNoteUseCase
 import com.example.client.domain.usecases.social.DelFavNoteUseCase
 import com.example.client.domain.usecases.social.DelLikeNoteUseCase
 import com.example.client.domain.usecases.social.FavNoteUseCase

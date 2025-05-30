@@ -8,13 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO
-import com.example.client.di.IoDispatcher
 import com.example.client.domain.usecases.AddNota
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -23,7 +21,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddNoteViewModel @Inject constructor(
-    @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val addNota: AddNota,
     private val application: Application
 ) : ViewModel() {
@@ -78,27 +75,6 @@ class AddNoteViewModel @Inject constructor(
                 }
 
                 null -> TODO()
-            }
-        }
-    }
-    private fun getCurrentLocation() {
-        viewModelScope.launch {
-            if (ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    location?.let {
-                        _uiState.update { state ->
-                            state.copy(currentLocation = location)
-                        }
-                    }
-                }
             }
         }
     }
