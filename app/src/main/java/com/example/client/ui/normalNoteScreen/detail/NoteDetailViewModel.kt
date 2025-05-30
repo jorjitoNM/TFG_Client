@@ -5,13 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.usecases.note.GetNoteUseCase
 import com.example.client.domain.usecases.note.RateNoteUseCase
 import com.example.client.domain.usecases.note.UpdateNoteUseCase
 import com.example.client.domain.usecases.note.images.LoadNoteImagesUseCase
 import com.example.client.ui.common.UiEvent
-import com.example.musicapprest.di.IoDispatcher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,7 +68,7 @@ class NoteDetailViewModel @Inject constructor(
                                         note.type,
                                         note.start,
                                         note.end,
-                                        photos = result.data
+                                        photos = result.data,
                                     )
                                 }
                             )
