@@ -97,6 +97,7 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-firestore = {module= "com.google.firebase:firebase-firestore"}
 firebase-crashlytics = {module = "com.google.firebase:firebase-crashlytics" }
 firebase-storage = { module = "com.google.firebase:firebase-storage-ktx" }
+firebase-auth = {module = "com.google.firebase:firebase-auth-ktx" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

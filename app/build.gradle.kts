@@ -30,7 +30,7 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.3.41:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://10.19.249.233:8080/\"")
         }
     }
 
@@ -99,6 +99,7 @@ dependencies {
     implementation (libs.converter.scalars)
     implementation (libs.logging.interceptor)
 
+    //Coil
     implementation(libs.coil)
     implementation(libs.coil.compose)
 
@@ -109,8 +110,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.adaptive.android)
-
-
 
 
     kapt(libs.hilt.compiler)
@@ -141,5 +140,6 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.auth)
 
 }
