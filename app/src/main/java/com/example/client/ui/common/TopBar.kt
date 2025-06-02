@@ -36,19 +36,21 @@ fun TopBar(
                     actionIconContentColor = Color.White
                 ),
                 title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = destination.scaffoldState.topBarState.arrangement
-                    ) {
-                        Text(
-                            text = destination.title,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                    if (destination.scaffoldState.topBarState.showScreenName){
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = destination.scaffoldState.topBarState.arrangement
+                        ) {
+                            Text(
+                                text = destination.title,
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                 },
                 navigationIcon = {

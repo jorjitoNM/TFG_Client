@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -168,7 +167,7 @@ class UserViewModel @Inject constructor(
     private fun favNote(noteId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            when (val result = favNoteUseCase.invoke(noteId, "user1")) {
+            when (val result = favNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(
                         aviso = UiEvent.ShowSnackbar(result.message),
@@ -204,10 +203,7 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = likeNoteUseCase.invoke(
-                noteId,
-                UUID.fromString("11111111-1111-1111-1111-111111111111")
-            )) {
+            when (val result = likeNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Success -> {
                     val updatedNotes = uiState.value.notes.map { note ->
                         if (note.id == noteId) {

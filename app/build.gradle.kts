@@ -28,7 +28,7 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.1.40:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://192.168.1.134:8080/\"")
         }
     }
 
@@ -107,8 +107,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.adaptive.android)
+    implementation(libs.androidx.biometric.ktx)
+    implementation(libs.androidx.security.crypto.ktx)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.appcompat)
 
-
+    implementation(libs.material)
 
 
     kapt(libs.hilt.compiler)

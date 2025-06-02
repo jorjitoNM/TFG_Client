@@ -13,7 +13,7 @@ class UserRepository @Inject constructor(
 ) {
     suspend fun getUser() = withContext(dispatcher) {
         try {
-            userRemoteDataSource.getUser("user1")
+            userRemoteDataSource.getUser()
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
@@ -21,7 +21,7 @@ class UserRepository @Inject constructor(
 
     suspend fun getMyNotes() = withContext(dispatcher) {
         try {
-            userRemoteDataSource.getMyNotes("user1")
+            userRemoteDataSource.getMyNotes()
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
