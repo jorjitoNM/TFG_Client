@@ -3,6 +3,7 @@ package com.example.client.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.firebase.auth.FirebaseAuthenticator
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.authentication.SaveTokenUseCase
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class LoginScreenViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    private val firebaseAuthenticator: FirebaseAuthenticator,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginScreenState())
@@ -40,6 +42,7 @@ class LoginScreenViewModel @Inject constructor(
             when (val result = loginUseCase.invoke(authenticationUser)) {
                 is NetworkResult.Success -> {
                     saveTokenUseCase.invoke(result.data)
+                    firebaseAuthenticator.authenticate(authenticationUser)
                     _uiState.update {
                         it.copy(
                             isValidated = true

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.R
+import com.example.client.data.firebase.auth.FirebaseAuthenticator
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.registerScreen.LogoAndMessage
@@ -64,8 +65,7 @@ fun LoginScreen (
     }
 
     LaunchedEffect(uiState.value.isValidated) {
-        if (uiState.value.isValidated)
-            navigateToApp()
+        if (uiState.value.isValidated) navigateToApp()
     }
 
     LoginScreenContent(
