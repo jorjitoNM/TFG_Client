@@ -127,7 +127,7 @@ object AddNote: AppDestination {
     override val route: Any = AddNoteDestination
     override val title: String = "Añadir Nota"
     override val isBottomBarVisible: Boolean = false
-    override val isTopBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
             topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
