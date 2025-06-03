@@ -7,6 +7,4 @@ sealed interface AddNoteEvents {
     data object AddNoteNote : AddNoteEvents
     data object UiNoteEventsDone : AddNoteEvents
     data class EditNote(val note: NoteDTO) : AddNoteEvents
-    data object GetCurrentLocation : AddNoteEvents
-    data object CheckLocationPermission : AddNoteEvents
 }

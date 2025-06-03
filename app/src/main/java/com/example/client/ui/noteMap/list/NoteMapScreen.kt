@@ -79,6 +79,7 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -293,6 +294,10 @@ fun NoteMapScreen(
                     mapType = MapType.NORMAL,
                     isMyLocationEnabled = uiState.hasLocationPermission,
                     mapStyleOptions = if (isDarkMode) darkStyle else null
+                ),
+                uiSettings = MapUiSettings(
+                    zoomControlsEnabled = false,
+                    mapToolbarEnabled = false
                 )
                 ,
                 cameraPositionState = cameraPositionState,
@@ -467,7 +472,14 @@ fun NoteMapScreen(
                 }
 
                 FloatingActionButton(
-                    onClick = onAddNoteClick,
+                    onClick = {
+
+                        uiState.currentLocation?.let { location ->
+                            sharedLocationViewModel.setLocation(location.latitude, location.longitude)
+                        }
+
+                        onAddNoteClick()
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp),

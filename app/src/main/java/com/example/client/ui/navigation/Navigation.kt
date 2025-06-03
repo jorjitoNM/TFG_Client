@@ -157,7 +157,7 @@ fun Navigation() {
 
             composable <AddNoteDestination> {
                 AddNoteScreen(
-                    showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() }
+                    showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() }, sharedLocationViewModel = sharedLocationViewModel
                 )
             }
         }

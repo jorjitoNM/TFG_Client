@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -51,6 +53,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +73,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import timber.log.Timber
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -80,30 +84,21 @@ fun AddNoteScreen(
     addNoteViewModel: AddNoteViewModel = hiltViewModel(),
     showSnackbar: (String) -> Unit = {},
     onNavigateBack: () -> Unit,
+    sharedLocationViewModel: SharedLocationViewModel
 ) {
     val uiState by addNoteViewModel.uiState.collectAsStateWithLifecycle()
+    val sharedLocation by sharedLocationViewModel.selectedLocation.collectAsState()
+    val isDarkMode = isSystemInDarkTheme()
 
-    // Permission handling
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
-        if (isGranted) {
-            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
-        } else {
-            showSnackbar("Permiso de ubicación denegado")
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        addNoteViewModel.handleEvent(AddNoteEvents.CheckLocationPermission)
-    }
-
-    LaunchedEffect(uiState.hasLocationPermission) {
-        if (!uiState.hasLocationPermission) {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        } else {
-            addNoteViewModel.handleEvent(AddNoteEvents.GetCurrentLocation)
+    // Actualiza la nota con la ubicación recibida del mapa
+    LaunchedEffect(sharedLocation) {
+        sharedLocation?.let { (lat, lon) ->
+            addNoteViewModel.handleEvent(
+                AddNoteEvents.EditNote(
+                    uiState.note.copy(latitude = lat, longitude = lon)
+                )
+            )
+            Timber.d("Lat: $lat, Lon: $lon")
         }
     }
 
@@ -120,23 +115,23 @@ fun AddNoteScreen(
         }
     }
 
-
-        if (uiState.isLoading) {
-            Box(
-                Modifier
-                    .fillMaxSize(),
-                Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            AddNoteContent(
-                note = uiState.note,
-                onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
-                onAddNote = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) }
-            )
+    if (uiState.isLoading) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(if (isDarkMode) Color(0xFF23272F) else Color.White),
+            Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
-
+    } else {
+        AddNoteContent(
+            note = uiState.note,
+            onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
+            onAddNote = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
+            isDarkMode = isDarkMode
+        )
+    }
 }
 
 @Composable
@@ -144,16 +139,22 @@ private fun AddNoteContent(
     modifier: Modifier = Modifier,
     note: NoteDTO,
     onEdit: (NoteDTO) -> Unit,
-    onAddNote: () -> Unit
+    onAddNote: () -> Unit,
+    isDarkMode: Boolean
 ) {
     var localNote by remember { mutableStateOf(note) }
 
-    Timber.d("lat: ${localNote.latitude}, lon: ${localNote.longitude}")
+    val backgroundColor = if (isDarkMode) Color(0xFF23272F) else Color.White
+    val primaryColor = Color(0xFF4285F4)
+    val textColor = if (isDarkMode) Color(0xFFE0E0E0) else Color.Gray
+    val inputTextColor = if (isDarkMode) Color.White else Color.Black
+    val borderColor = if (isDarkMode) Color(0xFF3A3A3A) else Color.LightGray
+    val focusedBorderColor = if (isDarkMode) primaryColor else Color.Blue
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(backgroundColor)
             .verticalScroll(rememberScrollState())
     ) {
         // Privacy Tabs
@@ -162,7 +163,8 @@ private fun AddNoteContent(
             onPrivacySelected = { privacy ->
                 localNote = localNote.copy(privacy = privacy)
                 onEdit(localNote)
-            }
+            },
+            isDarkMode = isDarkMode
         )
 
         Column(
@@ -175,9 +177,9 @@ private fun AddNoteContent(
             // Name Field
             Column {
                 Text(
-                    text = "Nombre",
+                    text = "Name",
                     fontSize = 16.sp,
-                    color = Color.Gray,
+                    color = textColor,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 OutlinedTextField(
@@ -188,9 +190,13 @@ private fun AddNoteContent(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.LightGray,
-                        focusedBorderColor = Color.Blue
+                        unfocusedBorderColor = borderColor,
+                        focusedBorderColor = focusedBorderColor,
+                        cursorColor = primaryColor,
+                        focusedTextColor = inputTextColor,
+                        unfocusedTextColor = inputTextColor
                     ),
+                    textStyle = LocalTextStyle.current.copy(color = inputTextColor),
                     singleLine = true
                 )
             }
@@ -198,9 +204,9 @@ private fun AddNoteContent(
             // Description Field
             Column {
                 Text(
-                    text = "Descripción",
+                    text = "Description",
                     fontSize = 16.sp,
-                    color = Color.Gray,
+                    color = textColor,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 OutlinedTextField(
@@ -211,9 +217,13 @@ private fun AddNoteContent(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.LightGray,
-                        focusedBorderColor = Color.Blue
+                        unfocusedBorderColor = borderColor,
+                        focusedBorderColor = focusedBorderColor,
+                        cursorColor = primaryColor,
+                        focusedTextColor = inputTextColor,
+                        unfocusedTextColor = inputTextColor
                     ),
+                    textStyle = LocalTextStyle.current.copy(color = inputTextColor),
                     minLines = 3
                 )
             }
@@ -221,9 +231,9 @@ private fun AddNoteContent(
             // Rating Section
             Column {
                 Text(
-                    text = "Valoración",
+                    text = "Rating",
                     fontSize = 16.sp,
-                    color = Color.Gray,
+                    color = textColor,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 StarRating(
@@ -243,25 +253,23 @@ private fun AddNoteContent(
                 Icon(
                     Icons.Default.DateRange,
                     contentDescription = null,
-                    tint = Color.Gray,
+                    tint = textColor,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                     fontSize = 16.sp,
-                    color = Color.Gray
+                    color = textColor
                 )
-
-
             }
 
             // Photos Section
             Column {
                 Text(
-                    text = "Fotos",
+                    text = "Photos",
                     fontSize = 16.sp,
-                    color = Color.Gray,
+                    color = textColor,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
 
@@ -271,12 +279,12 @@ private fun AddNoteContent(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.Gray
+                        contentColor = textColor
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "Añadir fotos",
+                        text = "Add Photos",
                         fontSize = 16.sp
                     )
                 }
@@ -291,12 +299,12 @@ private fun AddNoteContent(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4285F4)
+                    containerColor = primaryColor
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "AÑADIR",
+                    text = "ADD",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
@@ -311,8 +319,12 @@ private fun AddNoteContent(
 @Composable
 private fun PrivacyTabs(
     selectedPrivacy: NotePrivacy,
-    onPrivacySelected: (NotePrivacy) -> Unit
+    onPrivacySelected: (NotePrivacy) -> Unit,
+    isDarkMode: Boolean
 ) {
+    val selectedColor = Color(0xFF4285F4)
+    val unselectedColor = if (isDarkMode) Color(0xFFBBBBBB) else Color.Gray
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -330,7 +342,7 @@ private fun PrivacyTabs(
                 Text(
                     text = privacy.displayName,
                     fontSize = 16.sp,
-                    color = if (selectedPrivacy == privacy) Color(0xFF4285F4) else Color.Gray,
+                    color = if (selectedPrivacy == privacy) selectedColor else unselectedColor,
                     fontWeight = if (selectedPrivacy == privacy) FontWeight.Medium else FontWeight.Normal
                 )
 
@@ -340,7 +352,7 @@ private fun PrivacyTabs(
                         modifier = Modifier
                             .width(40.dp)
                             .height(2.dp)
-                            .background(Color(0xFF4285F4))
+                            .background(selectedColor)
                     )
                 }
             }
@@ -393,6 +405,7 @@ fun AddNoteScreenPreview() {
             end = "3232324",
         ),
         onEdit = {},
-        onAddNote = {}
+        onAddNote = {},
+        isDarkMode = true
     )
 }
