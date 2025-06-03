@@ -30,7 +30,7 @@ playServicesLocation = "21.2.0"
 accompanist = "0.32.0"
 
 #Firebase
-firebaseBom = "33.13.0"
+firebaseBom = "33.1.0"
 crashlytics = "3.0.2"
 services = "4.4.2"
 

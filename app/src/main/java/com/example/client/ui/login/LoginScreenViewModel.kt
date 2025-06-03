@@ -8,6 +8,7 @@ import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.authentication.SaveTokenUseCase
 import com.example.client.domain.usecases.user.LoginUseCase
+import com.example.client.domain.usecases.user.firebase.FirebaseLoginUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,7 +23,7 @@ class LoginScreenViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
-    private val firebaseAuthenticator: FirebaseAuthenticator,
+    private val firebaseLoginUseCase: FirebaseLoginUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginScreenState())
@@ -42,7 +43,7 @@ class LoginScreenViewModel @Inject constructor(
             when (val result = loginUseCase.invoke(authenticationUser)) {
                 is NetworkResult.Success -> {
                     saveTokenUseCase.invoke(result.data)
-                    firebaseAuthenticator.authenticate(authenticationUser)
+                    firebaseLoginUseCase.invoke(authenticationUser)
                     _uiState.update {
                         it.copy(
                             isValidated = true
