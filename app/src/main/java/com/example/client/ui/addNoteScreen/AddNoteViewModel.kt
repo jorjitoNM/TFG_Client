@@ -28,7 +28,6 @@ class AddNoteViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<AddNoteState> = MutableStateFlow(AddNoteState())
     val uiState: StateFlow<AddNoteState> = _uiState
 
-
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(application)
     }
@@ -42,7 +41,6 @@ class AddNoteViewModel @Inject constructor(
             }
             is AddNoteEvents.GetCurrentLocation -> getCurrentLocation()
             is AddNoteEvents.CheckLocationPermission -> checkLocationPermission()
-
         }
     }
 
@@ -61,19 +59,16 @@ class AddNoteViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-
                 is NetworkResult.Loading -> _uiState.update {
                     it.copy(isLoading = true)
                 }
-
                 is NetworkResult.Success -> _uiState.update {
                     it.copy(
-                        note = NoteDTO(), 
+                        note = NoteDTO(),
                         isLoading = false,
-                        uiEvent = UiEvent.ShowSnackbar("Nota añadida correctamente")
+                        uiEvent = UiEvent.PopBackStack
                     )
                 }
-
                 null -> TODO()
             }
         }
@@ -131,5 +126,4 @@ class AddNoteViewModel @Inject constructor(
             }
         }
     }
-
 }

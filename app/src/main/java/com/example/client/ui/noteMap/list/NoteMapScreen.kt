@@ -5,6 +5,7 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -464,6 +465,17 @@ fun NoteMapScreen(
                         modifier = Modifier.size(32.dp)
                     )
                 }
+
+                FloatingActionButton(
+                    onClick = onAddNoteClick,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp),
+                    containerColor = Color(0xFF2196F3),
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Añadir Nota")
+                }
             }
 
             LaunchedEffect(uiState.currentLocation, moveToCurrentLocation) {
@@ -492,16 +504,7 @@ fun NoteMapScreen(
                         .align(Alignment.Center)
                 )
             }
-            FloatingActionButton(
-                onClick = onAddNoteClick,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Añadir Nota")
-            }
+
         }
     }
 

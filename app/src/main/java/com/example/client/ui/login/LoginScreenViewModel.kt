@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.firebase.auth.FirebaseAuthenticator
+import com.example.client.data.repositories.SecurePreferencesRepository
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.authentication.SaveTokenUseCase
@@ -24,25 +25,34 @@ class LoginScreenViewModel @Inject constructor(
     private val saveTokenUseCase: SaveTokenUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val firebaseLoginUseCase: FirebaseLoginUseCase,
+    private val securePreferencesRepository: SecurePreferencesRepository,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginScreenState())
     val uiState = _uiState.asStateFlow()
 
-    fun handleEvent (event : LoginScreenEvents) {
+    fun handleEvent(event: LoginScreenEvents) {
         when (event) {
             is LoginScreenEvents.Login -> login(event.authenticationUser)
             is LoginScreenEvents.UpdateUsername -> updateUsername(event.newUsername)
             is LoginScreenEvents.UpdatePassword -> updatePassword(event.newPassword)
             is LoginScreenEvents.EventDone -> _uiState.update { it.copy(event = null) }
+            LoginScreenEvents.LoginWithBiometrics -> loginWithBiometrics()
         }
     }
 
     private fun login(authenticationUser: AuthenticationUser) {
         viewModelScope.launch(dispatcher) {
             when (val result = loginUseCase.invoke(authenticationUser)) {
+
                 is NetworkResult.Success -> {
+
                     saveTokenUseCase.invoke(result.data)
+                    securePreferencesRepository.saveCredentials(
+                        username = authenticationUser.username,
+                        password = authenticationUser.password
+                    )
                     firebaseLoginUseCase.invoke(authenticationUser)
                     _uiState.update {
                         it.copy(
@@ -62,6 +72,19 @@ class LoginScreenViewModel @Inject constructor(
                     it.copy(
                         isLoading = true
                     )
+                }
+            }
+        }
+    }
+
+    private fun loginWithBiometrics() {
+        viewModelScope.launch(dispatcher) {
+            val (username, password) = securePreferencesRepository.getCredentials()
+            if (!username.isNullOrEmpty() && !password.isNullOrEmpty()) {
+                login(AuthenticationUser(username=username, password = password))
+            } else {
+                _uiState.update {
+                    it.copy(event = UiEvent.ShowSnackbar("Stored credentials not found"))
                 }
             }
         }
