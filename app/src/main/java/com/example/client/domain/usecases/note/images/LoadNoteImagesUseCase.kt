@@ -7,5 +7,6 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class LoadNoteImagesUseCase @Inject constructor(private val imagesRepository: ImagesRepository) {
-    fun invoke (imagesUris : List<Uri>) : Flow<NetworkResult<List<String>>> = imagesRepository.loadNoteImages(imagesUris)
+    fun invoke (imagesUris : List<Uri>, firebaseId : String) : Flow<NetworkResult<List<String>>> =
+        imagesRepository.loadNoteImages(imagesUris,firebaseId)
 }

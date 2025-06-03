@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
-import java.util.UUID
 import javax.inject.Inject
 
 class ImagesRepository @Inject constructor(
@@ -21,10 +20,10 @@ class ImagesRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-    fun loadNoteImages(imagesUris: List<Uri>): Flow<NetworkResult<List<String>>> = flow {
+    fun loadNoteImages(imagesUris: List<Uri>,firebaseId : String): Flow<NetworkResult<List<String>>> = flow {
         emit(NetworkResult.Loading())
         val result = imagesUris.map { uri ->
-            val imageRef = storage.reference.child( "${stringProvider.getString(R.string.fb_storage_images_url)}/${UUID.randomUUID()}")
+            val imageRef = storage.reference.child( "${stringProvider.getString(R.string.fb_storage_images_url)}/${firebaseId}")
             imageRef.putFile(uri).await()
             imageRef.downloadUrl.await().toString()
         }

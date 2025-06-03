@@ -42,7 +42,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.R
-import com.example.client.data.firebase.auth.FirebaseAuthenticator
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.authentication.buildPromptInfo
 import com.example.client.domain.usecases.authentication.createBiometricPrompt

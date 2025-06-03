@@ -7,8 +7,8 @@ import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
-import com.example.client.domain.usecases.user.firebase.FirebaseRegisterUseCase
 import com.example.client.domain.usecases.user.RegisterUseCase
+import com.example.client.domain.usecases.user.firebase.FirebaseRegisterUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -49,7 +49,20 @@ class RegisterViewModel @Inject constructor(
                             isRegistered = true
                         )
                     }
-                    firebaseRegisterUseCase.invoke(authenticationUser)
+                    when (val authenticationResponse = firebaseRegisterUseCase.invoke(authenticationUser)) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                event = UiEvent.ShowSnackbar(authenticationResponse.message),
+                                isLoading = false,
+                            )
+                        }
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                        is NetworkResult.Success -> {}
+                    }
                 }
 
                 is NetworkResult.Error -> _uiState.update {

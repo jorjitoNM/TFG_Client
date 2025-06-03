@@ -13,7 +13,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,13 +25,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.client.R
-import com.example.client.data.firebase.auth.FirebaseAuthenticator
 import com.example.client.ui.addNoteScreen.AddNoteScreen
 import com.example.client.ui.common.BottomBar
 import com.example.client.ui.common.TopBar
 import com.example.client.ui.login.LoginScreen
 import com.example.client.ui.normalNoteScreen.detail.NoteDetailScreen
-import com.example.client.ui.normalNoteScreen.list.NoteListEvent
 import com.example.client.ui.normalNoteScreen.list.NoteListScreen
 import com.example.client.ui.noteMap.list.NoteMapScreen
 import com.example.client.ui.noteMap.search.MapSearchScreen
@@ -42,21 +39,13 @@ import com.example.client.ui.startScreen.StartScreen
 import com.example.client.ui.userScreen.detail.UserScreen
 import com.example.client.ui.userScreen.search.UserSearchScreen
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @Composable
-fun Navigation (
-    firebaseAuthenticator: FirebaseAuthenticator
-) {
+fun Navigation () {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val sharedLocationViewModel: SharedLocationViewModel = hiltViewModel()
-    var initialScreen : Any = StartDestination
-
-    LaunchedEffect(key1 = Unit) {
-        if (firebaseAuthenticator.isAuthenticated()) initialScreen = NoteMapDestination
-    }
 
     val showSnackbar = { message: String ->
         scope.launch {
@@ -111,7 +100,7 @@ fun Navigation (
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = initialScreen,
+            startDestination = StartDestination,
             modifier = Modifier.padding(innerPadding),
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },

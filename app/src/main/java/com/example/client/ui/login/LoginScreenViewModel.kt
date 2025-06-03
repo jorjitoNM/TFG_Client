@@ -3,7 +3,6 @@ package com.example.client.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.data.firebase.auth.FirebaseAuthenticator
 import com.example.client.data.repositories.SecurePreferencesRepository
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
@@ -44,15 +43,26 @@ class LoginScreenViewModel @Inject constructor(
     private fun login(authenticationUser: AuthenticationUser) {
         viewModelScope.launch(dispatcher) {
             when (val result = loginUseCase.invoke(authenticationUser)) {
-
                 is NetworkResult.Success -> {
-
                     saveTokenUseCase.invoke(result.data)
                     securePreferencesRepository.saveCredentials(
                         username = authenticationUser.username,
                         password = authenticationUser.password
                     )
-                    firebaseLoginUseCase.invoke(authenticationUser)
+                    when (val authenticationResponse = firebaseLoginUseCase.invoke(authenticationUser)) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                event = UiEvent.ShowSnackbar(authenticationResponse.message),
+                                isLoading = false,
+                            )
+                        }
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                        is NetworkResult.Success -> {}
+                    }
                     _uiState.update {
                         it.copy(
                             isValidated = true

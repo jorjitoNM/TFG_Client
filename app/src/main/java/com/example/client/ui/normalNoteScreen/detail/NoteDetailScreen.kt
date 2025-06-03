@@ -270,6 +270,7 @@ fun NoteDetailContent(
                         Text("Back")
                     }
 
+
                     if (state.isEditing) {
                         Row {
                             Button(

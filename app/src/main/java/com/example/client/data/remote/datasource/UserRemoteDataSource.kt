@@ -14,4 +14,6 @@ class UserRemoteDataSource @Inject constructor(private val userService: UserServ
     suspend fun getMyNotes() = safeApiCall { userService.getMyNotes() }
 
     suspend fun getLikedNotes() = safeApiCall { userService.getLikedNotes() }
+
+    suspend fun getFirebaseId () = safeApiCall { userService.getFirebaseId() }
 }

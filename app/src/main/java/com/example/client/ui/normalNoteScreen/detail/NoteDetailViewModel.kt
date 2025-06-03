@@ -4,13 +4,14 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.data.model.NoteDTO
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.usecases.note.GetNoteUseCase
 import com.example.client.domain.usecases.note.RateNoteUseCase
 import com.example.client.domain.usecases.note.UpdateNoteUseCase
 import com.example.client.domain.usecases.note.images.LoadNoteImagesUseCase
+import com.example.client.domain.usecases.social.LikeNoteUseCase
+import com.example.client.domain.usecases.user.firebase.GetFirebaseIdUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -26,6 +27,8 @@ class NoteDetailViewModel @Inject constructor(
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val rateNoteUseCase: RateNoteUseCase,
     private val loadNoteImagesUseCase: LoadNoteImagesUseCase,
+    private val likeNoteUseCase: LikeNoteUseCase,
+    private val getFirebaseIdUseCase : GetFirebaseIdUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteDetailState())
@@ -41,55 +44,88 @@ class NoteDetailViewModel @Inject constructor(
             is NoteDetailEvent.UpdateEditedContent -> updateEditedContent(event.content)
             is NoteDetailEvent.UpdateEditedPrivacy -> updateEditedPrivacy(event.privacy)
             is NoteDetailEvent.AvisoVisto -> avisoVisto()
-            is NoteDetailEvent.LikeNote -> {}
+            is NoteDetailEvent.LikeNote -> likeNote(event.noteId)
             is NoteDetailEvent.LoadNoteImages -> loadNoteImages(event.imagesUris)
         }
     }
 
     private fun loadNoteImages(imagesUris: List<Uri>) {
         viewModelScope.launch(dispatcher) {
-            loadNoteImagesUseCase.invoke(imagesUris).collect { result ->
-                when (result) {
-                    is NetworkResult.Success -> {
-                        _uiState.update {
-                            it.copy(
-                                note = _uiState.value.note?.let { note ->
-                                    NoteDTO(
-                                        note.id,
-                                        note.title,
-                                        note.content,
-                                        note.privacy,
-                                        note.rating,
-                                        note.ownerUsername,
-                                        note.likes,
-                                        note.created,
-                                        note.latitude,
-                                        note.longitude,
-                                        note.type,
-                                        note.start,
-                                        note.end,
-                                        photos = result.data,
+            when (val result = getFirebaseIdUseCase.invoke()) {
+                is NetworkResult.Success -> {
+                    loadNoteImagesUseCase.invoke(imagesUris,result.data.firebaseId).collect { result ->
+                        when (result) {
+                            is NetworkResult.Success -> {
+                                _uiState.update {
+                                    it.copy(
+                                        note = _uiState.value.note?.copy(photos = result.data)
                                     )
                                 }
-                            )
+                            }
+
+                            is NetworkResult.Error -> {
+                                _uiState.update {
+                                    it.copy(
+                                        aviso = UiEvent.ShowSnackbar(result.message),
+                                        isLoading = false
+                                    )
+                                }
+                            }
+
+                            is NetworkResult.Loading -> {
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = true
+                                    )
+                                }
+                            }
                         }
                     }
-
-                    is NetworkResult.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                aviso = UiEvent.ShowSnackbar(result.message),
-                                isLoading = false
-                            )
-                        }
+                }
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
                     }
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
+        }
+    }
 
-                    is NetworkResult.Loading -> {
-                        _uiState.update {
-                            it.copy(
-                                isLoading = true
-                            )
-                        }
+    private fun likeNote(noteId: Int) {
+        viewModelScope.launch(dispatcher) {
+            _uiState.update { it.copy(isLoading = true) }
+
+            when (val result = likeNoteUseCase.invoke(noteId)) {
+                is NetworkResult.Success -> _uiState.update {
+                    it.copy(
+                        note = _uiState.value.note?.copy(liked = true)
+                    )
+                }
+
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
                     }
                 }
             }
