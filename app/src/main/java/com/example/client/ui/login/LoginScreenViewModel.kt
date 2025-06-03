@@ -26,7 +26,6 @@ class LoginScreenViewModel @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val firebaseLoginUseCase: FirebaseLoginUseCase,
     private val securePreferencesRepository: SecurePreferencesRepository,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginScreenState())
