@@ -45,7 +45,7 @@ class AddNoteViewModel @Inject constructor(
             when (val result = addNota(currentNote)) {
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(
-                        uiEvent = UiEvent.ShowSnackbar(result.message),
+                        uiEvent = UiEvent.PopBackStack,
                         isLoading = false
                     )
                 }
