@@ -5,7 +5,6 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -34,7 +33,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -64,12 +62,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
-import com.example.client.ui.common.FilterChip
-import com.example.client.ui.common.NotesBottomSheet
+import com.example.client.ui.common.composables.FilterChip
+import com.example.client.ui.common.composables.NotesBottomSheet
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.common.getMarkerColor
-import com.example.client.ui.common.getMarkerIconRes
-import com.example.client.ui.common.vectorToBitmap
+import com.example.client.ui.common.composables.getMarkerColor
+import com.example.client.ui.common.composables.getMarkerIconRes
+import com.example.client.ui.common.composables.vectorToBitmap
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -79,6 +77,7 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -293,6 +292,10 @@ fun NoteMapScreen(
                     mapType = MapType.NORMAL,
                     isMyLocationEnabled = uiState.hasLocationPermission,
                     mapStyleOptions = if (isDarkMode) darkStyle else null
+                ),
+                uiSettings = MapUiSettings(
+                    zoomControlsEnabled = false,
+                    mapToolbarEnabled = false
                 )
                 ,
                 cameraPositionState = cameraPositionState,
@@ -467,7 +470,14 @@ fun NoteMapScreen(
                 }
 
                 FloatingActionButton(
-                    onClick = onAddNoteClick,
+                    onClick = {
+
+                        uiState.currentLocation?.let { location ->
+                            sharedLocationViewModel.setLocation(location.latitude, location.longitude)
+                        }
+
+                        onAddNoteClick()
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp),

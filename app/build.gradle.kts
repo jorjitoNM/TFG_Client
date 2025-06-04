@@ -28,7 +28,11 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.1.47:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://192.168.0.63:8080/\"")
+        }
+        create("production") {
+            dimension = "env"
+            buildConfigField("String", "API_URL", "\"https://informatica.iesquevedo.es/nomada/\"")
         }
     }
 

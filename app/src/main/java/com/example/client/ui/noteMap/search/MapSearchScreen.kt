@@ -101,6 +101,12 @@ fun MapSearchScreen(
         focusRequester.requestFocus()
     }
 
+    LaunchedEffect(state.userLogged) {
+        state.userLogged?.let { user ->
+            viewModel.handleEvent(MapSearchEvent.LoadRecents(user))
+        }
+    }
+
     LaunchedEffect(state.aviso) {
         state.aviso?.let {
             when (it) {
@@ -134,10 +140,13 @@ fun MapSearchScreen(
                 sharedLocationViewModel = sharedLocationViewModel,
                 navController = navController,
                 onInsertRecent = { location ->
-                    viewModel.handleEvent(
-                        MapSearchEvent.InsertRecent(location, viewModel.getLoggedUser())
-                    )
-                },
+                    state.userLogged?.let { user ->
+                        viewModel.handleEvent(
+                            MapSearchEvent.InsertRecent(location, user)
+                        )
+                    }
+                }
+                ,
                 onDeleteRecent = { location ->
                     viewModel.handleEvent(
                         MapSearchEvent.DeleteRecent(location.id, location.userLogged)

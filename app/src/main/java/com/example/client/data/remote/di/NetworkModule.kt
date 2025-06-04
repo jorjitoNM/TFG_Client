@@ -5,6 +5,7 @@ import com.example.client.BuildConfig
 import com.example.client.data.remote.security.AuthAuthenticator
 import com.example.client.data.remote.security.AuthInterceptor
 import com.example.client.data.remote.service.AuthenticationService
+import com.example.client.data.remote.service.FollowService
 import com.example.client.data.remote.service.GooglePlacesService
 import com.example.client.data.remote.service.NoteService
 import com.example.client.data.remote.service.SocialService
@@ -107,5 +108,9 @@ object NetworkModule {
     @Provides
     fun provideGooglePlacesService(@GooglePlacesRetrofit retrofit: Retrofit): GooglePlacesService =
         retrofit.create(GooglePlacesService::class.java)
+
+    @Provides
+    fun provideFollowService(@MainRetrofit retrofit: Retrofit): FollowService =
+        retrofit.create(FollowService::class.java)
 
 }

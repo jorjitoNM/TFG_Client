@@ -21,16 +21,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddNoteViewModel @Inject constructor(
-    private val addNota: AddNota,
-    private val application: Application
+    private val addNota: AddNota
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<AddNoteState> = MutableStateFlow(AddNoteState())
     val uiState: StateFlow<AddNoteState> = _uiState
-
-    private val fusedLocationClient: FusedLocationProviderClient by lazy {
-        LocationServices.getFusedLocationProviderClient(application)
-    }
 
     fun handleEvent(event: AddNoteEvents) {
         when (event) {
@@ -39,18 +34,13 @@ class AddNoteViewModel @Inject constructor(
             is AddNoteEvents.EditNote -> {
                 _uiState.update { it.copy(note = event.note) }
             }
-            is AddNoteEvents.GetCurrentLocation -> getCurrentLocation()
-            is AddNoteEvents.CheckLocationPermission -> checkLocationPermission()
         }
     }
 
     private fun addNote() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val currentState = _uiState.value
-            val currentNote = currentState.note
-            currentNote.latitude = currentState.currentLocation?.latitude ?: 0.0
-            currentNote.longitude = currentState.currentLocation?.longitude ?: 0.0
+            val currentNote = _uiState.value.note
 
             when (val result = addNota(currentNote)) {
                 is NetworkResult.Error -> _uiState.update {
@@ -67,60 +57,6 @@ class AddNoteViewModel @Inject constructor(
                         note = NoteDTO(),
                         isLoading = false,
                         uiEvent = UiEvent.PopBackStack
-                    )
-                }
-                null -> TODO()
-            }
-        }
-    }
-
-    private fun checkLocationPermission() {
-        val hasPermission = ActivityCompat.checkSelfPermission(
-            application,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-
-        _uiState.update { it.copy(hasLocationPermission = hasPermission) }
-    }
-
-    private fun getCurrentLocation() {
-        viewModelScope.launch {
-            if (ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(
-                    application,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    if (location != null) {
-                        _uiState.update { state ->
-                            state.copy(currentLocation = location)
-                        }
-                    } else {
-                        _uiState.update { state ->
-                            state.copy(
-                                uiEvent = UiEvent.ShowSnackbar("No se pudo obtener la ubicación actual")
-                            )
-                        }
-                    }
-                }.addOnFailureListener {
-                    _uiState.update { state ->
-                        state.copy(
-                            uiEvent = UiEvent.ShowSnackbar("Error al obtener la ubicación: ${it.message}")
-                        )
-                    }
-                }
-            } else {
-                _uiState.update { state ->
-                    state.copy(
-                        uiEvent = UiEvent.ShowSnackbar("Permisos de ubicación no otorgados")
                     )
                 }
             }

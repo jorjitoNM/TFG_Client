@@ -15,6 +15,9 @@ object NoteMapDestination
 object MapSearchDestination
 
 @Serializable
+data class VisitorUserScreenDestination (val username : String)
+
+@Serializable
 object UserScreenDestination
 @Serializable
 object UserSearchDestination
