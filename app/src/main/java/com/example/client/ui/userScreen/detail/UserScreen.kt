@@ -192,36 +192,41 @@ fun UserContent(
                     text = user.rol,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+//                    modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                Button(
-                    onClick = { },
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier
-                        .height(36.dp)
-                        .width(120.dp)
-                ) {
-                    Text(
-                        text = "Seguir",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
+//                Button(
+//                    onClick = { },
+//                    shape = RoundedCornerShape(50),
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = MaterialTheme.colorScheme.primary
+//                    ),
+//                    modifier = Modifier
+//                        .height(36.dp)
+//                        .width(120.dp)
+//                ) {
+//                    Text(
+//                        text = "Seguir",
+//                        color = MaterialTheme.colorScheme.onPrimary,
+//                        style = MaterialTheme.typography.labelLarge
+//                    )
+//                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+//                Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 45.dp, end = 32.dp), // Ajusta el padding a tu gusto
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     UserStat(number = user.notes.size, label = "Posts")
+                    Spacer(Modifier.width(32.dp)) // Espacio entre stats
                     UserStat(number = user.followers.size, label = "Seguidores")
+                    Spacer(Modifier.width(32.dp))
                     UserStat(number = user.following.size, label = "Siguiendo")
                 }
+
             }
         }
 
@@ -453,10 +458,10 @@ fun NoteCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "★ ${note.rating}/5",
+                        text = "★ ${note.rating}/10",
                         style = MaterialTheme.typography.labelSmall,
                         color = when {
-                            note.rating >= 4 -> Color(0xFF4CAF50)
+                            note.rating >= 7.5 -> Color(0xFF4CAF50)
                             note.rating >= 2.5 -> Color(0xFFFFC107)
                             else -> Color(0xFFF44336)
                         },
@@ -503,14 +508,7 @@ fun NoteCard(
 @Composable
 fun NoteTypeBadge(type: NoteType, modifier: Modifier = Modifier) {
     val color = noteTypeBadgeColor(type)
-    val label = when (type) {
-        NoteType.CLASSIC -> "CLÁSICA"
-        NoteType.EVENT -> "EVENTO"
-        NoteType.FOOD -> "GASTRO"
-        NoteType.HISTORICAL -> "HISTÓRICA"
-        NoteType.LANDSCAPE -> "PAISAJE"
-        NoteType.CULTURAL -> "CULTURAL"
-    }
+    val label = type.name
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(50))

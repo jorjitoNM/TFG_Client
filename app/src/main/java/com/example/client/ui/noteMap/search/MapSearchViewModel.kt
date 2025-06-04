@@ -13,6 +13,7 @@ import com.example.client.domain.usecases.map.GetPlaceDetailsUseCase
 import com.example.client.domain.usecases.map.local.DeleteCachedLocationUseCase
 import com.example.client.domain.usecases.map.local.GetCachedLocationsUseCase
 import com.example.client.domain.usecases.map.local.InsertCachedLocationUseCase
+import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -30,7 +31,8 @@ class MapSearchViewModel @Inject constructor(
     private val getCachedLocationsUseCase: GetCachedLocationsUseCase,
     private val insertCachedLocationUseCase: InsertCachedLocationUseCase,
     private val deleteCachedLocationUseCase: DeleteCachedLocationUseCase,
-    private val stringProvider: StringProvider
+    private val stringProvider: StringProvider,
+    private val getUserUseCase: GetUserUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MapSearchState())
@@ -38,11 +40,25 @@ class MapSearchViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    fun getLoggedUser(): String = "user3"
+    fun getLoggedUser() {
+        viewModelScope.launch {
+            val user = getUserUseCase()
+            when (user) {
+                is NetworkResult.Success -> {
+                    _uiState.update { it.copy(userLogged = user.data.username) }
+                }
+                is NetworkResult.Error -> {
+                    _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(user.message)) }
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+    }
 
     init {
-        val userLogged = getLoggedUser()
-        handleEvent(MapSearchEvent.LoadRecents(userLogged))
+        getLoggedUser()
     }
 
     fun handleEvent(event: MapSearchEvent) {
@@ -97,8 +113,10 @@ class MapSearchViewModel @Inject constructor(
                 }
             }
         } else {
-            val userLogged = getLoggedUser()
-            handleEvent(MapSearchEvent.LoadRecents(userLogged))
+            val userLogged = _uiState.value.userLogged
+            if (userLogged != null) {
+                handleEvent(MapSearchEvent.LoadRecents(userLogged))
+            }
             _uiState.update {
                 it.copy(
                     results = emptyList(),
