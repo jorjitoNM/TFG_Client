@@ -1,4 +1,4 @@
-package com.example.client.ui.common
+package com.example.client.ui.common.composables
 
 import android.content.Context
 import android.graphics.Bitmap

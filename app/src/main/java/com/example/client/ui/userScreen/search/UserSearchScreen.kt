@@ -57,6 +57,7 @@ import com.example.client.ui.common.UiEvent
 @Composable
 fun UserSearchScreen(
     viewModel: UserSearchViewModel = hiltViewModel(),
+    onNavigateToVisitor: (String) -> Unit,
     showSnackbar: (String) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -69,6 +70,9 @@ fun UserSearchScreen(
             if (event is UiEvent.ShowSnackbar) {
                 showSnackbar(event.message)
                 viewModel.handleEvent(UserSearchEvent.AvisoVisto)
+            } else if (event is UiEvent.PopBackStack) {
+                onNavigateToVisitor(uiState.selectedUser)
+                viewModel.handleEvent(UserSearchEvent.AvisoVisto)
             }
         }
     }
@@ -76,10 +80,14 @@ fun UserSearchScreen(
     UserSearchScreenContent(
         uiState = uiState,
         onSearchTextChanged = { viewModel.handleEvent(UserSearchEvent.UpdateSearchText(it)) },
-        onUserClick = { viewModel.handleEvent(UserSearchEvent.UserClicked(it)) },
+        onUserClick = { user ->
+            viewModel.handleEvent(UserSearchEvent.UserSelected(user.username))
+            viewModel.handleEvent(UserSearchEvent.UserClicked(user))
+        },
         onUserDelete = { viewModel.handleEvent(UserSearchEvent.OnDeleteUser(it)) },
         focusRequester = focusRequester
     )
+
 
 }
 

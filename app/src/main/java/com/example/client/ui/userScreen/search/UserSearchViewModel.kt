@@ -68,7 +68,17 @@ class UserSearchViewModel @Inject constructor(
             is UserSearchEvent.UserClicked -> addRecentUser(event.user)
             is UserSearchEvent.AvisoVisto -> _uiState.value = _uiState.value.copy(aviso = null)
             is UserSearchEvent.OnDeleteUser -> deleteRecentUser(event.username)
+            is UserSearchEvent.UserSelected -> selectUser(event.username)
 
+        }
+    }
+
+    private fun selectUser(username : String) {
+        _uiState.update {
+            it.copy(
+                selectedUser = username,
+                aviso = UiEvent.PopBackStack
+            )
         }
     }
 

@@ -38,6 +38,7 @@ import com.example.client.ui.registerScreen.SignUpScreen
 import com.example.client.ui.startScreen.StartScreen
 import com.example.client.ui.userScreen.detail.UserScreen
 import com.example.client.ui.userScreen.search.UserSearchScreen
+import com.example.client.ui.userScreen.visitor.VisitorUserScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -152,7 +153,12 @@ fun Navigation() {
                 )
             }
             composable<UserSearchDestination> {
-                UserSearchScreen( showSnackbar = { showSnackbar(it) })
+                UserSearchScreen( showSnackbar = { showSnackbar(it) }, onNavigateToVisitor = { navController.navigate(VisitorUserScreenDestination(it)) })
+            }
+
+            composable<VisitorUserScreenDestination> { backStackEntry ->
+                val destination = backStackEntry.toRoute() as VisitorUserScreenDestination
+                VisitorUserScreen(username = destination.username, showSnackbar = { showSnackbar(it) })
             }
 
             composable <AddNoteDestination> {

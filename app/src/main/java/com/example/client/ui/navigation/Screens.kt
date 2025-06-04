@@ -16,7 +16,7 @@ import com.example.client.ui.common.Constantes
 
 
 val appDestinationList = listOf(
-    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch)
+    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch, VisitorUserScreen)
 
 
 interface AppDestination {
@@ -38,7 +38,7 @@ interface AppMainBottomDestination : AppDestination {
 
 object NormalNoteList : AppMainBottomDestination {
     override val route: Any = NormalNoteListDestination
-    override val title: String = "Inicio"
+    override val title: String = "Home"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -53,7 +53,7 @@ object NormalNoteList : AppMainBottomDestination {
 
 object MapSearch : AppDestination{
     override val route: Any = MapSearchDestination
-    override val title: String = "Busqueda"
+    override val title: String = "Map Search"
     override val isBottomBarVisible: Boolean = false
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -66,7 +66,7 @@ object MapSearch : AppDestination{
 
 object NormalNoteDetail : AppDestination {
     override val route: Any = NormalNoteDetailDestination
-    override val title: String = "Nota Detalle"
+    override val title: String = "Note Detail"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -106,6 +106,18 @@ object UserScreen : AppMainBottomDestination {
     override val onBottomBar: Boolean = true
     override val icon: ImageVector = Icons.Outlined.AccountCircle
     override val iconFilled: ImageVector = Icons.Filled.AccountCircle
+}
+
+object VisitorUserScreen : AppDestination {
+    override val route: Any = VisitorUserScreenDestination
+    override val title: String = "Profile"
+    override val isBottomBarVisible: Boolean = false
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
 }
 
 object UserSearch : AppMainBottomDestination {

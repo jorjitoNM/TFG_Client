@@ -30,6 +30,10 @@ android {
             dimension = "env"
             buildConfigField("String", "API_URL", "\"http://192.168.0.63:8080/\"")
         }
+        create("production") {
+            dimension = "env"
+            buildConfigField("String", "API_URL", "\"https://informatica.iesquevedo.es/nomada/\"")
+        }
     }
 
     buildTypes {
