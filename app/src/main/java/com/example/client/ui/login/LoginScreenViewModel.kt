@@ -33,7 +33,7 @@ class LoginScreenViewModel @Inject constructor(
     fun handleEvent(event: LoginScreenEvents) {
         when (event) {
             is LoginScreenEvents.Login -> login(event.authenticationUser)
-            is LoginScreenEvents.UpdateUsername -> updateUsername(event.newUsername)
+            is LoginScreenEvents.UpdateEmail -> updateEmail(event.newEmail)
             is LoginScreenEvents.UpdatePassword -> updatePassword(event.newPassword)
             is LoginScreenEvents.EventDone -> _uiState.update { it.copy(event = null) }
             LoginScreenEvents.LoginWithBiometrics -> loginWithBiometrics()
@@ -99,10 +99,10 @@ class LoginScreenViewModel @Inject constructor(
         }
     }
 
-    private fun updateUsername(newUsername: String) {
+    private fun updateEmail(newEmail: String) {
         _uiState.update {
             it.copy(
-                authenticationUser = it.authenticationUser.copy(username = newUsername)
+                authenticationUser = it.authenticationUser.copy(email = newEmail)
             )
         }
     }

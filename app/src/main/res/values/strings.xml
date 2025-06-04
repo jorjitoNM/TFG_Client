@@ -27,4 +27,5 @@
     <string name="dont_have_account">Don`t have an account yet?</string>
     <string name="navigate_back">Navigate back</string>
     <string name="login_with_fingerprint">Sign in with fingerprint</string>
+    <string name="failed_to_authenticate_with_firebase">We could not authenticate you woth Firebase, maybe because you dont have a google email, but you can still use the app</string>
 </resources>

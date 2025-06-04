@@ -23,7 +23,7 @@ class ImagesRepository @Inject constructor(
     fun loadNoteImages(imagesUris: List<Uri>,firebaseId : String): Flow<NetworkResult<List<String>>> = flow {
         emit(NetworkResult.Loading())
         val result = imagesUris.map { uri ->
-            val imageRef = storage.reference.child( "${stringProvider.getString(R.string.fb_storage_images_url)}/${firebaseId}")
+            val imageRef = storage.reference.child("${stringProvider.getString(R.string.fb_storage_images_url)}/${firebaseId}")
             imageRef.putFile(uri).await()
             imageRef.downloadUrl.await().toString()
         }
