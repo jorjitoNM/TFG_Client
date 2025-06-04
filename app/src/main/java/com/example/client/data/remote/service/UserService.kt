@@ -8,21 +8,21 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface UserService {
-    @GET("/user")
+    @GET("user")
     suspend fun getUser(): Response<UserDTO>
 
-    @GET("/user/notes")
+    @GET("user/notes")
     suspend fun getMyNotes(): Response<List<NoteDTO>>
 
-    @GET("/user/notes/{username}")
+    @GET("user/notes/{username}")
     suspend fun getUserNotes(@Query("username") username: String): Response<List<NoteDTO>>
 
-    @GET("/user/all")
+    @GET("user/all")
     suspend fun getAllUserStartsWithText(@Query("text") text: String): Response<List<UserDTO>>
 
-    @GET("/user/likes")
+    @GET("user/likes")
     suspend fun getLikedNotes(): Response<List<NoteDTO>>
 
-    @GET("/user/info/{username}")
+    @GET("user/info/{username}")
     suspend fun getUserInfo(@Query("username") username: String): Response<UserDTO>
 }
