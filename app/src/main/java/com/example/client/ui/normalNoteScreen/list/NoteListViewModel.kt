@@ -9,6 +9,7 @@ import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.domain.usecases.note.OrderNoteUseCase
+import com.example.client.domain.usecases.note.OrderNotesByChronologicalUseCase
 import com.example.client.domain.usecases.social.DelFavNoteUseCase
 import com.example.client.domain.usecases.social.DelLikeNoteUseCase
 import com.example.client.domain.usecases.social.FavNoteUseCase
@@ -33,6 +34,7 @@ class NoteListViewModel @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val delLikeNoteUseCase: DelLikeNoteUseCase,
     private val delFavNoteUseCase: DelFavNoteUseCase,
+    private val orderByChronological : OrderNotesByChronologicalUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()
@@ -49,6 +51,7 @@ class NoteListViewModel @Inject constructor(
             is NoteListEvent.GetNoteSearch -> searchNote(event.title)
             is NoteListEvent.DelFavNote -> delSavedNote(event.noteId)
             is NoteListEvent.DelLikeNote -> delLikedNote(event.noteId)
+            is NoteListEvent.OrderByChronological -> orderByChronological()
         }
     }
 
@@ -178,6 +181,40 @@ class NoteListViewModel @Inject constructor(
                                 isLoading = false
                             )
                         }
+                    }
+                }
+
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
+
+                is NetworkResult.Loading -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun orderByChronological() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            when (val result = orderByChronological.invoke()) {
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            notes = result.data,
+                            isLoading = false
+                        )
                     }
                 }
 

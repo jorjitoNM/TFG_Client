@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
@@ -128,6 +129,10 @@ fun NoteListScreen(
                         viewModel.handleEvent(NoteListEvent.ApplyFilter(filterOption))
                         isFilterExpanded = false
                     },
+                    onChronologicalOrderSelected = {
+                        viewModel.handleEvent(NoteListEvent.OrderByChronological)
+                        isFilterExpanded = false
+                    },
                     onNoteTypeFilterSelected = { noteType ->
                         noteType?.let {
                             viewModel.handleEvent(NoteListEvent.OrderByType(it))
@@ -230,6 +235,7 @@ fun FilterHeader(
 fun FilterMenuOverlay(
     onFilterSelected: (Boolean) -> Unit,
     onNoteTypeFilterSelected: (NoteType?) -> Unit,
+    onChronologicalOrderSelected: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val iconTint = MaterialTheme.colorScheme.primary
@@ -310,6 +316,34 @@ fun FilterMenuOverlay(
                     thickness = 1.dp
                 )
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onChronologicalOrderSelected()
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Orden cronológico",
+                        tint = iconTint
+                    )
+                    Text(
+                        text = "Orden cronológico",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    thickness = 1.dp
+                )
+
                 NoteType.entries.forEach { noteType ->
                     Row(
                         modifier = Modifier
@@ -359,7 +393,6 @@ fun FilterMenuOverlay(
         }
     }
 }
-
 @Composable
 fun SearchBar(
     query: String,
