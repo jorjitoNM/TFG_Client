@@ -62,6 +62,13 @@ class NoteRepository @Inject constructor(
         }
 
     }
+    suspend fun orderByChronologicalOrder() = withContext(dispatcher) {
+        try {
+            noteRemoteDataSource.orderByChronologicalOrder()
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
 
     suspend fun deleteNote(idNote: Int) = withContext(dispatcher) {
         try {
