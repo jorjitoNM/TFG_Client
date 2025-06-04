@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -58,6 +59,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.data.model.NoteDTO
@@ -73,6 +75,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
+import java.time.Duration
 
 
 @Composable
@@ -172,12 +175,13 @@ private fun AddNoteContent(
             .fillMaxSize()
             .background(backgroundColor)
     ) {
-        //        // Contenido principal scrolleable
-        Column(
+
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 88.dp) // Espacio para el botón fijo
+                .fillMaxWidth()
+                .zIndex(1f) // Asegura que quede por encima del contenido
+                .background(backgroundColor)
+
         ) {
             NoteTypeTabs(
                 selectedType = localNote.type,
@@ -187,6 +191,16 @@ private fun AddNoteContent(
                 },
                 isDarkMode = isDarkMode
             )
+        }
+
+        //        // Contenido principal scrolleable
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 88.dp) // Espacio para el botón fijo
+        ) {
+
 
 
 
@@ -195,7 +209,7 @@ private fun AddNoteContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
-                    .padding(top = 24.dp),
+                    .padding(top = 64.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 // Name Field
@@ -333,111 +347,171 @@ private fun AddNoteContent(
                             color = textColor,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
+
+                        val startDateTime = localNote.start?.let { LocalDateTime.parse(it) }
+                        val endDateTime = localNote.end?.let { LocalDateTime.parse(it) }
+
+                        val startDateText = startDateTime?.toLocalDate()?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: ""
+                        val startTimeText = startDateTime?.toLocalTime()?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
+
+                        val endDateText = endDateTime?.toLocalDate()?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: ""
+                        val endTimeText = endDateTime?.toLocalTime()?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
+
+                        // START ROW: Fecha y hora inicio
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(7.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // START DATE FIELD + HORA
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                OutlinedTextField(
-                                    value = startDate?.let { formatDateForDisplay(it.toString()) } ?: "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    enabled = false,
-                                    label = { Text("Start date", color = enabledLabelColor) },
-                                    trailingIcon = {
-                                        IconButton(
-                                            onClick = {
-                                                datePickerForStart = true
+                            OutlinedTextField(
+                                value = startDateText,
+                                onValueChange = {},
+                                readOnly = true,
+                                enabled = false,
+                                label = { Text("Start date", color = enabledLabelColor) },
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            datePickerForStart = true
+                                            showDatePicker = true
+                                        }
+                                    ) {
+                                        Icon(Icons.Default.DateRange, contentDescription = "Pick start date", tint = enabledTextColor)
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = enabledTextColor,
+                                    unfocusedTextColor = enabledTextColor,
+                                    disabledTextColor = enabledTextColor,
+                                    focusedBorderColor = enabledBorderColor,
+                                    unfocusedBorderColor = enabledBorderColor,
+                                    disabledBorderColor = enabledBorderColor,
+                                    focusedLabelColor = enabledLabelColor,
+                                    unfocusedLabelColor = enabledLabelColor,
+                                    disabledLabelColor = enabledLabelColor,
+                                    cursorColor = Color.Transparent,
+                                    focusedContainerColor = backgroundColor,
+                                    unfocusedContainerColor = backgroundColor,
+                                    disabledContainerColor = backgroundColor
+                                )
+                            )
+                          Spacer(modifier = Modifier.width(2.dp))
+                            OutlinedTextField(
+                                value = startTimeText,
+                                onValueChange = {},
+                                readOnly = true,
+                                enabled = false,
+                                label = { Text("Start hour", color = enabledLabelColor) },
+                                trailingIcon = {
+                                    IconButton(
+                                        onClick = { showStartTimePicker = true }
+                                    ) {
+                                        Icon(Icons.Default.Settings, contentDescription = "Pick start time", tint = enabledTextColor)
+                                    }
+                                },
+                                modifier = Modifier.width(170.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = enabledTextColor,
+                                    unfocusedTextColor = enabledTextColor,
+                                    disabledTextColor = enabledTextColor,
+                                    focusedBorderColor = enabledBorderColor,
+                                    unfocusedBorderColor = enabledBorderColor,
+                                    disabledBorderColor = enabledBorderColor,
+                                    focusedLabelColor = enabledLabelColor,
+                                    unfocusedLabelColor = enabledLabelColor,
+                                    disabledLabelColor = enabledLabelColor,
+                                    cursorColor = Color.Transparent,
+                                    focusedContainerColor = backgroundColor,
+                                    unfocusedContainerColor = backgroundColor,
+                                    disabledContainerColor = backgroundColor
+                                )
+                            )
+                        }
+
+                        // END ROW: Fecha y hora fin
+                        val isEndEnabled = startDateTime != null
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            OutlinedTextField(
+                                value = endDateText,
+                                onValueChange = {},
+                                readOnly = true,
+                                enabled = isEndEnabled,
+                                label = { Text("End date", color = if (isEndEnabled) enabledLabelColor else disabledLabelColor) },
+                                trailingIcon = {
+                                    IconButton(
+                                        enabled = isEndEnabled,
+                                        onClick = {
+                                            if (isEndEnabled) {
+                                                datePickerForStart = false
                                                 showDatePicker = true
                                             }
-                                        ) {
-                                            Icon(Icons.Default.DateRange, contentDescription = "Pick start date", tint = enabledTextColor)
                                         }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedTextColor = enabledTextColor,
-                                        unfocusedTextColor = enabledTextColor,
-                                        disabledTextColor = enabledTextColor,
-                                        focusedBorderColor = enabledBorderColor,
-                                        unfocusedBorderColor = enabledBorderColor,
-                                        disabledBorderColor = enabledBorderColor,
-                                        focusedLabelColor = enabledLabelColor,
-                                        unfocusedLabelColor = enabledLabelColor,
-                                        disabledLabelColor = enabledLabelColor,
-                                        cursorColor = Color.Transparent,
-                                        focusedContainerColor = backgroundColor,
-                                        unfocusedContainerColor = backgroundColor,
-                                        disabledContainerColor = backgroundColor
-                                    )
+                                    ) {
+                                        Icon(
+                                            Icons.Default.DateRange,
+                                            contentDescription = "Pick end date",
+                                            tint = if (isEndEnabled) enabledTextColor else disabledTextColor
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = enabledTextColor,
+                                    unfocusedTextColor = enabledTextColor,
+                                    disabledTextColor = enabledTextColor,
+                                    focusedBorderColor = enabledBorderColor,
+                                    unfocusedBorderColor = enabledBorderColor,
+                                    disabledBorderColor = enabledBorderColor,
+                                    focusedLabelColor = enabledLabelColor,
+                                    unfocusedLabelColor = enabledLabelColor,
+                                    disabledLabelColor = enabledLabelColor,
+                                    cursorColor = Color.Transparent,
+                                    focusedContainerColor = backgroundColor,
+                                    unfocusedContainerColor = backgroundColor,
+                                    disabledContainerColor = backgroundColor
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                IconButton(onClick = { showStartTimePicker = true }) {
-                                    Icon(Icons.Default.Settings, contentDescription = "Pick start time", tint = enabledTextColor)
-                                }
-                            }
+                            )
 
-                            // END DATE FIELD + HORA
-                            val isEndEnabled = startDate != null
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                OutlinedTextField(
-                                    value = endDate?.let { formatDateForDisplay(it.toString()) } ?: "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    enabled = false,
-                                    label = { Text("End date", color = if (isEndEnabled) enabledLabelColor else disabledLabelColor) },
-                                    trailingIcon = {
-                                        IconButton(
-                                            enabled = isEndEnabled,
-                                            onClick = {
-                                                if (isEndEnabled) {
-                                                    datePickerForStart = false
-                                                    showDatePicker = true
-                                                }
-                                            }
-                                        ) {
-                                            Icon(
-                                                Icons.Default.DateRange,
-                                                contentDescription = "Pick end date",
-                                                tint = if (isEndEnabled) enabledTextColor else disabledTextColor
-                                            )
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedTextColor = enabledTextColor,
-                                        unfocusedTextColor = enabledTextColor,
-                                        disabledTextColor = enabledTextColor,
-                                        focusedBorderColor = enabledBorderColor,
-                                        unfocusedBorderColor = enabledBorderColor,
-                                        disabledBorderColor = enabledBorderColor,
-                                        focusedLabelColor = enabledLabelColor,
-                                        unfocusedLabelColor = enabledLabelColor,
-                                        disabledLabelColor = enabledLabelColor,
-                                        cursorColor = Color.Transparent,
-                                        focusedContainerColor = backgroundColor,
-                                        unfocusedContainerColor = backgroundColor,
-                                        disabledContainerColor = backgroundColor
-                                    )
+                            OutlinedTextField(
+                                value = endTimeText,
+                                onValueChange = {},
+                                readOnly = true,
+                                enabled = isEndEnabled,
+                                label = { Text("End hour", color = if (isEndEnabled) enabledLabelColor else disabledLabelColor) },
+                                trailingIcon = {
+                                    IconButton(
+                                        enabled = isEndEnabled,
+                                        onClick = { if (isEndEnabled) showEndTimePicker = true }
+                                    ) {
+                                        Icon(Icons.Default.Settings, contentDescription = "Pick end time", tint = if (isEndEnabled) enabledTextColor else disabledTextColor)
+                                    }
+                                },
+                                modifier = Modifier.width(170.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = enabledTextColor,
+                                    unfocusedTextColor = enabledTextColor,
+                                    disabledTextColor = enabledTextColor,
+                                    focusedBorderColor = enabledBorderColor,
+                                    unfocusedBorderColor = enabledBorderColor,
+                                    disabledBorderColor = enabledBorderColor,
+                                    focusedLabelColor = enabledLabelColor,
+                                    unfocusedLabelColor = enabledLabelColor,
+                                    disabledLabelColor = enabledLabelColor,
+                                    cursorColor = Color.Transparent,
+                                    focusedContainerColor = backgroundColor,
+                                    unfocusedContainerColor = backgroundColor,
+                                    disabledContainerColor = backgroundColor
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                IconButton(
-                                    enabled = isEndEnabled,
-                                    onClick = { if (isEndEnabled) showEndTimePicker = true }
-                                ) {
-                                    Icon(Icons.Default.Settings, contentDescription = "Pick end time", tint = if (isEndEnabled) enabledTextColor else disabledTextColor)
-                                }
-                            }
+                            )
                         }
                     }
                 }
+
 
 
 
@@ -482,13 +556,19 @@ private fun AddNoteContent(
             try {
                 val startDateTime = localNote.start?.let { LocalDateTime.parse(it) }
                 val endDateTime = localNote.end?.let { LocalDateTime.parse(it) }
-                startDateTime != null && endDateTime != null && !endDateTime.isBefore(startDateTime)
+                if (startDateTime != null && endDateTime != null) {
+                    val minutes = Duration.between(startDateTime, endDateTime).toMinutes()
+                    minutes >= 5
+                } else {
+                    false
+                }
             } catch (e: Exception) {
                 false
             }
         } else {
             true // Para otros tipos, no importa la fecha
         }
+
 
 
         val isAddEnabled = isTitleValid && isDescriptionValid == true && areDatesValid && isRatingNotZero
@@ -555,7 +635,12 @@ private fun AddNoteContent(
                 tempDate.dayOfMonth
             )
 
-            if (!datePickerForStart && startDate != null) {
+            if (datePickerForStart) {
+                // Solo permitir seleccionar hoy o días posteriores
+                val today = LocalDate.now()
+                dialog.datePicker.minDate = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            } else if (startDate != null) {
+                // Para end date, ya tienes la lógica
                 dialog.datePicker.minDate = startDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             }
 
@@ -563,6 +648,7 @@ private fun AddNoteContent(
             dialog.show()
         }
     }
+
 
 
 
@@ -591,26 +677,25 @@ private fun AddNoteContent(
 
     if (showEndTimePicker) {
         val context = LocalContext.current
-        DisposableEffect(showEndTimePicker) {
-            if (showEndTimePicker) {
-                val currentDateTime = localNote.end?.let { LocalDateTime.parse(it) } ?: LocalDateTime.now()
-                val dialog = TimePickerDialog(
-                    context,
-                    { _, hour, minute ->
-                        val newDateTime = currentDateTime.withHour(hour).withMinute(minute)
-                        localNote = localNote.copy(end = newDateTime.toString())
-                        onEdit(localNote)
-                        showEndTimePicker = false
-                    },
-                    currentDateTime.hour,
-                    currentDateTime.minute,
-                    true
-                )
-                dialog.show()
-            }
-            onDispose { }
+        LaunchedEffect(showEndTimePicker) {
+            val currentDateTime = localNote.end?.let { LocalDateTime.parse(it) } ?: LocalDateTime.now()
+            val dialog = TimePickerDialog(
+                context,
+                { _, hour, minute ->
+                    val newDateTime = currentDateTime.withHour(hour).withMinute(minute)
+                    localNote = localNote.copy(end = newDateTime.toString())
+                    onEdit(localNote)
+                    showEndTimePicker = false
+                },
+                currentDateTime.hour,
+                currentDateTime.minute,
+                true
+            )
+            dialog.setOnCancelListener { showEndTimePicker = false }
+            dialog.show()
         }
     }
+
 
 
 
@@ -788,7 +873,7 @@ fun NoteTypeTabs(
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 24.dp),
+            .padding(top = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         items(types) { type ->
