@@ -1,5 +1,7 @@
 package com.example.client.ui.addNoteScreen
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,11 +26,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -37,6 +41,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,7 +67,10 @@ import com.example.client.ui.common.UiEvent
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.theme.*
 import timber.log.Timber
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
@@ -140,6 +149,24 @@ private fun AddNoteContent(
     val borderColor = if (isDarkMode) Color(0xFF3A3A3A) else Color.LightGray
     val focusedBorderColor = if (isDarkMode) primaryColor else Color.Blue
 
+    var datePickerForStart by remember { mutableStateOf(true) } // true = start, false = end
+
+    // Puedes usar estos campos para mostrar la fecha seleccionada
+    val today = LocalDate.now()
+    val minStartDate = today.minusDays(7)
+    val startDate = localNote.start?.let { LocalDateTime.parse(it).toLocalDate() }
+    val endDate = localNote.end?.let { LocalDateTime.parse(it).toLocalDate() }
+
+
+    // Estado para la fecha seleccionada temporalmente (puedes usar LocalDate o String)
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var tempDate by remember { mutableStateOf(LocalDate.now()) }
+    var tempTime by remember { mutableStateOf(LocalTime.of(0, 0)) }
+    var showStartTimePicker by remember { mutableStateOf(false) }
+    var showEndTimePicker by remember { mutableStateOf(false) }
+
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -188,8 +215,8 @@ private fun AddNoteContent(
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = borderColor,
-                            focusedBorderColor = focusedBorderColor,
-                            cursorColor = primaryColor,
+
+                            cursorColor = textColor,
                             focusedTextColor = inputTextColor,
                             unfocusedTextColor = inputTextColor
                         ),
@@ -215,8 +242,7 @@ private fun AddNoteContent(
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = borderColor,
-                            focusedBorderColor = focusedBorderColor,
-                            cursorColor = primaryColor,
+                            cursorColor = textColor,
                             focusedTextColor = inputTextColor,
                             unfocusedTextColor = inputTextColor
                         ),
@@ -231,7 +257,6 @@ private fun AddNoteContent(
                         text = "Rating",
                         fontSize = 16.sp,
                         color = textColor,
-                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                     ColorfulLinearRatingBar(
                         rating = localNote.rating,
@@ -251,24 +276,170 @@ private fun AddNoteContent(
                     isDarkMode = isDarkMode
                 )
 
-                // Date Field
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    Icon(
-                        Icons.Default.DateRange,
-                        contentDescription = null,
-                        tint = textColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                Column {
                     Text(
-                        text = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        text = "Current Date",
                         fontSize = 16.sp,
-                        color = textColor
+                        color = textColor,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.DateRange,
+                            contentDescription = null,
+                            tint = textColor,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = LocalDateTime.now()
+                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                            fontSize = 16.sp,
+                            color = textColor,
+                        )
+                    }
                 }
+                val darkEnabledTextColor = Color(0xFFBDBDBD)    // Gris claro para texto deshabilitado
+                val darkEnabledBorderColor = Color(0xFFE0E0E0)  // Gris claro para borde deshabilitado
+                val darkEnabledLabelColor = Color(0xFFBDBDBD)
+
+                val darkDisabledTextColor = Color(0xFF636363)   // Gris oscuro para texto deshabilitado
+                val darkDisabledLabelColor = Color(0xFF5C5C5C)  // Gris oscuro para label deshabilitado
+
+// Colores para modo claro
+                val lightEnabledTextColor = Color(0xFF757575)   // Gris medio para texto deshabilitado
+                val lightEnabledBorderColor = Color(0xFFBDBDBD) // Gris claro para borde deshabilitado
+                val lightEnabledLabelColor = Color(0xFF757575)
+
+                val lightDisabledTextColor = Color(0xFFB0B0B0)  // Gris claro para texto deshabilitado
+                val lightDisabledLabelColor = Color(0xFF9E9E9E) // Gris medio para label deshabilitado
+
+// Selección según modo
+                val enabledTextColor = if (isDarkMode) darkEnabledTextColor else lightEnabledTextColor
+                val enabledBorderColor = if (isDarkMode) darkEnabledBorderColor else lightEnabledBorderColor
+                val enabledLabelColor = if (isDarkMode) darkEnabledLabelColor else lightEnabledLabelColor
+
+                val disabledTextColor = if (isDarkMode) darkDisabledTextColor else lightDisabledTextColor
+                val disabledLabelColor = if (isDarkMode) darkDisabledLabelColor else lightDisabledLabelColor
+
+                if (localNote.type == NoteType.EVENT) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = "Event Dates",
+                            fontSize = 16.sp,
+                            color = textColor,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // START DATE FIELD + HORA
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                OutlinedTextField(
+                                    value = startDate?.let { formatDateForDisplay(it.toString()) } ?: "",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    enabled = false,
+                                    label = { Text("Start date", color = enabledLabelColor) },
+                                    trailingIcon = {
+                                        IconButton(
+                                            onClick = {
+                                                datePickerForStart = true
+                                                showDatePicker = true
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.DateRange, contentDescription = "Pick start date", tint = enabledTextColor)
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedTextColor = enabledTextColor,
+                                        unfocusedTextColor = enabledTextColor,
+                                        disabledTextColor = enabledTextColor,
+                                        focusedBorderColor = enabledBorderColor,
+                                        unfocusedBorderColor = enabledBorderColor,
+                                        disabledBorderColor = enabledBorderColor,
+                                        focusedLabelColor = enabledLabelColor,
+                                        unfocusedLabelColor = enabledLabelColor,
+                                        disabledLabelColor = enabledLabelColor,
+                                        cursorColor = Color.Transparent,
+                                        focusedContainerColor = backgroundColor,
+                                        unfocusedContainerColor = backgroundColor,
+                                        disabledContainerColor = backgroundColor
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(onClick = { showStartTimePicker = true }) {
+                                    Icon(Icons.Default.Settings, contentDescription = "Pick start time", tint = enabledTextColor)
+                                }
+                            }
+
+                            // END DATE FIELD + HORA
+                            val isEndEnabled = startDate != null
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                OutlinedTextField(
+                                    value = endDate?.let { formatDateForDisplay(it.toString()) } ?: "",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    enabled = false,
+                                    label = { Text("End date", color = if (isEndEnabled) enabledLabelColor else disabledLabelColor) },
+                                    trailingIcon = {
+                                        IconButton(
+                                            enabled = isEndEnabled,
+                                            onClick = {
+                                                if (isEndEnabled) {
+                                                    datePickerForStart = false
+                                                    showDatePicker = true
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                Icons.Default.DateRange,
+                                                contentDescription = "Pick end date",
+                                                tint = if (isEndEnabled) enabledTextColor else disabledTextColor
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedTextColor = enabledTextColor,
+                                        unfocusedTextColor = enabledTextColor,
+                                        disabledTextColor = enabledTextColor,
+                                        focusedBorderColor = enabledBorderColor,
+                                        unfocusedBorderColor = enabledBorderColor,
+                                        disabledBorderColor = enabledBorderColor,
+                                        focusedLabelColor = enabledLabelColor,
+                                        unfocusedLabelColor = enabledLabelColor,
+                                        disabledLabelColor = enabledLabelColor,
+                                        cursorColor = Color.Transparent,
+                                        focusedContainerColor = backgroundColor,
+                                        unfocusedContainerColor = backgroundColor,
+                                        disabledContainerColor = backgroundColor
+                                    )
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(
+                                    enabled = isEndEnabled,
+                                    onClick = { if (isEndEnabled) showEndTimePicker = true }
+                                ) {
+                                    Icon(Icons.Default.Settings, contentDescription = "Pick end time", tint = if (isEndEnabled) enabledTextColor else disabledTextColor)
+                                }
+                            }
+                        }
+                    }
+                }
+
+
 
                 // Photos Section
                 Column {
@@ -299,6 +470,28 @@ private fun AddNoteContent(
 
             }
         }
+        val isTitleValid = localNote.title.isNotBlank()
+        val isDescriptionValid = localNote.content?.isNotBlank()
+        val isRatingNotZero = localNote.rating != 0
+
+// Valida que start y end no sean nulos ni vacíos
+
+
+// Valida que las fechas sean LocalDateTime válidas y que end >= start
+        val areDatesValid = if (localNote.type == NoteType.EVENT) {
+            try {
+                val startDateTime = localNote.start?.let { LocalDateTime.parse(it) }
+                val endDateTime = localNote.end?.let { LocalDateTime.parse(it) }
+                startDateTime != null && endDateTime != null && !endDateTime.isBefore(startDateTime)
+            } catch (e: Exception) {
+                false
+            }
+        } else {
+            true // Para otros tipos, no importa la fecha
+        }
+
+
+        val isAddEnabled = isTitleValid && isDescriptionValid == true && areDatesValid && isRatingNotZero
 
 
 
@@ -312,11 +505,13 @@ private fun AddNoteContent(
         ) {
             Button(
                 onClick = onAddNote,
+                enabled = isAddEnabled,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryColor
+                    containerColor = primaryColor,
+                    disabledContainerColor = Color.Gray // o el color que prefieras para deshabilitado
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -327,9 +522,104 @@ private fun AddNoteContent(
                     color = Color.White
                 )
             }
+
         }
     }
+    if (showDatePicker) {
+        val context = LocalContext.current
+        LaunchedEffect(showDatePicker) {
+            val dialog = DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    val pickedDate = LocalDate.of(year, month + 1, dayOfMonth)
+                    if (datePickerForStart) {
+                        val currentEnd = endDate
+                        val clearEnd = currentEnd != null && (pickedDate.isAfter(currentEnd) || pickedDate.isEqual(currentEnd))
+                        localNote = localNote.copy(
+                            start = pickedDate.atStartOfDay().toString(),
+                            end = if (clearEnd) null else localNote.end
+                        )
+                        onEdit(localNote)
+                    } else {
+                        if (startDate != null && !pickedDate.isBefore(startDate)) {
+                            localNote = localNote.copy(end = pickedDate.atStartOfDay().toString())
+                            onEdit(localNote)
+                        } else {
+                            // Mensaje de error si lo deseas
+                        }
+                    }
+                    showDatePicker = false
+                },
+                tempDate.year,
+                tempDate.monthValue - 1,
+                tempDate.dayOfMonth
+            )
+
+            if (!datePickerForStart && startDate != null) {
+                dialog.datePicker.minDate = startDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            }
+
+            dialog.setOnCancelListener { showDatePicker = false }
+            dialog.show()
+        }
+    }
+
+
+
+
+
+    if (showStartTimePicker) {
+        val context = LocalContext.current
+        LaunchedEffect(showStartTimePicker) {
+            val currentDateTime = localNote.start?.let { LocalDateTime.parse(it) } ?: LocalDateTime.now()
+            val dialog = TimePickerDialog(
+                context,
+                { _, hour, minute ->
+                    val newDateTime = currentDateTime.withHour(hour).withMinute(minute)
+                    localNote = localNote.copy(start = newDateTime.toString())
+                    onEdit(localNote)
+                    showStartTimePicker = false
+                },
+                currentDateTime.hour,
+                currentDateTime.minute,
+                true
+            )
+            dialog.setOnCancelListener { showStartTimePicker = false }
+            dialog.show()
+        }
+    }
+
+    if (showEndTimePicker) {
+        val context = LocalContext.current
+        DisposableEffect(showEndTimePicker) {
+            if (showEndTimePicker) {
+                val currentDateTime = localNote.end?.let { LocalDateTime.parse(it) } ?: LocalDateTime.now()
+                val dialog = TimePickerDialog(
+                    context,
+                    { _, hour, minute ->
+                        val newDateTime = currentDateTime.withHour(hour).withMinute(minute)
+                        localNote = localNote.copy(end = newDateTime.toString())
+                        onEdit(localNote)
+                        showEndTimePicker = false
+                    },
+                    currentDateTime.hour,
+                    currentDateTime.minute,
+                    true
+                )
+                dialog.show()
+            }
+            onDispose { }
+        }
+    }
+
+
+
+
 }
+
+
+
+
 
 
 @Composable
@@ -344,14 +634,13 @@ private fun PrivacyTabs(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
     ) {
         NotePrivacy.entries.forEach { privacy ->
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .clickable { onPrivacySelected(privacy) }
-                    .padding(vertical = 12.dp),
+                    .padding(top = 3.dp, bottom = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -395,7 +684,7 @@ fun ColorfulLinearRatingBar(
     var sliderValue by remember { mutableStateOf(rating.toFloat()) }
 
     Column(
-        modifier = modifier.padding(vertical = 12.dp)
+        modifier = modifier.padding(top = 10.dp, bottom = 3.dp)
     ) {
         // Calcula el progreso del slider (0f a 1f)
         val progress = (sliderValue - 1f) / (maxRating.toFloat() - 1f)
@@ -531,6 +820,14 @@ fun NoteTypeTabs(
     }
 }
 
+fun formatDateForDisplay(dateString: String): String {
+    return try {
+        val date = LocalDate.parse(dateString)
+        date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+    } catch (e: Exception) {
+        dateString
+    }
+}
 
 
 
@@ -557,8 +854,8 @@ fun AddNoteScreenPreview() {
             latitude = 40.4168,
             longitude = -3.7038,
             type = NoteType.EVENT,
-            start = "313212",
-            end = "3232324",
+            start = "",
+            end = "",
         ),
         onEdit = {},
         onAddNote = {},
