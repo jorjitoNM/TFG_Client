@@ -10,4 +10,6 @@ sealed class VisitorUserEvent {
     data class DelLikeNote(val noteId: Int) : VisitorUserEvent()
     data class LoadIsFollowing(val username: String) : VisitorUserEvent()
     data object AvisoVisto : VisitorUserEvent()
+    data class GetFollowers(val username: String) : VisitorUserEvent()
+    data class GetFollowing(val username: String) : VisitorUserEvent()
 }

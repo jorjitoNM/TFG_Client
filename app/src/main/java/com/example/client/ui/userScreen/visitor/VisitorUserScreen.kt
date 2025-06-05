@@ -72,6 +72,8 @@ fun VisitorUserScreen(
     // Carga el usuario visitante al entrar en la pantalla
     LaunchedEffect(username) {
         viewModel.handleEvent(VisitorUserEvent.LoadUser(username))
+        viewModel.handleEvent(VisitorUserEvent.GetFollowers(username))
+        viewModel.handleEvent(VisitorUserEvent.GetFollowing(username))
     }
 
     // Maneja eventos de aviso (snackbar)
@@ -100,6 +102,8 @@ fun VisitorUserScreen(
                     user = user,
                     notes = uiState.notes,
                     isFollowing = uiState.isFollowing,
+                    followers = uiState.followers,
+                    following = uiState.following,
                     onFollowClick = {
                         if (uiState.isFollowing) {
                             viewModel.handleEvent(VisitorUserEvent.Unfollow(username))
@@ -140,6 +144,8 @@ fun VisitorUserContent(
     user: UserDTO,
     notes: List<NoteDTO>,
     isFollowing: Boolean,
+    followers: List<UserDTO>,
+    following: List<UserDTO>,
     onFollowClick: () -> Unit,
     onFavClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit
@@ -214,9 +220,9 @@ fun VisitorUserContent(
                 ) {
                     UserStat(number = user.notes.size, label = "Posts")
                     Spacer(Modifier.width(32.dp)) // Espacio entre stats
-                    UserStat(number = 0, label = "Followers")
+                    UserStat(number = followers.size, label = "Followers")
                     Spacer(Modifier.width(32.dp))
-                    UserStat(number = 0, label = "Following")
+                    UserStat(number = following.size, label = "Following")
                 }
             }
         }
@@ -290,7 +296,9 @@ fun VisitorUserContentPreview(
         isFollowing = previewData.isFollowing,
         onFollowClick = {},
         onFavClick = {},
-        onLikeClick = {}
+        onLikeClick = {},
+        followers = emptyList(),
+        following = emptyList()
     )
 }
 

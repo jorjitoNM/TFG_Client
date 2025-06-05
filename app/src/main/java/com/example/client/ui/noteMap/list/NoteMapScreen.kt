@@ -33,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -509,11 +510,14 @@ fun NoteMapScreen(
 
             // Loading indicator
             if (uiState.isLoading) {
-                CircularProgressIndicator(
+                LinearProgressIndicator(
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 32.dp, vertical = 24.dp)
                 )
             }
+
 
         }
     }

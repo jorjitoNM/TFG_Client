@@ -190,7 +190,7 @@ fun UserContent(
                         .padding(start = 45.dp, end = 32.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    UserStat(number = user?.notes?.size ?: 0, label = "Posts")
+                    UserStat(number = user.notes.size ?: 0, label = "Posts")
                     Spacer(Modifier.width(32.dp))
                     UserStat(number = followers.size, label = "Followers")
                     Spacer(Modifier.width(32.dp))
