@@ -28,7 +28,11 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.1.17:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://192.168.0.63:8080/\"")
+        }
+        create("production") {
+            dimension = "env"
+            buildConfigField("String", "API_URL", "\"https://informatica.iesquevedo.es/nomada/\"")
         }
     }
 
@@ -107,8 +111,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.lifecycle.viewModelCompose)
     implementation(libs.androidx.adaptive.android)
+    implementation(libs.androidx.biometric.ktx)
+    implementation(libs.androidx.security.crypto.ktx)
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.appcompat)
 
-
+    implementation(libs.material)
 
 
     kapt(libs.hilt.compiler)
@@ -127,4 +135,16 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //google maps
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
+
+    //Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.firestore)
+
 }

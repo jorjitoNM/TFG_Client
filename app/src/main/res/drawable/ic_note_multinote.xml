@@ -1,0 +1,60 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Borde blanco (círculo grande) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,2a10,10 0 1,0 0,20a10,10 0 1,0 0,-20"/>
+
+    <!-- Círculo azul (más pequeño, para crear el efecto de borde) -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M12,4a8,8 0 1,0 0,16a8,8 0 1,0 0,-16"/>
+
+    <!-- Libro abierto (más realista) -->
+    <group
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="2.4"
+        android:translateY="2.4">
+        <!-- Tapa izquierda -->
+        <path
+            android:fillColor="#BDBDBD"
+            android:pathData="M6,7c0,0 0,8 0,10c0,0.5 0.5,1 1,1h5V7H6z"/>
+        <!-- Tapa derecha -->
+        <path
+            android:fillColor="#BDBDBD"
+            android:pathData="M18,7c0,0 0,8 0,10c0,0.5 -0.5,1 -1,1h-5V7h6z"/>
+        <!-- Hojas (blanco) -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M7,8h4v9H7z"/>
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M13,8h4v9h-4z"/>
+        <!-- Línea de separación central -->
+        <path
+            android:strokeColor="#2196F3"
+            android:strokeWidth="0.5"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M12,8v9"/>
+        <!-- Líneas de texto -->
+        <path
+            android:strokeColor="#90CAF9"
+            android:strokeWidth="0.3"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M8,10h2 M8,12h2 M8,14h2"/>
+        <path
+            android:strokeColor="#90CAF9"
+            android:strokeWidth="0.3"
+            android:fillColor="@android:color/transparent"
+            android:pathData="M14,10h2 M14,12h2 M14,14h2"/>
+        <!-- Marcador de diario (rojo) -->
+        <path
+            android:fillColor="#E53935"
+            android:pathData="M12,8.5l0,3l0.6,-0.5l0.6,0.5l0,-3z"/>
+    </group>
+</vector>
