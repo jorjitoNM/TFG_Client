@@ -15,4 +15,11 @@ class AuthenticationRepository @Inject constructor(
 
     suspend fun login(authenticationUser: AuthenticationUser): NetworkResult<Token> =
         authenticationDatasource.login(authenticationUser)
+
+    suspend fun validateGoogleToken(idToken: String): NetworkResult<Token> {
+        return authenticationDatasource.validateGoogleToken(idToken)
+    }
+
+
+
 }

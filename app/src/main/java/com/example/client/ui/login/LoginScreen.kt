@@ -1,5 +1,9 @@
 package com.example.client.ui.login
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,12 +48,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.R
 import com.example.client.domain.model.user.AuthenticationUser
-import com.example.client.domain.usecases.authentication.buildPromptInfo
-import com.example.client.domain.usecases.authentication.createBiometricPrompt
-import com.example.client.domain.usecases.authentication.isBiometricAvailable
+import com.example.client.domain.useCases.authentication.buildPromptInfo
+import com.example.client.domain.useCases.authentication.createBiometricPrompt
+import com.example.client.domain.useCases.authentication.isBiometricAvailable
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.registerScreen.LogoAndMessage
 import com.example.client.ui.startScreen.AuthenticationActionButton
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+
+
 
 @Composable
 fun LoginScreen(
@@ -58,6 +70,7 @@ fun LoginScreen(
     navigateToRegister: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
+
     val uiState = loginScreenViewModel.uiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
@@ -77,6 +90,54 @@ fun LoginScreen(
         if (uiState.value.isValidated)
             navigateToApp()
     }
+
+    val oneTapClient = remember { Identity.getSignInClient(context) }
+
+    val signInRequest = remember {
+        BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    .setServerClientId("TU_CLIENT_ID_AQUI") // poner clientId de consola Google Cloud
+                    .setFilterByAuthorizedAccounts(false)
+                    .build()
+            )
+            .build()
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+            val idToken = credential.googleIdToken
+            if (idToken != null) {
+                val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+                loginScreenViewModel.signInWithGoogle(firebaseCredential)
+            } else {
+                showSnackbar("Google ID token is null")
+            }
+        } else {
+            showSnackbar("Google Sign-In canceled")
+        }
+    }
+
+    val onGoogleSignInClick = {
+        oneTapClient.beginSignIn(signInRequest)
+            .addOnSuccessListener { result ->
+                try {
+                    launcher.launch(
+                        IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
+                    )
+                } catch (e: Exception) {
+                    showSnackbar("Google Sign-In failed: ${e.localizedMessage}")
+                }
+            }
+            .addOnFailureListener { e ->
+                showSnackbar("Google Sign-In failed: ${e.localizedMessage}")
+            }
+    }
+
 
     LoginScreenContent(
         authenticationUser = uiState.value.authenticationUser,
@@ -111,7 +172,8 @@ fun LoginScreen(
                 )
                 biometricPrompt.authenticate(buildPromptInfo())
             } ?: showSnackbar("It's not possible to use biometric authentication in this context")
-        }
+        },
+        onGoogleSignInClick ={ onGoogleSignInClick}
     )
 
 }
@@ -126,6 +188,7 @@ fun LoginScreenContent(
     onNavigateBack: () -> Unit,
     biometricAvailable: Boolean,
     onBiometricAuthenticate: () -> Unit,
+    onGoogleSignInClick: () -> Unit,
 ) {
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -193,6 +256,17 @@ fun LoginScreenContent(
                 ),
             )
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        AuthenticationActionButton(
+            onClick = { onGoogleSignInClick() },
+            text = stringResource(R.string.sign_in_with_google),
+            buttonColors = ButtonColors(
+                containerColor = Color(0xFFFFFFFF), // Blanco como fondo
+                contentColor = Color(0xFF4285F4),   // Azul Google
+                disabledContentColor = Color.Gray,
+                disabledContainerColor = Color.LightGray
+            )
+        )
         if (biometricAvailable) {
             Row(
                 modifier = Modifier
@@ -302,5 +376,5 @@ fun LoginFields(
 @Preview
 @Composable
 fun LoginScreenPreview() {
-    LoginScreenContent(AuthenticationUser(), {}, {}, {}, {}, {}, true, {})
+    LoginScreenContent(AuthenticationUser(), {}, {}, {}, {}, {}, true, {},{})
 }

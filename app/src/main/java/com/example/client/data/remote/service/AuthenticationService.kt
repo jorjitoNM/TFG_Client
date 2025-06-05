@@ -20,4 +20,7 @@ interface AuthenticationService {
     suspend fun refreshToken(
         @Header("Authorization") token: String,
     ): Response<String>
+
+    @POST("api/auth/google/")
+    suspend fun validateGoogleLogin(@Body body: Map<String, String>): Response<Token>
 }

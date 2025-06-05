@@ -15,4 +15,10 @@ class AuthenticationDatasource @Inject constructor(
 
     suspend fun login(authenticationUser: AuthenticationUser): NetworkResult<Token> =
         safeApiCall { authenticationService.login(authenticationUser) }
+
+    suspend fun validateGoogleToken(idToken: String): NetworkResult<Token> =
+        safeApiCall {
+            authenticationService.validateGoogleLogin(mapOf("token" to idToken))
+        }
+
 }

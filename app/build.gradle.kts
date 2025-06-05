@@ -142,5 +142,12 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation (libs.firebase.auth.ktx)
+    implementation ("com.google.android.gms:play-services-auth:20.6.0")
+
+
+
 
 }

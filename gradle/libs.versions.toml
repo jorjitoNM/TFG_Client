@@ -1,5 +1,6 @@
 [versions]
 agp = "8.6.1"
+credentialsPlayServicesAuth = "1.5.0"
 datastorePreferences = "1.1.2"
 kotlin = "1.9.24"
 coreKtx = "1.15.0"
@@ -35,12 +36,16 @@ biometricKtx = "1.4.0-alpha02"
 securityCryptoKtx = "1.1.0-alpha07"
 securityCrypto = "1.1.0-alpha07"
 appcompat = "1.7.0"
+playServicesAuth = "20.6.0"
 
 
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -102,6 +107,7 @@ androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx",
 androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
