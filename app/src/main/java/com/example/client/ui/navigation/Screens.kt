@@ -67,10 +67,10 @@ object MapSearch : AppDestination{
 object NormalNoteDetail : AppDestination {
     override val route: Any = NormalNoteDetailDestination
     override val title: String = "Note Detail"
-    override val isBottomBarVisible: Boolean = true
+    override val isBottomBarVisible: Boolean = false
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
-            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
             fabVisible = false
         )
     override val isTopBarVisible: Boolean = true

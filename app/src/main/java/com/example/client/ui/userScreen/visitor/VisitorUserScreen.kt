@@ -185,12 +185,6 @@ fun VisitorUserContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(
-                    text = user.rol,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
@@ -204,7 +198,7 @@ fun VisitorUserContent(
                         .width(120.dp)
                 ) {
                     Text(
-                        text = if (isFollowing) "Siguiendo" else "Seguir",
+                        text = if (isFollowing) "Following" else "Follow",
                         color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.labelLarge
                     )
@@ -220,9 +214,9 @@ fun VisitorUserContent(
                 ) {
                     UserStat(number = user.notes.size, label = "Posts")
                     Spacer(Modifier.width(32.dp)) // Espacio entre stats
-                    UserStat(number = user.followers.size, label = "Followers")
+                    UserStat(number = 0, label = "Followers")
                     Spacer(Modifier.width(32.dp))
-                    UserStat(number = user.following.size, label = "Following")
+                    UserStat(number = 0, label = "Following")
                 }
             }
         }
@@ -235,12 +229,28 @@ fun VisitorUserContent(
             modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
         )
 
-        NoteList(
-            notes = notes,
-            onNoteClick = {},
-            onFavClick = onFavClick,
-            onLikeClick = onLikeClick
-        )
+        if (notes.isEmpty()) {
+            // Mensaje cuando no hay notas/fotos
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "This user still doesn't have any notes.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            NoteList(
+                notes = notes,
+                onNoteClick = {},
+                onFavClick = onFavClick,
+                onLikeClick = onLikeClick
+            )
+        }
     }
 }
 
@@ -249,13 +259,10 @@ class VisitorUserPreviewProvider : PreviewParameterProvider<VisitorUserPreviewDa
         VisitorUserPreviewData(
             user = UserDTO(
                 username = "dave",
-                rol = "PREMIUM",
                 notes = listOf(
                     NoteDTO(id = 1, title = "Granada", content = "Alhambra", type = NoteType.HISTORICAL),
                     NoteDTO(id = 2, title = "Madrid", content = "Museo del Prado", type = NoteType.CULTURAL)
                 ),
-                followers = listOf(UserDTO(username = "eve"), UserDTO(username = "frank")),
-                following = listOf(UserDTO(username = "eve"), UserDTO(username = "frank"))
             ),
             notes = listOf(
                 NoteDTO(id = 1, title = "Granada", content = "Alhambra", type = NoteType.HISTORICAL),

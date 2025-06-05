@@ -67,6 +67,8 @@ fun UserScreen(
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(UserEvent.LoadUser)
+        viewModel.handleEvent(UserEvent.GetFollowers)
+        viewModel.handleEvent(UserEvent.GetFollowing)
     }
 
     LaunchedEffect(uiState.aviso) {
@@ -98,6 +100,8 @@ fun UserScreen(
             UserContent(
                 notes = uiState.notes,
                 user = uiState.user,
+                followers = uiState.followers,
+                following = uiState.following,
                 selectedTab = uiState.selectedTab,
                 onTabSelected = { tab ->
                     viewModel.handleEvent(UserEvent.SelectTab(tab))
@@ -132,6 +136,8 @@ fun UserScreen(
 fun UserContent(
     notes: List<NoteDTO>,
     user: UserDTO,
+    followers: List<UserDTO>,
+    following: List<UserDTO>,
     selectedTab: UserTab,
     onTabSelected: (UserTab) -> Unit,
     onFavClick: (Int) -> Unit,
@@ -178,24 +184,17 @@ fun UserContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(
-                    text = user.rol,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-
-                )
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 45.dp, end = 32.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    UserStat(number = user.notes.size, label = "Posts")
-                    Spacer(Modifier.width(32.dp)) // Espacio entre stats
-                    UserStat(number = user.followers.size, label = "Followers")
+                    UserStat(number = user?.notes?.size ?: 0, label = "Posts")
                     Spacer(Modifier.width(32.dp))
-                    UserStat(number = user.following.size, label = "Following")
+                    UserStat(number = followers.size, label = "Followers")
+                    Spacer(Modifier.width(32.dp))
+                    UserStat(number = following.size, label = "Following")
                 }
 
             }
@@ -338,6 +337,8 @@ fun Preview() {
         onTabSelected = {},
         selectedTab = UserTab.FAVORITES,
         onFavClick = {},
-        onLikeClick = {}
+        onLikeClick = {},
+        followers = emptyList(),
+        following = emptyList()
     )
 }

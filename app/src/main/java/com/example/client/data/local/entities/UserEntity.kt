@@ -7,6 +7,5 @@ import androidx.room.PrimaryKey
 data class UserEntity(
     @PrimaryKey val username: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val rol : String,
     val userLogged : String
 )

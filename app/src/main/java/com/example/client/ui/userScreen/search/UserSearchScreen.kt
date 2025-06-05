@@ -289,24 +289,6 @@ fun UserCard(
                     color = textColor,
                     fontWeight = FontWeight.Medium
                 )
-
-                // Solo si es premium, muestra el badge
-                if (user.rol == "PREMIUM") {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(Color(0xFF4CAF50))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "PREMIUM",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1
-                        )
-                    }
-                }
             }
 
             // Icono de eliminar (solo si tiene callback)
@@ -352,9 +334,9 @@ class UserSearchStateProvider : PreviewParameterProvider<UserSearchState> {
         // Estado: con usuarios encontrados
         UserSearchState(
             users = listOf(
-                UserDTO(username = "alice", rol = "PREMIUM"),
-                UserDTO(username = "bob", rol = "FREE"),
-                UserDTO(username = "charlie", rol = "PREMIUM")
+                UserDTO(username = "alice", ),
+                UserDTO(username = "bob",) ,
+                UserDTO(username = "charlie",)
             ),
             isLoading = false,
             searchText = "a",
@@ -374,9 +356,9 @@ class UserSearchStateProvider : PreviewParameterProvider<UserSearchState> {
             showEmptyState = true,
         ),UserSearchState(
             users = listOf(
-                UserDTO(username = "alice", rol = "PREMIUM"),
-                UserDTO(username = "bob", rol = "FREE"),
-                UserDTO(username = "charlie", rol = "PREMIUM")
+                UserDTO(username = "alice",),
+                UserDTO(username = "bob", ),
+                UserDTO(username = "charlie", )
             ),
             isLoading = false,
             searchText = "",

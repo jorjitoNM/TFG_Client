@@ -25,6 +25,12 @@ interface FollowService {
         @Path("username") username: String
     ): Response<List<UserDTO>>
 
+    @GET("users/followers")
+    suspend fun getMyFollowers(): Response<List<UserDTO>>
+
+    @GET("users/following")
+    suspend fun getMyFollowing(): Response<List<UserDTO>>
+
     @GET("users/is-following")
     suspend fun isFollowing(
         @Query("username") username: String
