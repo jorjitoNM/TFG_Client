@@ -29,6 +29,8 @@ android {
         create("development") {
             dimension = "env"
             buildConfigField("String", "API_URL", "\"http://192.168.1.134:8080/\"")
+            buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${project.findProperty("GOOGLE_CLIENT_ID")}\"")
+
         }
     }
 
@@ -113,6 +115,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
 
     implementation(libs.material)
+    implementation(project(":app"))
 
 
     kapt(libs.hilt.compiler)
@@ -144,8 +147,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.credentials.play.services.auth)
-    implementation (libs.firebase.auth.ktx)
-    implementation ("com.google.android.gms:play-services-auth:20.6.0")
+    implementation (libs.play.services.auth.v2130)
+    implementation (libs.androidx.credentials)
 
 
 

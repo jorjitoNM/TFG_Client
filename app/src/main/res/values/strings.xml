@@ -25,4 +25,6 @@
     <string name="navigate_back">Navigate back</string>
     <string name="login_with_fingerprint">Sign in with fingerprint</string>
     <string name="sign_in_with_google">Log in with Google\n</string>
+    <string name="default_web_client_id">142010296157-sg39kb0dkjusbdfj11dtgklqbjeuuolm.apps.googleusercontent.com</string>
+
 </resources>
