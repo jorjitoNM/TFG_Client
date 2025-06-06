@@ -14,8 +14,8 @@
 
 ## 🚀 What is NOMADA?
 
-NOMADA is a **revolutionary** 📱 location-based note-taking Android application that transforms how you capture and share experiences!  
-Create notes tied to specific places, discover hidden gems from other users, and build a social network around real-world locations! 🌟
+#### Nomada is a **revolutionary** 📱 location-based note-taking Android application that transforms how you capture and share experiences!
+#### Create notes tied to specific places, discover hidden gems from other users, and build a social network around real-world locations! 🌟
 ---
 
 ## ✨ Amazing Features
@@ -55,7 +55,7 @@ Create different types of notes with unique icons for each category:
 - 🏷️ **Filter by Note Type** - Find exactly what you're looking for
 
 <div align="center">
-<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/ic_note_multinote.png" alt="Multiple Notes Marker" width="48"/>
+<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/multinote.svg" alt="Multiple Notes Marker" width="48"/>
 <br/>
 <em>Special marker for locations with multiple notes</em>
 </div>
@@ -155,12 +155,12 @@ Create different types of notes with unique icons for each category:
 
 <h3>🎨 <b>App Icons & Assets</b></h3>
 
-<span style="display: inline-flex; align-items: center; gap: 6px;">
-  <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/google_logo.png" alt="Google Logo" width="16"/>
+<span>
+  <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/google_logo.png" width="16"/>
   <span>Google Authentication</span>
 </span>
 
-<br><br>
+<br>
 
 <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/image.png" alt="Splash Image" width="100"/><br/>
 <em>Splash Screen Animation</em>
