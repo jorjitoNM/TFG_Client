@@ -160,7 +160,7 @@ Create different types of notes with unique icons for each category:
   <span>Google Authentication</span>
 </span>
 
-<br><br>
+<br>
 
 <span>
   <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/google_marker.svg" width="16"/>
