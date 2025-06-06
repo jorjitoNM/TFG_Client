@@ -16,11 +16,6 @@
 
 NOMADA is a **revolutionary** 📱 location-based note-taking Android application that transforms how you capture and share experiences!  
 Create notes tied to specific places, discover hidden gems from other users, and build a social network around real-world locations! 🌟
-
-<div align="center">
-<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/start_screen_background_big.png" alt="App Background" width="300"/>
-</div>
-
 ---
 
 ## ✨ Amazing Features
@@ -158,15 +153,20 @@ Create different types of notes with unique icons for each category:
 
 <div align="center">
 
-### 🎨 **App Icons & Assets**
+<h3>🎨 <b>App Icons & Assets</b></h3>
 
-<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/google_logo.png" alt="Google Logo" width="32"/> Google Authentication
+<span style="display: inline-flex; align-items: center; gap: 6px;">
+  <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/google_logo.png" alt="Google Logo" width="16"/>
+  <span>Google Authentication</span>
+</span>
 
-<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/image.png" alt="Splash Image" width="100"/>
-<br/>
+<br><br>
+
+<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/image.png" alt="Splash Image" width="100"/><br/>
 <em>Splash Screen Animation</em>
 
 </div>
+
 
 ---
 
