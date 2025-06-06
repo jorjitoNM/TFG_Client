@@ -162,8 +162,10 @@ Create different types of notes with unique icons for each category:
 
 <br>
 
-<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/image.png" alt="Splash Image" width="100"/><br/>
-<em>Splash Screen Animation</em>
+<span>
+  <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/google_marker.svg" width="16"/>
+  <span>Google Marker</span>
+</span>
 
 </div>
 
