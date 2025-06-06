@@ -119,7 +119,7 @@ fun UserSearchScreenContent(
                     .padding(horizontal = 16.dp, vertical = 10.dp)
                     .height(56.dp)
                     .focusRequester(focusRequester),
-                placeholder = { Text("Buscar usuarios...") },
+                placeholder = { Text("Search users...") },
                 singleLine = true,
                 leadingIcon = {
                     Icon(
@@ -165,14 +165,14 @@ fun UserSearchScreenContent(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "No hay búsquedas recientes",
+                            text = "There are no recent users",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.95f)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text =
-                                "Cuando busques o selecciones usuarios aparecerán aquí.",
+                                "When you search for users, they will appear here.",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
@@ -199,13 +199,13 @@ fun UserSearchScreenContent(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "No hemos encontrado ningún usuario",
+                            text = "No users found",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.95f)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Intenta buscar con otro nombre o revisa la ortografía.",
+                            text = "Try to find with a different name or check your spelling.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
                             textAlign = TextAlign.Center

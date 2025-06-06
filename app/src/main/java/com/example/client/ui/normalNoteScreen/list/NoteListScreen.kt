@@ -52,8 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.data.model.NoteDTO
+import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.common.composables.formatDateTime
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -157,10 +159,12 @@ fun NoteListContent(
     isFilterExpanded: Boolean,
     onFilterExpandToggle: () -> Unit,
 ) {
+    val publicNotes = notes.filter { it.privacy == NotePrivacy.PUBLIC }
+
     val filteredNotes = if (searchQuery.isBlank()) {
-        notes
+        publicNotes
     } else {
-        notes.filter { note ->
+        publicNotes.filter { note ->
             note.title.contains(searchQuery, ignoreCase = true) ||
                     (note.content?.contains(searchQuery, ignoreCase = true) == true)
         }
@@ -561,16 +565,7 @@ fun NoteItem(
     }
 }
 
-fun formatDateTime(dateTimeStr: String): String {
-    return try {
-        val formatter = DateTimeFormatter.ISO_DATE_TIME
-        val dateTime = LocalDateTime.parse(dateTimeStr, formatter)
-        val outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-        dateTime.format(outputFormatter)
-    } catch (e: Exception) {
-        dateTimeStr
-    }
-}
+
 
 @Preview(name = "Portrait Mode", showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable

@@ -34,12 +34,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -82,8 +86,13 @@ import coil.compose.AsyncImage
 import com.example.client.R
 import com.example.client.domain.model.google.Location
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.common.composables.getGooglePhotoUrl
 import com.example.client.ui.navigation.NoteMapDestination
 import kotlinx.coroutines.delay
+import java.text.DateFormat.FULL
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 
 @Composable
@@ -177,7 +186,7 @@ private fun SearchBarSection(
                 .padding(horizontal = 16.dp, vertical = 10.dp)
                 .height(56.dp)
                 .focusRequester(focusRequester),
-            placeholder = { Text("Buscar lugares...") },
+            placeholder = { Text("Search places...") },
             singleLine = true,
             leadingIcon = {
                 IconButton(onClick = onNavigateBack) {
@@ -240,7 +249,7 @@ private fun LoadingIndicator() {
 @Composable
 private fun EmptyState() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("No se encontraron resultados", color = Color.Gray)
+        Text("No results found", color = Color.Gray)
     }
 }
 @Composable
@@ -289,7 +298,7 @@ fun ExpandableAddress(
                     TextButton(
                         onClick = {
                             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("Dirección", address)
+                            val clip = ClipData.newPlainText("Address", address)
                             clipboard.setPrimaryClip(clip)
                             copied = true
                         },
@@ -297,7 +306,7 @@ fun ExpandableAddress(
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Text(
-                            text = if (expanded) "Ver menos" else "Ver más",
+                            text = if (expanded) "Show less" else "Show more",
                             color = secondaryTextColor,
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -315,7 +324,7 @@ fun ExpandableAddress(
                 TextButton(
                     onClick = {
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("Dirección", address)
+                        val clip = ClipData.newPlainText("Address", address)
                         clipboard.setPrimaryClip(clip)
                         copied = true
                     },
@@ -329,7 +338,7 @@ fun ExpandableAddress(
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                     Text(
-                        text = "Copiar dirección",
+                        text = "Copy address",
                         color = secondaryTextColor,
                         style = MaterialTheme.typography.labelSmall
                     )
@@ -342,7 +351,7 @@ fun ExpandableAddress(
                 exit = fadeOut()
             ) {
                 Text(
-                    text = "¡Copiado al portapapeles!",
+                    text = "¡Copied to clipboard!",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier
@@ -361,6 +370,7 @@ fun PlaceCard(
     onClick: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var showSchedule by remember { mutableStateOf(false) }
     var selectedPhotoReference by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val isDarkMode = isSystemInDarkTheme()
@@ -370,6 +380,7 @@ fun PlaceCard(
     val openColor = Color(0xFF4CAF50)
     val closedColor = Color.Red
     val apiKey = stringResource(R.string.google_maps_key)
+
     // Dialog para la imagen ampliada
     if (selectedPhotoReference != null) {
         PlaceImageDialog(
@@ -439,7 +450,7 @@ fun PlaceCard(
                     Text(
                         text = place.openingHours,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (place.openingHours.contains("Abierto", ignoreCase = true))
+                        color = if (place.openingHours.contains("Open", ignoreCase = true))
                             openColor else closedColor
                     )
                 }
@@ -473,7 +484,6 @@ fun PlaceCard(
                             AsyncImage(
                                 model = getGooglePhotoUrl(
                                     photo.photoReference,
-                                    apiKey,
                                     maxWidth = 200 // Miniatura
                                 ),
                                 contentDescription = null,
@@ -490,6 +500,34 @@ fun PlaceCard(
                 }
 
                 // Website
+                if (!place.website.isNullOrBlank()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Website",
+                            tint = secondaryTextColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = place.website,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.clickable {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(place.website))
+                                context.startActivity(intent)
+                            }
+                        )
+                    }
+                }
+
                 // Phone number
                 if (!place.phoneNumber.isNullOrBlank()) {
                     Row(
@@ -517,7 +555,6 @@ fun PlaceCard(
                     }
                 }
 
-
                 // Rating
                 if (place.rating != null) {
                     Row(
@@ -532,14 +569,132 @@ fun PlaceCard(
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "${place.rating} (${place.userRatingsTotal ?: 0} reseñas)",
+                            text = "${place.rating} (${place.userRatingsTotal ?: 0} reviews)",
                             style = MaterialTheme.typography.bodyMedium,
                             color = textColor
                         )
                     }
                 }
+
+                // Horarios activos button
+                if (!place.openingHoursFull.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Horarios",
+                            tint = secondaryTextColor,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Schedule",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = textColor,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = { showSchedule = !showSchedule },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (showSchedule) Icons.Default.KeyboardArrowUp
+                                else Icons.Default.KeyboardArrowDown,
+                                contentDescription = if (showSchedule) "Ocultar horarios" else "Mostrar horarios",
+                                tint = secondaryTextColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    // Horarios expandibles
+                    AnimatedVisibility(visible = showSchedule) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                ,
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isDarkMode) Color(0xFF2A2A2A) else Color(0xFFF8F8F8)
+                            ),
+                        ) {
+                            val todayName = LocalDate.now().dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH)
+                            Column(
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                place.openingHoursFull.forEach { dayText ->
+                                    val parts = dayText.split(": ", limit = 2)
+                                    val isToday = parts[0].equals(todayName, ignoreCase = true)
+                                    val isClosed = parts.getOrNull(1)?.contains("Closed", ignoreCase = true) == true
+
+                                    if (parts.size == 2) {
+                                        val intervals = parts[1].split(",").map { it.trim() }
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp)
+                                        ) {
+                                            intervals.forEachIndexed { index, interval ->
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween
+                                                ) {
+                                                    Text(
+                                                        text = if (index == 0) parts[0] else "",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = when {
+                                                            isToday && isClosed -> Color.Red
+                                                            isToday && !isClosed -> Color(0xFF4CAF50) // Verde
+                                                            else -> textColor
+                                                        },
+                                                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
+                                                        modifier = Modifier.weight(0.4f)
+                                                    )
+                                                    Text(
+                                                        text = interval,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = secondaryTextColor,
+                                                        modifier = Modifier.weight(0.6f),
+                                                        textAlign = TextAlign.End
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        // Día cerrado u otro formato
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = parts[0],
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = if (isToday) Color.Red else textColor,
+                                                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
+                                                modifier = Modifier.weight(0.4f)
+                                            )
+                                            Text(
+                                                text = "",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = secondaryTextColor,
+                                                modifier = Modifier.weight(0.6f)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        }
+
 
         // Divider
         Divider(
@@ -548,7 +703,9 @@ fun PlaceCard(
             modifier = Modifier.fillMaxWidth()
         )
     }
-}
+
+
+
 
 
 
@@ -663,7 +820,6 @@ fun PlaceImageDialog(
                     AsyncImage(
                         model = getGooglePhotoUrl(
                             selectedPhotoReference,
-                            apiKey,
                             maxWidth = 3000
                         ),
                         contentDescription = null,
@@ -789,19 +945,19 @@ fun RecentsList(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.LocationOn,
-                    contentDescription = "Sin lugares recientes",
+                    contentDescription = "No recent places",
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                     modifier = Modifier.size(80.dp)
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "No hay búsquedas recientes",
+                    text = "There are no recent places",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.95f)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Cuando busques o selecciones lugares aparecerán aquí.",
+                    text = "When you search for a place, it will appear here",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray,
                     textAlign = TextAlign.Center,

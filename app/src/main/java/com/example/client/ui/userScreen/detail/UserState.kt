@@ -12,6 +12,7 @@ data class UserState(
     val notes: List<NoteDTO> = emptyList(),
     val followers: List<UserDTO> = emptyList(),
     val following: List<UserDTO> = emptyList(),
+    val selectedNoteId : Int = 0
 )
 
 enum class UserTab { NOTES, FAVORITES, LIKES }

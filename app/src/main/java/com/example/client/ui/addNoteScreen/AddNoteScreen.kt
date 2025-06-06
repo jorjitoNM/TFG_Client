@@ -66,6 +66,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.common.composables.ColorfulLinearRatingBar
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.example.client.ui.theme.*
 import timber.log.Timber
@@ -751,104 +752,6 @@ private fun PrivacyTabs(
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ColorfulLinearRatingBar(
-    rating: Int,
-    onRatingChanged: (Int) -> Unit,
-    maxRating: Int = 10,
-    modifier: Modifier = Modifier,
-    isDarkMode: Boolean
-) {
-    fun getBarColor(value: Float): Color = when {
-        value <= maxRating / 3f -> Color(0xFFE53935) // Rojo
-        value <= 2 * maxRating / 3f -> Color(0xFFFF903B) // Amarillo
-        else -> Color(0xFF43A047) // Verde
-    }
-
-    var sliderValue by remember { mutableStateOf(rating.toFloat()) }
-
-    Column(
-        modifier = modifier.padding(top = 10.dp, bottom = 3.dp)
-    ) {
-        // Calcula el progreso del slider (0f a 1f)
-        val progress = (sliderValue - 1f) / (maxRating.toFloat() - 1f)
-
-        Slider(
-            value = sliderValue,
-            onValueChange = {
-                sliderValue = it
-                // Si quieres actualizar en tiempo real con decimales, puedes mostrarlo
-                // Si prefieres solo enteros, usa: onRatingChanged(it.roundToInt())
-            },
-            onValueChangeFinished = {
-                // Aquí puedes redondear y notificar el valor final entero
-                onRatingChanged(sliderValue.roundToInt())
-            },
-            valueRange = 1f..maxRating.toFloat(),
-            steps = 0, // Slider continuo (decimales)
-            colors = SliderDefaults.colors(
-                thumbColor = getBarColor(sliderValue),
-                activeTrackColor = Color.Transparent,
-                inactiveTrackColor = Color.Transparent
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp),
-            thumb = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .background(
-                            color = getBarColor(sliderValue),
-                            shape = CircleShape
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = getBarColor(sliderValue),
-                            shape = CircleShape
-                        )
-                )
-            },
-            track = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                color = if (!isDarkMode) Color(0xFFD7D7D7) else Color(
-                                    0xFF5F5F5F
-                                ),
-                                shape = RoundedCornerShape(3.dp)
-                            )
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(progress)
-                            .fillMaxHeight()
-                            .background(
-                                color = getBarColor(sliderValue),
-                                shape = RoundedCornerShape(3.dp)
-                            )
-                    )
-                }
-            }
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = "${sliderValue.roundToInt()} / $maxRating",
-            fontSize = 16.sp,
-            color = Color.Gray,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-    }
-}
 
 @Composable
 fun NoteTypeTabs(

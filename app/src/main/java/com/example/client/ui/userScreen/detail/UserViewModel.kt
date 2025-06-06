@@ -51,14 +51,14 @@ class UserViewModel @Inject constructor(
                     UserTab.LIKES -> getLikedNotes()
                 }
             }
-
-            UserEvent.GetMyNote -> getMyNotes()
+           is  UserEvent.GetMyNote -> getMyNotes()
             is UserEvent.DelFavNote -> delSavedNote(event.noteId)
             is UserEvent.DelLikeNote -> delLikedNote(event.noteId)
             is UserEvent.FavNote -> favNote(event.noteId)
             is UserEvent.LikeNote -> likeNote(event.noteId)
             is UserEvent.GetFollowers -> getFollowers()
             is UserEvent.GetFollowing -> getFollowing()
+            is UserEvent.SelectedNote -> selectNote(event.noteId)
         }
     }
 
@@ -359,6 +359,15 @@ class UserViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun selectNote(id: Int) {
+        _uiState.update {
+            it.copy(
+                selectedNoteId = id,
+                aviso = UiEvent.PopBackStack
+            )
         }
     }
 

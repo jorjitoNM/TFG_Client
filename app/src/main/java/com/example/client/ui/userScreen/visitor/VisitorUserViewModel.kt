@@ -46,6 +46,7 @@ class VisitorUserViewModel @Inject constructor(
             is VisitorUserEvent.AvisoVisto -> avisoVisto()
             is VisitorUserEvent.GetFollowers -> getFollowers(event.username)
             is VisitorUserEvent.GetFollowing -> getFollowing(event.username)
+            is VisitorUserEvent.SelectedNote -> selectNote(event.noteId)
         }
     }
 
@@ -228,6 +229,15 @@ class VisitorUserViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = true) }
                 }
             }
+        }
+    }
+
+    private fun selectNote(id: Int) {
+        _uiState.update {
+            it.copy(
+                selectedNoteId = id,
+                aviso = UiEvent.PopBackStack
+            )
         }
     }
 

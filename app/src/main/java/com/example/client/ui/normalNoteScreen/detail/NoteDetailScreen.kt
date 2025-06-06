@@ -2,7 +2,6 @@ package com.example.client.ui.normalNoteScreen.detail
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +11,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
@@ -24,35 +21,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -72,9 +52,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.normalNoteScreen.list.formatDateTime
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import com.example.client.ui.common.composables.formatDateTime
 
 @Composable
 fun NoteDetailScreen(
@@ -115,7 +93,7 @@ fun NoteDetailScreen(
 fun NoteDetailContent(
     state: NoteDetailState,
 
-) {
+    ) {
     val note = state.note ?: return
     val photoList = List(8) { R.drawable.ic_launcher_background }
     Column(
@@ -242,20 +220,6 @@ fun NoteDetailContent(
                         color = Color.Black
                     )
                 }
-                NotePrivacy.FOLLOWERS -> {
-                    Icon(
-                        imageVector = Icons.Default.AccountBox,
-                        contentDescription = "Solo seguidores",
-                        tint = Color.Black,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Only for Followers",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Black
-                    )
-                }
                 NotePrivacy.PUBLIC -> {
                     Icon(
                         imageVector = Icons.Default.Person,
@@ -355,7 +319,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
                 id = 2,
                 title = "Team Meeting",
                 content = "Discuss project roadmap and assign tasks for the next sprint.",
-                privacy = NotePrivacy.FOLLOWERS,
+                privacy = NotePrivacy.PUBLIC,
                 rating = 4,
                 ownerUsername = "manager",
                 created = "2023-04-15T10:30:00",
@@ -374,7 +338,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
                 id = 3,
                 title = "Shopping List",
                 content = "Milk, eggs, bread, cheese",
-                privacy = NotePrivacy.PRIVATE,
+                privacy = NotePrivacy.PUBLIC,
                 rating = 5,
                 ownerUsername = "user123",
                 created = "2023-04-15T10:30:00",
@@ -419,7 +383,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
 fun NoteDetailScreenPreview(@PreviewParameter(NoteDetailStateProvider::class) state: NoteDetailState) {
     MaterialTheme {
         Surface {
-            NoteDetailContent(state = state)
+           NoteDetailContent(state = state)
         }
     }
 }

@@ -12,4 +12,5 @@ data class VisitorUserState(
     val aviso: UiEvent? = null,
     val followers: List<UserDTO> = emptyList(),
     val following: List<UserDTO> = emptyList(),
+    val selectedNoteId : Int = 0
 )

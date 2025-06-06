@@ -1,13 +1,10 @@
 package com.example.client.ui.userScreen.detail
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,22 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material.icons.outlined.ThumbUp
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -43,14 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.model.note.NoteType
@@ -62,6 +45,7 @@ import com.example.client.ui.common.composables.UserStat
 fun UserScreen(
     showSnackbar: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel(),
+    onNavigateToNoteDetail: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -80,6 +64,7 @@ fun UserScreen(
                 }
 
                 is UiEvent.PopBackStack -> {
+                    onNavigateToNoteDetail(uiState.selectedNoteId)
                     viewModel.handleEvent(UserEvent.AvisoVisto)
                 }
             }
@@ -125,7 +110,10 @@ fun UserScreen(
                             viewModel.handleEvent(UserEvent.LikeNote(noteId))
                         }
                     }
-                }
+                },
+                onNoteClick = { noteId ->
+                    viewModel.handleEvent(UserEvent.SelectedNote(noteId))
+                },
             )
         }
     }
@@ -139,6 +127,7 @@ fun UserContent(
     followers: List<UserDTO>,
     following: List<UserDTO>,
     selectedTab: UserTab,
+    onNoteClick: (Int) -> Unit,
     onTabSelected: (UserTab) -> Unit,
     onFavClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit
@@ -214,7 +203,7 @@ fun UserContent(
             UserTab.NOTES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {},
+                    onNoteClick = {onNoteClick(it)},
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -223,7 +212,7 @@ fun UserContent(
             UserTab.FAVORITES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {},
+                    onNoteClick = {onNoteClick(it)},
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -232,7 +221,7 @@ fun UserContent(
             UserTab.LIKES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {},
+                    onNoteClick = {onNoteClick(it)},
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -261,13 +250,13 @@ fun TabSelector(
         Row(modifier = Modifier.fillMaxWidth()) {
 
             TabButton(
-                text = "Notas",
+                text = "Notes",
                 isSelected = selectedTab == UserTab.NOTES,
                 onClick = { onTabSelected(UserTab.NOTES) },
                 modifier = Modifier.weight(1f)
             )
             TabButton(
-                text = "Favoritos",
+                text = "Favorites",
                 isSelected = selectedTab == UserTab.FAVORITES,
                 onClick = { onTabSelected(UserTab.FAVORITES) },
                 modifier = Modifier.weight(1f)
@@ -339,6 +328,7 @@ fun Preview() {
         onFavClick = {},
         onLikeClick = {},
         followers = emptyList(),
-        following = emptyList()
+        following = emptyList(),
+        onNoteClick = {},
     )
 }

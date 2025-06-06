@@ -16,7 +16,7 @@ import com.example.client.ui.common.Constantes
 
 
 val appDestinationList = listOf(
-    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch, VisitorUserScreen)
+    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch, VisitorUserScreen, MyNoteDetail)
 
 
 interface AppDestination {
@@ -75,6 +75,19 @@ object NormalNoteDetail : AppDestination {
         )
     override val isTopBarVisible: Boolean = true
 }
+
+object MyNoteDetail : AppDestination {
+    override val route: Any = MyNoteDetailDestination
+    override val title: String = "Your Note"
+    override val isBottomBarVisible: Boolean = false
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+}
+
 
 
 

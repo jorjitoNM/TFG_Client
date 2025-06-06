@@ -55,17 +55,20 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
+import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.NoteList
 import com.example.client.ui.common.composables.UserStat
+import com.example.client.ui.userScreen.detail.UserEvent
 
 
 @Composable
 fun VisitorUserScreen(
     username: String,
     showSnackbar: (String) -> Unit,
-    viewModel: VisitorUserViewModel = hiltViewModel()
+    viewModel: VisitorUserViewModel = hiltViewModel(),
+    onNavigateToNoteDetail: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -81,6 +84,9 @@ fun VisitorUserScreen(
         uiState.aviso?.let { event ->
             if (event is UiEvent.ShowSnackbar) {
                 showSnackbar(event.message)
+                viewModel.handleEvent(VisitorUserEvent.AvisoVisto)
+            } else if (event is UiEvent.PopBackStack) {
+                onNavigateToNoteDetail(uiState.selectedNoteId)
                 viewModel.handleEvent(VisitorUserEvent.AvisoVisto)
             }
         }
@@ -130,7 +136,10 @@ fun VisitorUserScreen(
                                 viewModel.handleEvent(VisitorUserEvent.LikeNote(noteId))
                             }
                         }
-                    }
+                    },
+                    onNoteClick = { noteId ->
+                        viewModel.handleEvent(VisitorUserEvent.SelectedNote(noteId))
+                    },
                 )
 
             }
@@ -148,8 +157,11 @@ fun VisitorUserContent(
     following: List<UserDTO>,
     onFollowClick: () -> Unit,
     onFavClick: (Int) -> Unit,
+    onNoteClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit
 ) {
+    val publicNotes = notes.filter { it.privacy == NotePrivacy.PUBLIC }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -235,7 +247,7 @@ fun VisitorUserContent(
             modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
         )
 
-        if (notes.isEmpty()) {
+        if (publicNotes.isEmpty()) {
             // Mensaje cuando no hay notas/fotos
             Box(
                 modifier = Modifier
@@ -244,15 +256,15 @@ fun VisitorUserContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "This user still doesn't have any notes.",
+                    text = "This user still doesn't have any notes to show.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         } else {
             NoteList(
-                notes = notes,
-                onNoteClick = {},
+                notes = publicNotes,
+                onNoteClick = onNoteClick,
                 onFavClick = onFavClick,
                 onLikeClick = onLikeClick
             )
@@ -298,7 +310,8 @@ fun VisitorUserContentPreview(
         onFavClick = {},
         onLikeClick = {},
         followers = emptyList(),
-        following = emptyList()
+        following = emptyList(),
+        onNoteClick = {}
     )
 }
 

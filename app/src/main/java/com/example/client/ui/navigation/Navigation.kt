@@ -120,7 +120,8 @@ fun Navigation() {
                     showSnackbar = { showSnackbar(it) },
                     onNavigateToList = { navController.navigate(MapSearchDestination) },
                     sharedLocationViewModel = sharedLocationViewModel,
-                    onAddNoteClick = { navController.navigate(AddNoteDestination) }
+                    onAddNoteClick = { navController.navigate(AddNoteDestination) },
+                    onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))}
                 )
             }
             composable<RegisterDestination> {
@@ -149,8 +150,14 @@ fun Navigation() {
             }
 
             composable<UserScreenDestination> {
-                UserScreen(showSnackbar = { showSnackbar(it) }
-                )
+                UserScreen(showSnackbar = { showSnackbar(it) }, onNavigateToNoteDetail = {navController.navigate(MyNoteDetailDestination(it))})
+
+            }
+
+            composable<MyNoteDetailDestination> { backStackEntry ->
+                val destination = backStackEntry.toRoute() as MyNoteDetailDestination
+                com.example.client.ui.userScreen.myNoteDetail.NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) })
+
             }
             composable<UserSearchDestination> {
                 UserSearchScreen( showSnackbar = { showSnackbar(it) }, onNavigateToVisitor = { navController.navigate(VisitorUserScreenDestination(it)) })
@@ -158,7 +165,7 @@ fun Navigation() {
 
             composable<VisitorUserScreenDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as VisitorUserScreenDestination
-                VisitorUserScreen(username = destination.username, showSnackbar = { showSnackbar(it) })
+                VisitorUserScreen(username = destination.username, showSnackbar = { showSnackbar(it) }, onNavigateToNoteDetail = {navController.navigate(NormalNoteDetailDestination(it))})
             }
 
             composable <AddNoteDestination> {

@@ -2,6 +2,7 @@ package com.example.client.ui.noteMap.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.client.BuildConfig
 import com.example.client.R
 import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
@@ -15,6 +16,7 @@ import com.example.client.domain.usecases.map.local.GetCachedLocationsUseCase
 import com.example.client.domain.usecases.map.local.InsertCachedLocationUseCase
 import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.common.composables.getGooglePhotoUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -40,10 +42,9 @@ class MapSearchViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
-    fun getLoggedUser() {
+    private fun getLoggedUser() {
         viewModelScope.launch {
-            val user = getUserUseCase()
-            when (user) {
+            when (val user = getUserUseCase()) {
                 is NetworkResult.Success -> {
                     _uiState.update { it.copy(userLogged = user.data.username) }
                 }
@@ -83,12 +84,11 @@ class MapSearchViewModel @Inject constructor(
         if (text.isNotBlank()) {
             searchJob = viewModelScope.launch {
                 delay(1500)
-                val apiKey = stringProvider.getString(R.string.google_maps_key)
-                when (val autoResult = getPlaceAutoCompleteUseCase(text, apiKey)) {
+                when (val autoResult = getPlaceAutoCompleteUseCase(text)) {
                     is NetworkResult.Success -> {
                         val predictions = autoResult.data.predictions.take(7)
                         val results = predictions.mapNotNull { prediction ->
-                            getLocationForPrediction(prediction, apiKey)
+                            getLocationForPrediction(prediction)
                         }
                         _uiState.update {
                             it.copy(
@@ -127,17 +127,17 @@ class MapSearchViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getLocationForPrediction(prediction: Prediction, apiKey: String): Location? {
-        return when (val detailsResult = getPlaceDetailsUseCase(prediction.placeId, apiKey)) {
+    private suspend fun getLocationForPrediction(prediction: Prediction): Location? {
+        return when (val detailsResult = getPlaceDetailsUseCase(prediction.placeId)) {
             is NetworkResult.Success -> {
                 val result = detailsResult.data.result
                 val photoUrl = result.photos?.firstOrNull()?.photoReference?.let {
-                    getGooglePhotoUrl(it, apiKey)
+                    getGooglePhotoUrl(it)
                 }
                 val openingHoursText = result.openingHours?.let { oh ->
                     when (oh.openNow) {
-                        true -> "Abierto ahora"
-                        false -> "Cerrado ahora"
+                        true -> "Open now"
+                        false -> "Closed"
                         else -> null
                     }
                 }
@@ -154,7 +154,8 @@ class MapSearchViewModel @Inject constructor(
                     website = result.website,
                     photos = result.photos?.map { photo ->
                         PlacePhoto(photoReference = photo.photoReference)
-                    } ?: emptyList()
+                    } ?: emptyList(),
+                    openingHoursFull = result.openingHours?.weekdayText
                 )
             }
             is NetworkResult.Error -> {
@@ -230,8 +231,3 @@ class MapSearchViewModel @Inject constructor(
 
 
 }
-
-fun getGooglePhotoUrl(photoReference: String, apiKey: String, maxWidth: Int = 400): String =
-    "https://maps.googleapis.com/maps/api/place/photo?maxwidth=$maxWidth&photoreference=$photoReference&key=$apiKey"
-
-

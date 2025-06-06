@@ -4,5 +4,4 @@ package com.example.client.domain.model.note
 enum class NotePrivacy(val displayName: String) {
     PUBLIC("Public"),
     PRIVATE("Private"),
-    FOLLOWERS("Followers");
 }
