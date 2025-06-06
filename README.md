@@ -39,12 +39,12 @@ Create different types of notes with unique icons for each category:
 
 | Note Type | Icon | Description |
 |-----------|------|-------------|
-| **Classic** 📖 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/ic_note_classic.png" width="32"/> | Everyday thoughts |
-| **Event** 🎉 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/ic_note_event.png" width="32"/> | Special occasions and events |
-| **Historical** 🏛️ | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/ic_note_historical.png" width="32"/> | Cultural heritage sites |
-| **Food** 🍕 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/ic_note_food.png" width="32"/> | Culinary adventures and reviews |
-| **Landscape** 🏔️ | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/ic_note_landscape.png" width="32"/> | Breathtaking natural landscapes |
-| **Cultural** 🎭 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/ic_note_cultural.png" width="32"/> | Art, museums, and cultural experiences |
+| **Classic** 📖 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/classic.svg" width="32"/> | Everyday thoughts |
+| **Event** 🎉 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/event.svg" width="32"/> | Special occasions and events |
+| **Historical** 🏛️ | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/historical.svg" width="32"/> | Cultural heritage sites |
+| **Food** 🍕 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/food.svg" width="32"/> | Culinary adventures and reviews |
+| **Landscape** 🏔️ | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/landscape.svg" width="32"/> | Breathtaking natural landscapes |
+| **Cultural** 🎭 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/cultural.svg" width="32"/> | Art, museums, and cultural experiences |
 
 </div>
 
