@@ -1,5 +1,6 @@
 package com.example.client.ui.normalNoteScreen.list
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,11 +47,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
@@ -355,10 +358,10 @@ fun FilterMenuOverlay(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Filtrar por $noteType",
-                            tint = iconTint
+                        Image(
+                            painter = painterResource(getNoteTypeIcon(noteType)),
+                            contentDescription = "Filtrar por ${noteType.name}",
+                            modifier = Modifier.size(30.dp)
                         )
                         Text(
                             text = noteType.name,
@@ -393,6 +396,19 @@ fun FilterMenuOverlay(
         }
     }
 }
+
+@Composable
+fun getNoteTypeIcon(noteType: NoteType): Int {
+    return when (noteType) {
+        NoteType.CLASSIC -> R.drawable.ic_note_classic
+        NoteType.EVENT -> R.drawable.ic_note_event
+        NoteType.HISTORICAL -> R.drawable.ic_note_historical
+        NoteType.FOOD -> R.drawable.ic_note_food
+        NoteType.LANDSCAPE -> R.drawable.ic_note_landscape
+        NoteType.CULTURAL -> R.drawable.ic_note_cultural
+    }
+}
+
 @Composable
 fun SearchBar(
     query: String,
