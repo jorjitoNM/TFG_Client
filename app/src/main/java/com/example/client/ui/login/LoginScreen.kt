@@ -43,9 +43,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.R
 import com.example.client.domain.model.user.AuthenticationUser
-import com.example.client.domain.usecases.authentication.buildPromptInfo
-import com.example.client.domain.usecases.authentication.createBiometricPrompt
-import com.example.client.domain.usecases.authentication.isBiometricAvailable
+import com.example.client.domain.useCases.authentication.buildPromptInfo
+import com.example.client.domain.useCases.authentication.createBiometricPrompt
+import com.example.client.domain.useCases.authentication.isBiometricAvailable
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.registerScreen.LogoAndMessage
 import com.example.client.ui.startScreen.AuthenticationActionButton

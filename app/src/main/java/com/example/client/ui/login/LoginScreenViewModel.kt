@@ -46,7 +46,7 @@ class LoginScreenViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     saveTokenUseCase.invoke(result.data)
                     securePreferencesRepository.saveCredentials(
-                        username = authenticationUser.username,
+                        email = authenticationUser.email,
                         password = authenticationUser.password
                     )
                     when (val authenticationResponse = firebaseLoginUseCase.invoke(authenticationUser)) {
@@ -88,9 +88,9 @@ class LoginScreenViewModel @Inject constructor(
 
     private fun loginWithBiometrics() {
         viewModelScope.launch(dispatcher) {
-            val (username, password) = securePreferencesRepository.getCredentials()
-            if (!username.isNullOrEmpty() && !password.isNullOrEmpty()) {
-                login(AuthenticationUser(username=username, password = password))
+            val (email, password) = securePreferencesRepository.getCredentials()
+            if (!email.isNullOrEmpty() && !password.isNullOrEmpty()) {
+                login(AuthenticationUser(email=email, password = password))
             } else {
                 _uiState.update {
                     it.copy(event = UiEvent.ShowSnackbar("Stored credentials not found"))

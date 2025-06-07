@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -506,9 +507,9 @@ fun NoteItem(
                 NoteTypeBadge(type = note.type)
                 if (note.type == NoteType.EVENT) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalAlignment = Alignment.Start
                     ) {
                         Text(
                             text = "Start: ${note.start?.let { formatDateTime(it) }}",
@@ -519,6 +520,7 @@ fun NoteItem(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+
                 }
             }
 
@@ -564,18 +566,14 @@ fun NoteItem(
 }
 
 
-@Preview(
-    name = "Portrait Mode",
-    showBackground = true,
-    device = "spec:width=411dp,height=891dp"
-)
+@Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
 @Composable
 fun Preview() {
     NoteListContent(
         notes = listOf(
             NoteDTO(title = "Nota 1", content = "Contenido 1", rating = 10, saved = true),
             NoteDTO(title = "Nota 1", rating = 5),
-            NoteDTO(title = "Nota 1", type = NoteType.EVENT, liked = true),
+            NoteDTO(title = "Nota 1", content = "dadadadasdad", type = NoteType.EVENT, liked = true, start = "01/02/2023 02:00", end = "01/02/2023 19:00"),
             NoteDTO(title = "Nota 1"),
             NoteDTO(title = "Nota 1"),
             NoteDTO(title = "Nota 1")
