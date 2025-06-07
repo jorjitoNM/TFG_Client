@@ -11,6 +11,7 @@ sealed class UserEvent {
     data object GetMyNote : UserEvent()
     data object GetFollowing : UserEvent()
     data object GetFollowers : UserEvent()
-    data class SelectedNote(val noteId: Int) : UserEvent()
+    data class SelectedNote(val noteId: Int, val isMyNote: Boolean) : UserEvent()
+    data object NavigationConsumed : UserEvent()
 
 }

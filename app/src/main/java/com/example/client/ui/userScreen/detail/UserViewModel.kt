@@ -14,6 +14,7 @@ import com.example.client.domain.usecases.social.GetNoteSavedUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.userScreen.DetailNavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,7 +59,9 @@ class UserViewModel @Inject constructor(
             is UserEvent.LikeNote -> likeNote(event.noteId)
             is UserEvent.GetFollowers -> getFollowers()
             is UserEvent.GetFollowing -> getFollowing()
-            is UserEvent.SelectedNote -> selectNote(event.noteId)
+            is UserEvent.NavigationConsumed -> clearNavigation()
+
+            is UserEvent.SelectedNote -> selectNote(event.noteId, event.isMyNote)
         }
     }
 
@@ -362,13 +365,19 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    private fun selectNote(id: Int) {
+    private fun selectNote(noteId: Int, isMyNote: Boolean) {
         _uiState.update {
             it.copy(
-                selectedNoteId = id,
-                aviso = UiEvent.PopBackStack
+                navigationEvent = if (isMyNote)
+                    DetailNavigationEvent.NavigateToMyNoteDetail(noteId)
+                else
+                    DetailNavigationEvent.NavigateToNormalNoteDetail(noteId)
             )
         }
+    }
+
+    private fun clearNavigation() {
+        _uiState.update { it.copy(navigationEvent = DetailNavigationEvent.None) }
     }
 
     private fun avisoVisto() {

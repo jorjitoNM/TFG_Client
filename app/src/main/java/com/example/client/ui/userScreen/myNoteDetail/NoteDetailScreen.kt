@@ -1,5 +1,9 @@
 package com.example.client.ui.userScreen.myNoteDetail
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,9 +22,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
@@ -53,6 +59,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
@@ -60,6 +67,7 @@ import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.ColorfulLinearRatingBar
 import com.example.client.ui.common.composables.formatDateTime
+import com.example.client.ui.normalNoteScreen.detail.AddImageButton
 
 @Composable
 fun NoteDetailScreen(
@@ -69,10 +77,14 @@ fun NoteDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
+    // Obtener nota y cargar imágenes
+    LaunchedEffect(noteId) {
         viewModel.handleEvent(NoteDetailEvent.GetNote(noteId))
     }
-
+    // Cargar imágenes cuando la nota esté lista
+    LaunchedEffect(state.note?.id) {
+        state.note?.id?.let { viewModel.loadNoteImages(it) }
+    }
     LaunchedEffect(state.aviso) {
         state.aviso?.let {
             when (it) {
@@ -101,10 +113,9 @@ fun NoteDetailScreen(
 @Composable
 fun NoteDetailContent(
     state: NoteDetailState,
-    onEvent: (NoteDetailEvent) -> Unit
+    onEvent: (NoteDetailEvent) -> Unit,
 ) {
     val note = state.note ?: return
-    val photoList = List(8) { R.drawable.ic_launcher_background }
 
     Column(
         modifier = Modifier
@@ -274,6 +285,7 @@ fun NoteDetailContent(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Only for you", color = Color.Black)
                             }
+
                             NotePrivacy.PUBLIC -> {
                                 Icon(
                                     imageVector = Icons.Default.Person,
@@ -309,6 +321,7 @@ fun NoteDetailContent(
                             color = Color.Black
                         )
                     }
+
                     NotePrivacy.PUBLIC -> {
                         Icon(
                             imageVector = Icons.Default.Person,
@@ -358,7 +371,6 @@ fun NoteDetailContent(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // Fecha de creación (solo en modo vista)
         if (!state.isEditing) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -379,53 +391,90 @@ fun NoteDetailContent(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Divider
             HorizontalDivider(
                 modifier = Modifier.fillMaxWidth(),
                 thickness = 1.dp,
                 color = Color.LightGray
             )
-
             Spacer(modifier = Modifier.height(16.dp))
+        }
 
-            // Photos section
-            Text(
-                text = "Photos",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
+        Text(
+            text = "Photos",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Photos section en grid de 2 columnas
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(500.dp) // Altura fija para la galería
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(500.dp)
+        ) {
+            val photos = note.photos
+            if (state.isImagesLoading) {
+                // Loader SOLO en la galería
+                Box(
+                    Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(photoList.size) { idx ->
-                        Image(
-                            painter = painterResource(id = photoList[idx]),
-                            contentDescription = "Photo $idx",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                        )
+                    items(photos.size) { idx ->
+                        Box(modifier = Modifier.aspectRatio(1f)) {
+                            AsyncImage(
+                                model = photos[idx],
+                                contentDescription = "Photo $idx",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(12.dp))
+                            )
+                            // Solo muestra el botón de eliminar si está en modo edición
+                            if (state.isEditing) {
+                                IconButton(
+                                    onClick = { onEvent(NoteDetailEvent.DeleteImage(photos[idx])) },
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .background(
+                                            Color.White.copy(alpha = 0.7f),
+                                            shape = CircleShape
+                                        )
+                                        .padding(2.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Delete photo",
+                                        tint = Color.Red,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    // Solo muestra el botón de agregar si está en modo edición y hay menos de 4 fotos
+                    if (state.isEditing && photos.size < 8) {
+                        item {
+                            AddImageButton(
+                                onLoadImages = { uris -> onEvent(NoteDetailEvent.SaveNoteImages(uris)) }
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
+
 
 
 

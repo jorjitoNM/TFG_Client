@@ -150,8 +150,11 @@ fun Navigation () {
             }
 
             composable<UserScreenDestination> {
-                UserScreen(showSnackbar = { showSnackbar(it) }, onNavigateToNoteDetail = {navController.navigate(MyNoteDetailDestination(it))})
-
+                UserScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateToNoteDetail = { navController.navigate(MyNoteDetailDestination(it)) },
+                    onNavigateToDetailObservable = { navController.navigate(NormalNoteDetailDestination(it)) }
+                )
             }
 
             composable<MyNoteDetailDestination> { backStackEntry ->

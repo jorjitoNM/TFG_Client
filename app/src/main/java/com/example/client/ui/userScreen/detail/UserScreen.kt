@@ -40,12 +40,14 @@ import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.NoteList
 import com.example.client.ui.common.composables.UserStat
+import com.example.client.ui.userScreen.DetailNavigationEvent
 
 @Composable
 fun UserScreen(
     showSnackbar: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel(),
     onNavigateToNoteDetail: (Int) -> Unit,
+    onNavigateToDetailObservable : (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -57,17 +59,24 @@ fun UserScreen(
 
     LaunchedEffect(uiState.aviso) {
         uiState.aviso?.let { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> {
+            if (event is UiEvent.ShowSnackbar) {
                     showSnackbar(event.message)
                     viewModel.handleEvent(UserEvent.AvisoVisto)
-                }
-
-                is UiEvent.PopBackStack -> {
-                    onNavigateToNoteDetail(uiState.selectedNoteId)
-                    viewModel.handleEvent(UserEvent.AvisoVisto)
-                }
             }
+        }
+    }
+
+    LaunchedEffect(uiState.navigationEvent) {
+        when (val event = uiState.navigationEvent) {
+            is DetailNavigationEvent.NavigateToMyNoteDetail -> {
+                onNavigateToNoteDetail(event.noteId)
+                viewModel.handleEvent(UserEvent.NavigationConsumed)
+            }
+            is DetailNavigationEvent.NavigateToNormalNoteDetail -> {
+                onNavigateToDetailObservable(event.noteId)
+                viewModel.handleEvent(UserEvent.NavigationConsumed)
+            }
+            else -> {}
         }
     }
 
@@ -112,7 +121,8 @@ fun UserScreen(
                     }
                 },
                 onNoteClick = { noteId ->
-                    viewModel.handleEvent(UserEvent.SelectedNote(noteId))
+                    val isMyNote = uiState.selectedTab == UserTab.NOTES
+                    viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
                 },
             )
         }
