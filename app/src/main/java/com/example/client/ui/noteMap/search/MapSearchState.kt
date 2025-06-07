@@ -11,5 +11,7 @@ data class MapSearchState(
     val isLoading: Boolean = false,
     val showEmptyState: Boolean = false,
     val aviso: UiEvent? = null,
-    val showEmptyStateDelayed: Boolean = false
+    val showEmptyStateDelayed: Boolean = false,
+    val userLogged: String? = null // <-- Añade esto
+
 )

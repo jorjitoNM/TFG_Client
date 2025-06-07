@@ -3,6 +3,8 @@ package com.example.client.ui.userScreen.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.domain.usecases.follow.GetMyFollowersUseCase
+import com.example.client.domain.usecases.follow.GetMyFollowingUseCase
 import com.example.client.domain.usecases.note.GetMyNoteUseCase
 import com.example.client.domain.usecases.social.DelFavNoteUseCase
 import com.example.client.domain.usecases.social.DelLikeNoteUseCase
@@ -30,6 +32,8 @@ class UserViewModel @Inject constructor(
     private val delFavNoteUseCase: DelFavNoteUseCase,
     private val getMyNote: GetMyNoteUseCase,
     private val getLikedNoteUseCase: GetLikedNoteUseCase,
+    private val getMyFollowersUseCase: GetMyFollowersUseCase,
+    private val getMyFollowingsUseCase: GetMyFollowingUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserState())
@@ -47,12 +51,38 @@ class UserViewModel @Inject constructor(
                     UserTab.LIKES -> getLikedNotes()
                 }
             }
-
-            UserEvent.GetMyNote -> getMyNotes()
+           is  UserEvent.GetMyNote -> getMyNotes()
             is UserEvent.DelFavNote -> delSavedNote(event.noteId)
             is UserEvent.DelLikeNote -> delLikedNote(event.noteId)
             is UserEvent.FavNote -> favNote(event.noteId)
             is UserEvent.LikeNote -> likeNote(event.noteId)
+            is UserEvent.GetFollowers -> getFollowers()
+            is UserEvent.GetFollowing -> getFollowing()
+            is UserEvent.SelectedNote -> selectNote(event.noteId)
+        }
+    }
+
+
+
+   private fun getFollowers() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = getMyFollowersUseCase()) {
+                is NetworkResult.Success -> _uiState.update { it.copy(followers = result.data, isLoading = false) }
+                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
+            }
+        }
+    }
+
+   private fun getFollowing() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = getMyFollowingsUseCase()) {
+                is NetworkResult.Success -> _uiState.update { it.copy(following = result.data, isLoading = false) }
+                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
+            }
         }
     }
 
@@ -329,6 +359,15 @@ class UserViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun selectNote(id: Int) {
+        _uiState.update {
+            it.copy(
+                selectedNoteId = id,
+                aviso = UiEvent.PopBackStack
+            )
         }
     }
 

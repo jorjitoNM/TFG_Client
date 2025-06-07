@@ -3,10 +3,12 @@ package com.example.client.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.repositories.SecurePreferencesRepository
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.authentication.SaveTokenUseCase
 import com.example.client.domain.usecases.user.LoginUseCase
+import com.example.client.domain.usecases.user.firebase.FirebaseLoginUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,18 +22,21 @@ import javax.inject.Inject
 class LoginScreenViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val saveTokenUseCase: SaveTokenUseCase,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    private val firebaseLoginUseCase: FirebaseLoginUseCase,
+    private val securePreferencesRepository: SecurePreferencesRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginScreenState())
     val uiState = _uiState.asStateFlow()
 
-    fun handleEvent (event : LoginScreenEvents) {
+    fun handleEvent(event: LoginScreenEvents) {
         when (event) {
             is LoginScreenEvents.Login -> login(event.authenticationUser)
-            is LoginScreenEvents.UpdateUsername -> updateUsername(event.newUsername)
+            is LoginScreenEvents.UpdateEmail -> updateEmail(event.newEmail)
             is LoginScreenEvents.UpdatePassword -> updatePassword(event.newPassword)
             is LoginScreenEvents.EventDone -> _uiState.update { it.copy(event = null) }
+            LoginScreenEvents.LoginWithBiometrics -> loginWithBiometrics()
         }
     }
 
@@ -40,6 +45,24 @@ class LoginScreenViewModel @Inject constructor(
             when (val result = loginUseCase.invoke(authenticationUser)) {
                 is NetworkResult.Success -> {
                     saveTokenUseCase.invoke(result.data)
+                    securePreferencesRepository.saveCredentials(
+                        username = authenticationUser.username,
+                        password = authenticationUser.password
+                    )
+                    when (val authenticationResponse = firebaseLoginUseCase.invoke(authenticationUser)) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                event = UiEvent.ShowSnackbar(authenticationResponse.message),
+                                isLoading = false,
+                            )
+                        }
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                        is NetworkResult.Success -> {}
+                    }
                     _uiState.update {
                         it.copy(
                             isValidated = true
@@ -63,10 +86,23 @@ class LoginScreenViewModel @Inject constructor(
         }
     }
 
-    private fun updateUsername(newUsername: String) {
+    private fun loginWithBiometrics() {
+        viewModelScope.launch(dispatcher) {
+            val (username, password) = securePreferencesRepository.getCredentials()
+            if (!username.isNullOrEmpty() && !password.isNullOrEmpty()) {
+                login(AuthenticationUser(username=username, password = password))
+            } else {
+                _uiState.update {
+                    it.copy(event = UiEvent.ShowSnackbar("Stored credentials not found"))
+                }
+            }
+        }
+    }
+
+    private fun updateEmail(newEmail: String) {
         _uiState.update {
             it.copy(
-                authenticationUser = it.authenticationUser.copy(username = newUsername)
+                authenticationUser = it.authenticationUser.copy(email = newEmail)
             )
         }
     }

@@ -5,7 +5,9 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinSerialization) apply false
     alias(libs.plugins.kapt) apply false
 
+    //Firebase
     alias(libs.plugins.crashlytics) apply false
+    alias(libs.plugins.googleServices) apply false
 
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.room) apply false

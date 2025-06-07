@@ -2,6 +2,7 @@ package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.remote.datasource.UserRemoteDataSource
+import com.example.client.data.remote.service.UserService
 import com.example.client.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -27,6 +28,22 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun getUserInfo(username: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getUserInfo(username)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun getUserNotes(username: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getUserNotes(username)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
     suspend fun getLikedNotes() = withContext(dispatcher) {
         try {
             userRemoteDataSource.getLikedNotes()
@@ -42,5 +59,8 @@ class UserRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
+
+    suspend fun getFirebaseId(): NetworkResult<UserService.FirebaseIdResponse> =
+        userRemoteDataSource.getFirebaseId()
 
 }

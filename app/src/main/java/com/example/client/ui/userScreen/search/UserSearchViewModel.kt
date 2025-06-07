@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.usecases.user.GetAllUserStartsWithTextUseCase
+import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.domain.usecases.user.local.DeleteCachedUserUseCase
 import com.example.client.domain.usecases.user.local.GetCachedUsersUseCase
 import com.example.client.domain.usecases.user.local.InsertCachedUserUseCase
@@ -13,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,11 +23,28 @@ class UserSearchViewModel @Inject constructor(
     private val getAllUserStartsWithTextUseCase: GetAllUserStartsWithTextUseCase,
     private val getCachedUsersUseCase: GetCachedUsersUseCase,
     private val insertCachedUserUseCase: InsertCachedUserUseCase,
-    private val deleteCachedUserUseCase: DeleteCachedUserUseCase) : ViewModel() {
+    private val deleteCachedUserUseCase: DeleteCachedUserUseCase,
+    private val getUserUseCase: GetUserUseCase
+) : ViewModel() {
     private val _uiState = MutableStateFlow(UserSearchState())
     val uiState: StateFlow<UserSearchState> = _uiState.asStateFlow()
 
-    private fun getLoggedUser(): String = "user1" // O el que corresponda tras login
+    fun getLoggedUser() {
+        viewModelScope.launch {
+            val user = getUserUseCase()
+            when (user) {
+                is NetworkResult.Success -> {
+                    _uiState.update { it.copy(userLogged = user.data.username) }
+                }
+                is NetworkResult.Error -> {
+                    _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(user.message)) }
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
+            }
+        }
+    }
     //aqui va el preference
     init {
         loadRecentUsers()
@@ -49,12 +68,27 @@ class UserSearchViewModel @Inject constructor(
             is UserSearchEvent.UserClicked -> addRecentUser(event.user)
             is UserSearchEvent.AvisoVisto -> _uiState.value = _uiState.value.copy(aviso = null)
             is UserSearchEvent.OnDeleteUser -> deleteRecentUser(event.username)
+            is UserSearchEvent.UserSelected -> selectUser(event.username)
 
         }
     }
 
+    private fun selectUser(username : String) {
+        _uiState.update {
+            it.copy(
+                selectedUser = username,
+                aviso = UiEvent.PopBackStack
+            )
+        }
+    }
+
     private fun loadRecentUsers() {
-        val loggedUser = getLoggedUser()
+        val loggedUser = _uiState.value.userLogged
+        if (loggedUser == null) {
+            // Si aún no está disponible, puedes esperar o mostrar un loading
+            getLoggedUser() // Lanza la carga si aún no se ha hecho
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             when (val result = getCachedUsersUseCase.invoke(loggedUser)) {
@@ -76,7 +110,12 @@ class UserSearchViewModel @Inject constructor(
     }
 
     private fun addRecentUser(user: UserDTO) {
-        val loggedUser = getLoggedUser()
+        val loggedUser = _uiState.value.userLogged
+        if (loggedUser == null) {
+            // Si aún no está disponible, puedes esperar o mostrar un loading
+            getLoggedUser() // Lanza la carga si aún no se ha hecho
+            return
+        }
         viewModelScope.launch {
             when (val result = insertCachedUserUseCase.invoke(user, loggedUser)) {
                 is NetworkResult.Error -> {
@@ -96,7 +135,12 @@ class UserSearchViewModel @Inject constructor(
 
 
     private fun deleteRecentUser (username:String){
-        val loggedUser = getLoggedUser()
+        val loggedUser = _uiState.value.userLogged
+        if (loggedUser == null) {
+            // Si aún no está disponible, puedes esperar o mostrar un loading
+            getLoggedUser() // Lanza la carga si aún no se ha hecho
+            return
+        }
         viewModelScope.launch {
             when (val result = deleteCachedUserUseCase.invoke(username,loggedUser)) {
                 is NetworkResult.Error -> {

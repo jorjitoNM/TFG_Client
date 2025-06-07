@@ -11,5 +11,4 @@ sealed class NoteDetailEvent {
     data class UpdateEditedContent(val content: String) : NoteDetailEvent()
     data class UpdateEditedPrivacy(val privacy: NotePrivacy) : NoteDetailEvent()
     data object AvisoVisto : NoteDetailEvent()
-    data class DeleteNote(val idNote: Int):NoteDetailEvent()
 }

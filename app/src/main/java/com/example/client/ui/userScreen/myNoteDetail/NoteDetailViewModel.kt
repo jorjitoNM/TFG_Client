@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.domain.model.note.NotePrivacy
-import com.example.client.domain.usecases.note.DeleteNoteUseCase
 import com.example.client.domain.usecases.note.GetNoteUseCase
 import com.example.client.domain.usecases.note.RateNoteUseCase
 import com.example.client.domain.usecases.note.UpdateNoteUseCase
@@ -20,8 +19,7 @@ import javax.inject.Inject
 class NoteDetailViewModel @Inject constructor(
     private val getNoteUseCase: GetNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
-    private val rateNoteUseCase: RateNoteUseCase,
-    private val deleteNote: DeleteNoteUseCase,
+    private val rateNoteUseCase: RateNoteUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteDetailState())
     val uiState = _uiState.asStateFlow()
@@ -36,39 +34,9 @@ class NoteDetailViewModel @Inject constructor(
             is NoteDetailEvent.UpdateEditedContent -> updateEditedContent(event.content)
             is NoteDetailEvent.UpdateEditedPrivacy -> updateEditedPrivacy(event.privacy)
             is NoteDetailEvent.AvisoVisto -> avisoVisto()
-            is NoteDetailEvent.DeleteNote -> deleteNote(event.idNote)
         }
     }
-    private fun deleteNote(id:Int){
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = deleteNote.invoke(id)) {
-                is NetworkResult.Success-> {
-                    _uiState.update {
-                        it.copy(aviso =UiEvent.ShowSnackbar("Eliminado correctamente"))
-                    }
-                }
-
-                is NetworkResult.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            aviso = UiEvent.ShowSnackbar(result.message),
-                            isLoading = false
-                        )
-                    }
-                }
-                is NetworkResult.Loading -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true
-                        )
-                    }
-                }
-            }
-        }
-
-    }
     private fun getNote(id: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }

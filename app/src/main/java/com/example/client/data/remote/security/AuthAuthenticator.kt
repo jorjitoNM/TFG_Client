@@ -24,7 +24,7 @@ class AuthAuthenticator @Inject constructor(
         return runBlocking {
             val newToken = getNewToken(refreshToken)
             newToken.body()?.let {
-                dataStoreRepository.saveAccessToken(it)
+                dataStoreRepository.saveAccessToken(it.access)
                 response.request.newBuilder()
                     .header("Authorization", "Bearer $it")
                     .build()
@@ -32,7 +32,7 @@ class AuthAuthenticator @Inject constructor(
         }
     }
 
-    private suspend fun getNewToken(refreshToken: String?): retrofit2.Response<String> {
+    private suspend fun getNewToken(refreshToken: String?): retrofit2.Response<Token> {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         return service.get().refreshToken("Bearer $refreshToken")

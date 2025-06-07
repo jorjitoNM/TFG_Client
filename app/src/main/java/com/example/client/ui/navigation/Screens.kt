@@ -16,7 +16,7 @@ import com.example.client.ui.common.Constantes
 
 
 val appDestinationList = listOf(
-    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch)
+    NormalNoteList, NoteMap, SignUp, Login,Start ,NormalNoteDetail,MapSearch,UserScreen,AddNote, UserSearch, VisitorUserScreen, MyNoteDetail)
 
 
 interface AppDestination {
@@ -38,7 +38,7 @@ interface AppMainBottomDestination : AppDestination {
 
 object NormalNoteList : AppMainBottomDestination {
     override val route: Any = NormalNoteListDestination
-    override val title: String = "Inicio"
+    override val title: String = "Home"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -53,7 +53,7 @@ object NormalNoteList : AppMainBottomDestination {
 
 object MapSearch : AppDestination{
     override val route: Any = MapSearchDestination
-    override val title: String = "Busqueda"
+    override val title: String = "Map Search"
     override val isBottomBarVisible: Boolean = false
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -66,11 +66,23 @@ object MapSearch : AppDestination{
 
 object NormalNoteDetail : AppDestination {
     override val route: Any = NormalNoteDetailDestination
-    override val title: String = "Nota Detalle"
-    override val isBottomBarVisible: Boolean = true
+    override val title: String = "Note Detail"
+    override val isBottomBarVisible: Boolean = false
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
-            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+}
+
+object MyNoteDetail : AppDestination {
+    override val route: Any = MyNoteDetailDestination
+    override val title: String = "Your Note"
+    override val isBottomBarVisible: Boolean = false
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
             fabVisible = false
         )
     override val isTopBarVisible: Boolean = true
@@ -78,9 +90,10 @@ object NormalNoteDetail : AppDestination {
 
 
 
+
 object NoteMap : AppMainBottomDestination {
     override val route: Any = NoteMapDestination
-    override val title: String = "Mapa"
+    override val title: String = "Map"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -95,7 +108,7 @@ object NoteMap : AppMainBottomDestination {
 
 object UserScreen : AppMainBottomDestination {
     override val route: Any = UserScreenDestination
-    override val title: String = "Perfil"
+    override val title: String = "Profile"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -108,9 +121,21 @@ object UserScreen : AppMainBottomDestination {
     override val iconFilled: ImageVector = Icons.Filled.AccountCircle
 }
 
+object VisitorUserScreen : AppDestination {
+    override val route: Any = VisitorUserScreenDestination
+    override val title: String = "Profile"
+    override val isBottomBarVisible: Boolean = false
+    override val scaffoldState: ScaffoldState
+        get() = ScaffoldState(
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
+            fabVisible = false
+        )
+    override val isTopBarVisible: Boolean = true
+}
+
 object UserSearch : AppMainBottomDestination {
     override val route: Any = UserSearchDestination
-    override val title: String = "Búsqueda"
+    override val title: String = "Search"
     override val isBottomBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
@@ -125,12 +150,12 @@ object UserSearch : AppMainBottomDestination {
 
 object AddNote: AppDestination {
     override val route: Any = AddNoteDestination
-    override val title: String = "Añadir Nota"
+    override val title: String = "Add Note"
     override val isBottomBarVisible: Boolean = false
-    override val isTopBarVisible: Boolean = false
+    override val isTopBarVisible: Boolean = true
     override val scaffoldState: ScaffoldState
         get() = ScaffoldState(
-            topBarState = TopBarState(showNavigationIcon = false, arrangement = Arrangement.Start),
+            topBarState = TopBarState(showNavigationIcon = true, arrangement = Arrangement.Start),
             fabVisible = false
         )
 }

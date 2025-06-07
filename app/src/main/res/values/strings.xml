@@ -4,6 +4,9 @@
     <string name="rating">Rating:</string>
     <string name="event_dates">Event Dates:</string>
     <string name="no_notes_found">No notes found</string>
+    <string name="error_uploading_images">We could not save your image correctly, please, try again</string>
+    <string name="fb_storage_images_url">note_images</string>
+    <string name="load_image">Load images</string>
     <string name="app_logo">App logo</string>
     <string name="start_Screen_background">Start screen background</string>
     <string name="app_real_name">Nomada</string>
@@ -23,4 +26,14 @@
     <string name="login_message">Log in to Nomada</string>
     <string name="dont_have_account">Don`t have an account yet?</string>
     <string name="navigate_back">Navigate back</string>
+    <string name="login_with_fingerprint">Sign in with fingerprint</string>
+    <string name="failed_to_authenticate_with_firebase">We could not authenticate you woth Firebase, maybe because you dont have a google email, but you can still use the app</string>
+    <string name="error_loading_images">We could not retreive the images from this note, please, try again later</string>
+    <string name="timeout_error">Oops, something went of, check you connection</string>
+    <string name="timeout_list_error">Failed to list images: Timeout occurred</string>
+    <string name="timeout_download_error">Image download timed out</string>
+    <string name="download_failed">Failed to download image</string>
+    <string name="download_error">Error downloading images</string>
+    <string name="unexpected_error">Unexpected error occurred</string>
+    <string name="error_deleting_image">Could not delete the image, try again later</string>
 </resources>

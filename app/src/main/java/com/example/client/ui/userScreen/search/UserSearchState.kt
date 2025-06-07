@@ -9,4 +9,6 @@ data class UserSearchState(
     val aviso: UiEvent? = null,
     val searchText: String = "",
     val showEmptyState: Boolean = false,
+    val userLogged : String? = null,
+    val selectedUser : String = ""
 )

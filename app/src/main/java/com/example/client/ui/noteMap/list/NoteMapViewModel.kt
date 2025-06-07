@@ -49,6 +49,7 @@ class NoteMapViewModel @Inject constructor(
             is NoteMapEvent.NavigateToSearch -> {
                 _uiState.update { it.copy(aviso = UiEvent.PopBackStack) }
             }
+            is NoteMapEvent.SelectedNote -> selectNote(event.noteId)
 
         }
     }
@@ -195,6 +196,15 @@ class NoteMapViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun selectNote(id: Int) {
+        _uiState.update {
+            it.copy(
+                noteSelectedId = id,
+                aviso = UiEvent.PopBackStack
+            )
         }
     }
 
