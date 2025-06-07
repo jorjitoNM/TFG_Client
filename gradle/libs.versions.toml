@@ -38,6 +38,9 @@ biometricKtx = "1.4.0-alpha02"
 securityCryptoKtx = "1.1.0-alpha07"
 securityCrypto = "1.1.0-alpha07"
 appcompat = "1.7.0"
+googleGmsGoogleServices = "4.4.2"
+firebaseMessaging = "24.1.1"
+firebaseMessagingKtx = "24.1.1"
 
 
 
@@ -112,6 +115,9 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -123,3 +129,5 @@ room = { id="androidx.room", version.ref = "roomRuntime" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 crashlytics = {id= "com.google.firebase.crashlytics", version.ref = "crashlytics"}
 googleServices = { id = "com.google.gms.google-services", version.ref = "services"}
+googleGmsGoogleServices = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+
