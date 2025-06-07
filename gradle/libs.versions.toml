@@ -129,5 +129,4 @@ room = { id="androidx.room", version.ref = "roomRuntime" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 crashlytics = {id= "com.google.firebase.crashlytics", version.ref = "crashlytics"}
 googleServices = { id = "com.google.gms.google-services", version.ref = "services"}
-googleGmsGoogleServices = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 
