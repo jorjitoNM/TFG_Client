@@ -108,3 +108,4 @@ fun NoteImageItem(modifier: Modifier = Modifier, index: Int, imageUri: Uri, onDe
         }
     }
 }
+//que coño pasas?
