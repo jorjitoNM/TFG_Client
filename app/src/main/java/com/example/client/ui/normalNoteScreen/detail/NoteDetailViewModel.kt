@@ -1,7 +1,8 @@
 package com.example.client.ui.normalNoteScreen.detail
 
 import android.net.Uri
-import android.view.View
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
@@ -37,6 +38,7 @@ class NoteDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(NoteDetailState())
     val uiState = _uiState.asStateFlow()
 
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     fun handleEvent(event: NoteDetailEvent) {
         when (event) {
             is NoteDetailEvent.GetNote -> getNote(event.id)
@@ -53,11 +55,44 @@ class NoteDetailViewModel @Inject constructor(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun clearDeletedPhoto(deletedUri: Uri, photos: List<Uri>): List<Uri> {
+        return photos.stream().dropWhile { it == deletedUri }.toList()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun deleteImage(imageUri: Uri) {
         viewModelScope.launch(dispatcher) {
-            when (_uiState.value.note?.let { deleteImageUseCase.invoke(imageUri, it.id) }) {
+            _uiState.value.note?.let { it ->
+                deleteImageUseCase.invoke(
+                    imageUri, it.id
+                ).collect { result ->
+                    when (result) {
+                        is NetworkResult.Success -> _uiState.update {
+                            it.copy(
+                                note = _uiState.value.note?.copy(
+                                    photos = clearDeletedPhoto(
+                                        imageUri,
+                                        _uiState.value.note!!.photos
+                                    )
+                                )
+                            )
+                        }
 
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
 
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -72,26 +107,23 @@ class NoteDetailViewModel @Inject constructor(
                         is NetworkResult.Success -> {
                             _uiState.update {
                                 it.copy(
-                                    note = _uiState.value.note?.copy(photos = result.data)
-                                )
-                            }
-                        }
-
-                        is NetworkResult.Error -> {
-                            _uiState.update {
-                                it.copy(
-                                    aviso = UiEvent.ShowSnackbar(result.message),
+                                    note = _uiState.value.note?.copy(photos = result.data),
                                     isLoading = false
                                 )
                             }
                         }
 
-                        is NetworkResult.Loading -> {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = true
-                                )
-                            }
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
                         }
                     }
                 }

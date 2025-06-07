@@ -56,8 +56,6 @@ import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.formatDateTime
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun NoteListScreen(

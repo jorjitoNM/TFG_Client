@@ -89,7 +89,6 @@ import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.getGooglePhotoUrl
 import com.example.client.ui.navigation.NoteMapDestination
 import kotlinx.coroutines.delay
-import java.text.DateFormat.FULL
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale

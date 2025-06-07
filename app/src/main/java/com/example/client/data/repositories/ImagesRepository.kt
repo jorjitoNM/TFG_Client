@@ -5,7 +5,6 @@ import com.example.client.R
 import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
 import com.example.client.di.IoDispatcher
-import com.google.android.gms.tasks.Task
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +56,7 @@ class ImagesRepository @Inject constructor(
     fun deleteImage (imageUri : Uri, noteId : Int) : Flow<NetworkResult<Unit>> = flow {
         if (storage.reference.child("${stringProvider.getString(R.string.fb_storage_images_url)}/$noteId/$imageUri")
             .delete().isSuccessful)
-            emit(NetworkResult.Error(stringProvider.getString(R.string.error_deleting_image)))
-        else emit(NetworkResult.Success(Unit))
+            emit(NetworkResult.Success(Unit))
+        else emit(NetworkResult.Error(stringProvider.getString(R.string.error_deleting_image)))
     }
 }

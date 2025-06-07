@@ -1,8 +1,5 @@
 package com.example.client.ui.userScreen.detail
 
-import com.example.client.ui.navigation.UserScreen
-import com.example.client.ui.normalNoteScreen.list.NoteListEvent
-
 sealed class UserEvent {
     data object LoadUser : UserEvent()
     data object AvisoVisto : UserEvent()
