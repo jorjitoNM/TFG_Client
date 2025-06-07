@@ -80,7 +80,7 @@ fun UserSearchScreen(
         uiState = uiState,
         onSearchTextChanged = { viewModel.handleEvent(UserSearchEvent.UpdateSearchText(it)) },
         onUserClick = { user ->
-            viewModel.handleEvent(UserSearchEvent.UserSelected(user.username))
+            viewModel.handleEvent(UserSearchEvent.UserSelected(user.email))
             viewModel.handleEvent(UserSearchEvent.UserClicked(user))
         },
         onUserDelete = { viewModel.handleEvent(UserSearchEvent.OnDeleteUser(it)) },

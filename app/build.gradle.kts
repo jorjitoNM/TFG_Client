@@ -30,7 +30,7 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.1.107:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://192.168.0.63:8080/\"")
             buildConfigField("String","GOOGLE_PLACES_API_KEY","\"AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ\"")
         }
         create("production") {
