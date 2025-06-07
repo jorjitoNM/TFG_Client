@@ -1,6 +1,7 @@
 package com.example.client.ui.normalNoteScreen.detail
 
 import android.net.Uri
+import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
@@ -9,9 +10,10 @@ import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.usecases.note.GetNoteUseCase
 import com.example.client.domain.usecases.note.RateNoteUseCase
 import com.example.client.domain.usecases.note.UpdateNoteUseCase
+import com.example.client.domain.usecases.note.images.DeleteImageUseCase
 import com.example.client.domain.usecases.note.images.LoadNoteImagesUseCase
+import com.example.client.domain.usecases.note.images.SaveNoteImagesUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
-import com.example.client.domain.usecases.user.firebase.GetFirebaseIdUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -26,9 +28,10 @@ class NoteDetailViewModel @Inject constructor(
     private val getNoteUseCase: GetNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val rateNoteUseCase: RateNoteUseCase,
-    private val loadNoteImagesUseCase: LoadNoteImagesUseCase,
+    private val saveNoteImagesUseCase: SaveNoteImagesUseCase,
     private val likeNoteUseCase: LikeNoteUseCase,
-    private val getFirebaseIdUseCase : GetFirebaseIdUseCase,
+    private val loadNoteImagesUseCase: LoadNoteImagesUseCase,
+    private val deleteImageUseCase: DeleteImageUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteDetailState())
@@ -45,56 +48,51 @@ class NoteDetailViewModel @Inject constructor(
             is NoteDetailEvent.UpdateEditedPrivacy -> updateEditedPrivacy(event.privacy)
             is NoteDetailEvent.AvisoVisto -> avisoVisto()
             is NoteDetailEvent.LikeNote -> likeNote(event.noteId)
-            is NoteDetailEvent.LoadNoteImages -> loadNoteImages(event.imagesUris)
+            is NoteDetailEvent.SaveNoteImages -> saveNoteImages(event.imagesUris)
+            is NoteDetailEvent.DeleteImage -> deleteImage(event.imageUri)
         }
     }
 
-    private fun loadNoteImages(imagesUris: List<Uri>) {
+    private fun deleteImage(imageUri: Uri) {
         viewModelScope.launch(dispatcher) {
-            when (val result = getFirebaseIdUseCase.invoke()) {
-                is NetworkResult.Success -> {
-                    loadNoteImagesUseCase.invoke(imagesUris,result.data.firebaseId).collect { result ->
-                        when (result) {
-                            is NetworkResult.Success -> {
-                                _uiState.update {
-                                    it.copy(
-                                        note = _uiState.value.note?.copy(photos = result.data)
-                                    )
-                                }
-                            }
+            when (_uiState.value.note?.let { deleteImageUseCase.invoke(imageUri, it.id) }) {
 
-                            is NetworkResult.Error -> {
-                                _uiState.update {
-                                    it.copy(
-                                        aviso = UiEvent.ShowSnackbar(result.message),
-                                        isLoading = false
-                                    )
-                                }
-                            }
 
-                            is NetworkResult.Loading -> {
-                                _uiState.update {
-                                    it.copy(
-                                        isLoading = true
-                                    )
-                                }
+            }
+        }
+    }
+
+    private fun saveNoteImages(imagesUris: List<Uri>) {
+        viewModelScope.launch(dispatcher) {
+            _uiState.value.note?.let { it ->
+                saveNoteImagesUseCase.invoke(
+                    imagesUris, it.id
+                ).collect { result ->
+                    when (result) {
+                        is NetworkResult.Success -> {
+                            _uiState.update {
+                                it.copy(
+                                    note = _uiState.value.note?.copy(photos = result.data)
+                                )
                             }
                         }
-                    }
-                }
-                is NetworkResult.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            aviso = UiEvent.ShowSnackbar(result.message),
-                            isLoading = false
-                        )
-                    }
-                }
-                is NetworkResult.Loading -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true
-                        )
+
+                        is NetworkResult.Error -> {
+                            _uiState.update {
+                                it.copy(
+                                    aviso = UiEvent.ShowSnackbar(result.message),
+                                    isLoading = false
+                                )
+                            }
+                        }
+
+                        is NetworkResult.Loading -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = true
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -108,7 +106,8 @@ class NoteDetailViewModel @Inject constructor(
             when (val result = likeNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Success -> _uiState.update {
                     it.copy(
-                        note = _uiState.value.note?.copy(liked = true)
+                        note = _uiState.value.note?.copy(liked = true),
+                        isLoading = false
                     )
                 }
 
@@ -135,7 +134,6 @@ class NoteDetailViewModel @Inject constructor(
     private fun getNote(id: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-
             when (val result = getNoteUseCase(id)) {
                 is NetworkResult.Success -> {
                     _uiState.update {
@@ -148,6 +146,7 @@ class NoteDetailViewModel @Inject constructor(
                             editedPrivacy = result.data.privacy
                         )
                     }
+                    loadNoteImages()
                 }
 
                 is NetworkResult.Error -> {
@@ -170,6 +169,38 @@ class NoteDetailViewModel @Inject constructor(
         }
     }
 
+    private fun loadNoteImages() {
+        viewModelScope.launch(dispatcher) {
+            _uiState.value.note?.let { note ->
+                loadNoteImagesUseCase.invoke(note.id).collect { result ->
+                    when (result) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+
+                        is NetworkResult.Success -> _uiState.update {
+                            it.copy(
+                                note = _uiState.value.note!!.copy(
+                                    photos = result.data
+                                ),
+                                isLoading = false
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun updateNote() {
         viewModelScope.launch {
             val currentState = _uiState.value
@@ -181,7 +212,7 @@ class NoteDetailViewModel @Inject constructor(
                 privacy = currentState.editedPrivacy
             )
 
-            when (val result = updateNoteUseCase(updatedNote)) {
+            when (val result = updateNoteUseCase.invoke(updatedNote)) {
                 is NetworkResult.Success -> {
                     _uiState.update {
                         it.copy(

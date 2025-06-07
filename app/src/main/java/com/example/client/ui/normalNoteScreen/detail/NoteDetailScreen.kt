@@ -92,8 +92,8 @@ fun NoteDetailScreen(
                 onSaveClick = { viewModel.handleEvent(NoteDetailEvent.UpdateNote) },
                 onCancelClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
                 onBackClick = onNavigateBack,
-                onDeleteClick = { /* Implement if needed */ },
-                onLoadImages = { viewModel.handleEvent(NoteDetailEvent.LoadNoteImages(it))}
+                onDeleteClick = {imageUrl -> viewModel.handleEvent(NoteDetailEvent.DeleteImage(imageUrl)) },
+                onLoadImages = { viewModel.handleEvent(NoteDetailEvent.SaveNoteImages(it))}
             )
         }
     }
@@ -109,7 +109,7 @@ fun NoteDetailContent(
     onSaveClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {},
+    onDeleteClick: (Uri) -> Unit = {},
     onLoadImages: (List<Uri>) -> Unit = {},
 ) {
     val note = state.note ?: return
@@ -249,9 +249,10 @@ fun NoteDetailContent(
                     NoteImages(
                         modifier = Modifier
                             .padding(4.dp)
-                            .size(200.dp),
+                            .size(170.dp),
                         photos = note.photos,
-                        onLoadImages = onLoadImages
+                        onLoadImages = onLoadImages,
+                        onDeleteImage = onDeleteClick
                     )
                 }
 

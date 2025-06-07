@@ -31,14 +31,15 @@ import coil.compose.AsyncImage
 import com.example.client.R
 
 @Composable
-fun NoteImages(modifier: Modifier = Modifier, photos: List<String>, onLoadImages: (List<Uri>) -> Unit) {
+fun NoteImages(modifier: Modifier = Modifier, photos: List<Uri>, onLoadImages: (List<Uri>) -> Unit, onDeleteImage : (Uri) -> Unit) {
     LazyRow {
         itemsIndexed(photos) { index, imageUrl ->
             Box(modifier = modifier) {
                 NoteImageItem(
                     modifier = modifier,
                     index = index,
-                    imageUrl = imageUrl,
+                    imageUri = imageUrl,
+                    onDeleteImage = onDeleteImage
                 )
             }
         }
@@ -75,19 +76,19 @@ fun AddImageButton(modifier: Modifier = Modifier, onLoadImages : (List<Uri>) -> 
 }
 
 @Composable
-fun NoteImageItem(modifier: Modifier = Modifier, index: Int, imageUrl: String) {
+fun NoteImageItem(modifier: Modifier = Modifier, index: Int, imageUri: Uri, onDeleteImage: (Uri) -> Unit) {
     Box(
         modifier = modifier
     ) {
         AsyncImage(
-            model = imageUrl,
+            model = imageUri,
             contentDescription = "Note image $index",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
 
         IconButton(
-            onClick = { //onRemoveImage(imageUrl)
+            onClick = { onDeleteImage(imageUri)
             },
             modifier = Modifier
                 .align(Alignment.TopEnd)

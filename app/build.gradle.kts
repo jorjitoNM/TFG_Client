@@ -32,6 +32,10 @@ android {
             dimension = "env"
             buildConfigField("String", "API_URL", "\"http://192.168.1.17:8080/\"")
         }
+        create("production") {
+            dimension = "env"
+            buildConfigField("String", "API_URL", "\"https://informatica.iesquevedo.es/nomada/\"")
+        }
     }
 
     buildTypes {
@@ -148,4 +152,8 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.firebase.auth)
 
+    //Coroutine
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 }

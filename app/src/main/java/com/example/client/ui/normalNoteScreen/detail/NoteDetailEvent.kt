@@ -13,5 +13,6 @@ sealed interface NoteDetailEvent {
     data class UpdateEditedPrivacy(val privacy: NotePrivacy) : NoteDetailEvent
     data class LikeNote (val noteId : Int) : NoteDetailEvent
     data object AvisoVisto : NoteDetailEvent
-    data class LoadNoteImages (val imagesUris : List<Uri>) : NoteDetailEvent
+    data class SaveNoteImages (val imagesUris : List<Uri>) : NoteDetailEvent
+    data class DeleteImage (val imageUri : Uri) : NoteDetailEvent
 }
