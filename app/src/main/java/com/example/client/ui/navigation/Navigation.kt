@@ -113,7 +113,7 @@ fun Navigation() {
             }
             composable<NormalNoteDetailDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
-                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) })
+                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = {navController.navigate(NormalNoteListDestination)})
             }
             composable<NoteMapDestination> {
                 NoteMapScreen(
