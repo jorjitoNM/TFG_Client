@@ -1,64 +1,71 @@
 package com.example.client.ui.userScreen.myNoteDetail
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.normalNoteScreen.list.formatDateTime
-
+import com.example.client.ui.common.composables.ColorfulLinearRatingBar
+import com.example.client.ui.common.composables.formatDateTime
 @Composable
 fun NoteDetailScreen(
     noteId: Int,
     showSnackbar: (String) -> Unit,
-    onNavigateBack: () -> Unit,
     viewModel: NoteDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -85,368 +92,346 @@ fun NoteDetailScreen(
         } else {
             NoteDetailContent(
                 state = state,
-                onTitleChange = { viewModel.handleEvent(NoteDetailEvent.UpdateEditedTitle(it)) },
-                onContentChange = { viewModel.handleEvent(NoteDetailEvent.UpdateEditedContent(it)) },
-                onPrivacyChange = { viewModel.handleEvent(NoteDetailEvent.UpdateEditedPrivacy(it)) },
-                onRatingChange = { viewModel.handleEvent(NoteDetailEvent.RateNote(it)) },
-                onEditClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
-                onSaveClick = { viewModel.handleEvent(NoteDetailEvent.UpdateNote) },
-                onCancelClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
-                onBackClick = onNavigateBack,
-                onDeleteClick = { viewModel.handleEvent(NoteDetailEvent.DeleteNote(it)) }
+                onEvent = viewModel::handleEvent
             )
         }
     }
 }
+
 
 @Composable
 fun NoteDetailContent(
     state: NoteDetailState,
-    onTitleChange: (String) -> Unit = {},
-    onContentChange: (String) -> Unit = {},
-    onPrivacyChange: (NotePrivacy) -> Unit = {},
-    onRatingChange: (Int) -> Unit = {},
-    onEditClick: () -> Unit = {},
-    onSaveClick: () -> Unit = {},
-    onCancelClick: () -> Unit = {},
-    onBackClick: () -> Unit = {},
-    onDeleteClick: (Int) -> Unit = {}
+    onEvent: (NoteDetailEvent) -> Unit
 ) {
     val note = state.note ?: return
+    val photoList = List(8) { R.drawable.ic_launcher_background }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        // Header with back button, title and edit button
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                // Title
-                if (state.isEditing) {
-                    OutlinedTextField(
-                        value = state.editedTitle,
-                        onValueChange = onTitleChange,
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else {
-                    Text(
-                        text = note.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+            if (state.isEditing) {
+                OutlinedTextField(
+                    value = state.editedTitle,
+                    onValueChange = { onEvent(NoteDetailEvent.UpdateEditedTitle(it)) },
+                    label = { Text("Title") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+            } else {
+                Text(
+                    text = note.title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Edit/Save/Cancel buttons
+            if (state.isEditing) {
+                Row {
+                    // Save button
+                    IconButton(
+                        onClick = { onEvent(NoteDetailEvent.UpdateNote) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Save",
+                            tint = Color.Green
+                        )
+                    }
+                    // Cancel button
+                    IconButton(
+                        onClick = { onEvent(NoteDetailEvent.ToggleEditMode) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel",
+                            tint = Color.Red
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Location
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 4.dp)
+            } else {
+                IconButton(
+                    onClick = { onEvent(NoteDetailEvent.ToggleEditMode) }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Location",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = Color.Black
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${note.latitude}, ${note.longitude}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                // Content
-                if (state.isEditing) {
-                    OutlinedTextField(
-                        value = state.editedContent,
-                        onValueChange = onContentChange,
-                        label = { Text("Content") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        maxLines = 5
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Privacy dropdown
-                    Text(
-                        text = "Privacy",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    PrivacyDropdown(
-                        selectedPrivacy = state.editedPrivacy,
-                        onPrivacySelected = onPrivacyChange
-                    )
-                } else {
-                    Text(
-                        text = note.content ?: "",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Event details if it's an event
-                    if (note.type == NoteType.EVENT) {
-                        EventDetails(note)
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Metadata
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "By: ${note.ownerUsername ?: "Unknown"}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Text(
-                            text = "Created: ${formatDateTime(note.created.toString())}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Rating
-                Text(
-                    text = "Rating",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                RatingBar(
-                    currentRating = note.rating,
-                    onRatingChanged = onRatingChange
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Button(
-                        onClick = onBackClick,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    ) {
-                        Text("Back")
-                    }
-
-                    if (state.isEditing) {
-                        Row {
-                            Button(
-                                onClick = onCancelClick,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                modifier = Modifier.padding(end = 8.dp)
-                            ) {
-                                Text("Cancel")
-                            }
-
-                            Button(
-                                onClick = onSaveClick,
-                                enabled = !state.isUpdating
-                            ) {
-                                if (state.isUpdating) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        strokeWidth = 2.dp
-                                    )
-                                } else {
-                                    Text("Save")
-                                }
-                            }
-                        }
-                    } else {
-                        Row {
-                            Button(
-                                onClick = {onDeleteClick(note.id)},
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError
-                                ),
-                                modifier = Modifier.padding(end = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete",
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Delete")
-                            }
-
-                            Button(onClick = onEditClick) {
-                                Text("Edit")
-                            }
-                        }
-                    }
                 }
             }
         }
-    }
-}
 
-@Composable
-fun EventDetails(note: NoteDTO) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
-        ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Description
+        if (state.isEditing) {
+            OutlinedTextField(
+                value = state.editedContent,
+                onValueChange = { onEvent(NoteDetailEvent.UpdateEditedContent(it)) },
+                label = { Text("Content") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+                maxLines = 6
+            )
+        } else {
+            Text(
+                text = note.content ?: "Una breve descripción de esta nota",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.DarkGray
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Rating section
+        if (state.isEditing) {
+            Text(
+                text = "Rating",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            ColorfulLinearRatingBar(
+                rating = note.rating,
+                onRatingChanged = { newRating ->
+                    onEvent(NoteDetailEvent.RateNote(newRating))
+                },
+                maxRating = 10,
+                isDarkMode = false,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            // Rating: X/10 y estrella dorada
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Star,
-                    contentDescription = "Event",
-                    tint = MaterialTheme.colorScheme.primary
+                    contentDescription = "Rating",
+                    tint = Color(0xFFFFD700), // Gold color
+                    modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Event Details",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(
-                        text = "Start",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = formatDateTime(note.start ?: ""),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                Column {
-                    Text(
-                        text = "End",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = formatDateTime(note.end ?: ""),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun RatingBar(
-    currentRating: Int,
-    onRatingChanged: (Int) -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row {
-            for (i in 1..5) {
-                Icon(
-                    imageVector = if (i <= currentRating) Icons.Filled.Star else Icons.Outlined.Star,
-                    contentDescription = "Star $i",
-                    tint = if (i <= currentRating) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { onRatingChanged(i) }
-                        .padding(end = 4.dp)
+                    text = "${note.rating}/10",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Black
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "$currentRating/5",
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
-
-@Composable
-fun PrivacyDropdown(
-    selectedPrivacy: NotePrivacy,
-    onPrivacySelected: (NotePrivacy) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        OutlinedButton(
-            onClick = { expanded = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        // Privacy section
+        if (state.isEditing) {
             Text(
-                text = selectedPrivacy.name,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Start
+                text = "Privacy",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = "Dropdown"
-            )
+
+            Column {
+                NotePrivacy.values().forEach { privacy ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onEvent(NoteDetailEvent.UpdateEditedPrivacy(privacy)) }
+                            .padding(vertical = 8.dp)
+                    ) {
+                        RadioButton(
+                            selected = state.editedPrivacy == privacy,
+                            onClick = { onEvent(NoteDetailEvent.UpdateEditedPrivacy(privacy)) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        when (privacy) {
+                            NotePrivacy.PRIVATE -> {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = "Private",
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Only for you", color = Color.Black)
+                            }
+                            NotePrivacy.PUBLIC -> {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Public",
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Public", color = Color.Black)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            // Icono de privacidad según el tipo, con texto al costado
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                when (note.privacy) {
+                    NotePrivacy.PRIVATE -> {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Privada",
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Only for you",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Black
+                        )
+                    }
+                    NotePrivacy.PUBLIC -> {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Pública",
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Public",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Black
+                        )
+                    }
+                }
+            }
         }
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth(0.9f)
-        ) {
-            NotePrivacy.entries.forEach { privacy ->
-                DropdownMenuItem(
-                    text = { Text(privacy.name) },
-                    onClick = {
-                        onPrivacySelected(privacy)
-                        expanded = false
-                    }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Si es evento, mostrar fechas (solo en modo vista)
+        if (note.type == NoteType.EVENT && !state.isEditing) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Evento",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
                 )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = "Start: ${formatDateTime(note.start ?: "")}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                    Text(
+                        text = "End: ${formatDateTime(note.end ?: "")}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        // Fecha de creación (solo en modo vista)
+        if (!state.isEditing) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = "Date",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = formatDateTime(note.created.toString()),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Black
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Divider
+            HorizontalDivider(
+                modifier = Modifier.fillMaxWidth(),
+                thickness = 1.dp,
+                color = Color.LightGray
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Photos section
+            Text(
+                text = "Photos",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Photos section en grid de 2 columnas
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(500.dp) // Altura fija para la galería
+            ) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(photoList.size) { idx ->
+                        Image(
+                            painter = painterResource(id = photoList[idx]),
+                            contentDescription = "Photo $idx",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                        )
+                    }
+                }
             }
         }
     }
 }
+
+
+
+
+
 class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
     override val values = sequenceOf(
         // Loading state
@@ -475,7 +460,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
                 id = 2,
                 title = "Team Meeting",
                 content = "Discuss project roadmap and assign tasks for the next sprint.",
-                privacy = NotePrivacy.FOLLOWERS,
+                privacy = NotePrivacy.PUBLIC,
                 rating = 4,
                 ownerUsername = "manager",
                 created = "2023-04-15T10:30:00",
@@ -539,7 +524,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
 fun NoteDetailScreenPreview(@PreviewParameter(NoteDetailStateProvider::class) state: NoteDetailState) {
     MaterialTheme {
         Surface {
-            NoteDetailContent(state = state)
+            NoteDetailContent(state = state, onEvent = {})
         }
     }
 }

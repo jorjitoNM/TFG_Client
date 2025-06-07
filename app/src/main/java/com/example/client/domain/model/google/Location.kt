@@ -13,5 +13,7 @@ data class Location(
     val openingHours: String? = null,
     val phoneNumber: String? = null,
     val website: String? = null,
-    val photos: List<PlacePhoto> = emptyList() 
+    val photos: List<PlacePhoto> = emptyList(),
+    val openingHoursFull: List<String>? = null, // para weekday_text
+
 )

@@ -5,6 +5,7 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -62,12 +63,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
-import com.example.client.ui.common.FilterChip
-import com.example.client.ui.common.NotesBottomSheet
+import com.example.client.ui.common.composables.FilterChip
+import com.example.client.ui.common.composables.NotesBottomSheet
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.common.getMarkerColor
-import com.example.client.ui.common.getMarkerIconRes
-import com.example.client.ui.common.vectorToBitmap
+import com.example.client.ui.common.composables.getMarkerColor
+import com.example.client.ui.common.composables.getMarkerIconRes
+import com.example.client.ui.common.composables.vectorToBitmap
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -77,6 +78,7 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -89,7 +91,8 @@ fun NoteMapScreen(
     viewModel: NoteMapViewModel = hiltViewModel(),
     sharedLocationViewModel: SharedLocationViewModel,
     onNavigateToList: () -> Unit,
-    onAddNoteClick: () -> Unit
+    onAddNoteClick: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit
 
 
 ) {
@@ -275,7 +278,9 @@ fun NoteMapScreen(
         sheetContent = {
             NotesBottomSheet(
                 notes = selectedNotes,
-                location = selectedLocation
+                location = selectedLocation,
+                onNoteClick = { noteId -> onNavigateToDetail(noteId) }
+
             )
         },
         sheetPeekHeight = 0.dp,
@@ -291,6 +296,10 @@ fun NoteMapScreen(
                     mapType = MapType.NORMAL,
                     isMyLocationEnabled = uiState.hasLocationPermission,
                     mapStyleOptions = if (isDarkMode) darkStyle else null
+                ),
+                uiSettings = MapUiSettings(
+                    zoomControlsEnabled = false,
+                    mapToolbarEnabled = false
                 )
                 ,
                 cameraPositionState = cameraPositionState,
@@ -381,7 +390,7 @@ fun NoteMapScreen(
                                     viewModel.handleEvent(NoteMapEvent.NavigateToSearch)
                                 },
                             enabled = false, // Deshabilita edición directa aquí
-                            placeholder = { Text("Buscar lugares...") },
+                            placeholder = { Text("Search places...") },
                             singleLine = true,
                             leadingIcon = {
                                 Icon(
@@ -465,7 +474,14 @@ fun NoteMapScreen(
                 }
 
                 FloatingActionButton(
-                    onClick = onAddNoteClick,
+                    onClick = {
+
+                        uiState.currentLocation?.let { location ->
+                            sharedLocationViewModel.setLocation(location.latitude, location.longitude)
+                        }
+
+                        onAddNoteClick()
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp),
@@ -497,11 +513,13 @@ fun NoteMapScreen(
 
             // Loading indicator
             if (uiState.isLoading) {
-                CircularProgressIndicator(
+                LinearProgressIndicator(
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
                 )
             }
+
 
         }
     }

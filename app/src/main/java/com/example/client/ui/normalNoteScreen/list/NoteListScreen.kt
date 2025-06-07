@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
@@ -51,8 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.client.data.model.NoteDTO
+import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.common.composables.formatDateTime
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -128,6 +131,10 @@ fun NoteListScreen(
                         viewModel.handleEvent(NoteListEvent.ApplyFilter(filterOption))
                         isFilterExpanded = false
                     },
+                    onChronologicalOrderSelected = {
+                        viewModel.handleEvent(NoteListEvent.OrderByChronological)
+                        isFilterExpanded = false
+                    },
                     onNoteTypeFilterSelected = { noteType ->
                         noteType?.let {
                             viewModel.handleEvent(NoteListEvent.OrderByType(it))
@@ -152,10 +159,12 @@ fun NoteListContent(
     isFilterExpanded: Boolean,
     onFilterExpandToggle: () -> Unit,
 ) {
+    val publicNotes = notes.filter { it.privacy == NotePrivacy.PUBLIC }
+
     val filteredNotes = if (searchQuery.isBlank()) {
-        notes
+        publicNotes
     } else {
-        notes.filter { note ->
+        publicNotes.filter { note ->
             note.title.contains(searchQuery, ignoreCase = true) ||
                     (note.content?.contains(searchQuery, ignoreCase = true) == true)
         }
@@ -230,6 +239,7 @@ fun FilterHeader(
 fun FilterMenuOverlay(
     onFilterSelected: (Boolean) -> Unit,
     onNoteTypeFilterSelected: (NoteType?) -> Unit,
+    onChronologicalOrderSelected: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val iconTint = MaterialTheme.colorScheme.primary
@@ -310,6 +320,34 @@ fun FilterMenuOverlay(
                     thickness = 1.dp
                 )
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            onChronologicalOrderSelected()
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Orden cronológico",
+                        tint = iconTint
+                    )
+                    Text(
+                        text = "Orden cronológico",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                    thickness = 1.dp
+                )
+
                 NoteType.entries.forEach { noteType ->
                     Row(
                         modifier = Modifier
@@ -359,7 +397,6 @@ fun FilterMenuOverlay(
         }
     }
 }
-
 @Composable
 fun SearchBar(
     query: String,
@@ -528,16 +565,7 @@ fun NoteItem(
     }
 }
 
-fun formatDateTime(dateTimeStr: String): String {
-    return try {
-        val formatter = DateTimeFormatter.ISO_DATE_TIME
-        val dateTime = LocalDateTime.parse(dateTimeStr, formatter)
-        val outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-        dateTime.format(outputFormatter)
-    } catch (e: Exception) {
-        dateTimeStr
-    }
-}
+
 
 @Preview(name = "Portrait Mode", showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable

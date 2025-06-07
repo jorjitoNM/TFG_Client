@@ -31,10 +31,12 @@ android {
         create("development") {
             dimension = "env"
             buildConfigField("String", "API_URL", "\"http://192.168.1.17:8080/\"")
+            buildConfigField("String","GOOGLE_PLACES_API_KEY","\"AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ\"")
         }
         create("production") {
             dimension = "env"
             buildConfigField("String", "API_URL", "\"https://informatica.iesquevedo.es/nomada/\"")
+            buildConfigField("String","GOOGLE_PLACES_API_KEY","\"AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ\"")
         }
     }
 
@@ -83,7 +85,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)

@@ -41,6 +41,9 @@ interface NoteService {
         @Query("type") noteType: NoteType,
     ): Response<List<NoteDTO>>
 
+    @GET("notes/antiquity")
+    suspend fun orderByChronologicalOrder(): Response<List<NoteDTO>>
+
     @DELETE("notes/{id}")
     suspend fun deleteNote(@Path("id") id: Int):Response<Unit>
 

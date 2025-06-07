@@ -52,7 +52,7 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.normalNoteScreen.list.formatDateTime
+import com.example.client.ui.common.composables.formatDateTime
 
 @Composable
 fun NoteDetailScreen(
@@ -471,7 +471,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
                 id = 2,
                 title = "Team Meeting",
                 content = "Discuss project roadmap and assign tasks for the next sprint.",
-                privacy = NotePrivacy.FOLLOWERS,
+                privacy = NotePrivacy.PRIVATE,
                 rating = 4,
                 ownerUsername = "manager",
                 created = "2023-04-15T10:30:00",

@@ -1,5 +1,8 @@
 package com.example.client.ui.userScreen.detail
 
+import com.example.client.ui.navigation.UserScreen
+import com.example.client.ui.normalNoteScreen.list.NoteListEvent
+
 sealed class UserEvent {
     data object LoadUser : UserEvent()
     data object AvisoVisto : UserEvent()
@@ -9,4 +12,8 @@ sealed class UserEvent {
     data class DelFavNote(val noteId: Int) : UserEvent()
     data class DelLikeNote(val noteId: Int) : UserEvent()
     data object GetMyNote : UserEvent()
+    data object GetFollowing : UserEvent()
+    data object GetFollowers : UserEvent()
+    data class SelectedNote(val noteId: Int) : UserEvent()
+
 }

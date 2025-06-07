@@ -28,6 +28,22 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun getUserInfo(username: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getUserInfo(username)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun getUserNotes(username: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getUserNotes(username)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
     suspend fun getLikedNotes() = withContext(dispatcher) {
         try {
             userRemoteDataSource.getLikedNotes()
