@@ -1,17 +1,11 @@
 package com.example.client.ui.addNoteScreen
 
-import android.Manifest
-import android.app.Application
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.usecases.AddNota
 import com.example.client.ui.common.UiEvent
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

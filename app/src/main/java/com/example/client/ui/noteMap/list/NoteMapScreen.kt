@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -63,9 +62,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
+import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.FilterChip
 import com.example.client.ui.common.composables.NotesBottomSheet
-import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.getMarkerColor
 import com.example.client.ui.common.composables.getMarkerIconRes
 import com.example.client.ui.common.composables.vectorToBitmap
@@ -519,9 +518,6 @@ fun NoteMapScreen(
                         .align(Alignment.BottomCenter)
                 )
             }
-
-
         }
     }
-
 }

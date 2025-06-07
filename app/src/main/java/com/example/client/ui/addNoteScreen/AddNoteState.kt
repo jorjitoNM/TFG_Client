@@ -1,6 +1,5 @@
 package com.example.client.ui.addNoteScreen
 
-import android.location.Location
 import com.example.client.data.model.NoteDTO
 import com.example.client.ui.common.UiEvent
 

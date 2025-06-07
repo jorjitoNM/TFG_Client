@@ -2,8 +2,6 @@ package com.example.client.ui.noteMap.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.client.BuildConfig
-import com.example.client.R
 import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
 import com.example.client.domain.model.google.Location

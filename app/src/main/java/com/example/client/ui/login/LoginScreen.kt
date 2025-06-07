@@ -74,16 +74,15 @@ fun LoginScreen(
     }
 
     LaunchedEffect(uiState.value.isValidated) {
-        if (uiState.value.isValidated)
-            navigateToApp()
+        if (uiState.value.isValidated) navigateToApp()
     }
 
     LoginScreenContent(
         authenticationUser = uiState.value.authenticationUser,
-        onUsernameChange = { username ->
+        onEmailChange = { email ->
             loginScreenViewModel.handleEvent(
-                LoginScreenEvents.UpdateUsername(
-                    username
+                LoginScreenEvents.UpdateEmail(
+                    email
                 )
             )
         },
@@ -119,7 +118,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreenContent(
     authenticationUser: AuthenticationUser,
-    onUsernameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     navigateToRegister: () -> Unit,
     onLoginClick: () -> Unit,
@@ -170,7 +169,7 @@ fun LoginScreenContent(
         ) {
             LoginFields(
                 modifier = Modifier.fillMaxWidth(),
-                onUsernameChange = onUsernameChange,
+                onEmailChange = onEmailChange,
                 onPasswordChange = onPasswordChange,
                 authenticationUser = authenticationUser
             )
@@ -239,7 +238,7 @@ fun LoginScreenContent(
 @Composable
 fun LoginFields(
     modifier: Modifier,
-    onUsernameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     authenticationUser: AuthenticationUser
 ) {
@@ -248,10 +247,10 @@ fun LoginFields(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         OutlinedTextField(
-            value = authenticationUser.username,
-            onValueChange = onUsernameChange,
+            value = authenticationUser.email,
+            onValueChange = onEmailChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(text = stringResource(R.string.username), color = Color(0xFF8490B2)) },
+            label = { Text(text = stringResource(R.string.email), color = Color(0xFF8490B2)) },
             colors = TextFieldDefaults.colors(
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White,
@@ -265,9 +264,9 @@ fun LoginFields(
                 focusedLabelColor = Color.White,
                 unfocusedLabelColor = Color(0xFF8490B2)
             ),
-            placeholder = { Text(stringResource(R.string.username), color = Color(0xFF8490B2)) },
+            placeholder = { Text(stringResource(R.string.email), color = Color(0xFF8490B2)) },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
         )
 
         OutlinedTextField(

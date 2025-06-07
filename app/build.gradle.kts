@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.crashlytics)
 }
 
 android {
@@ -28,7 +30,7 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.0.63:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://192.168.1.108:8080/\"")
             buildConfigField("String","GOOGLE_PLACES_API_KEY","\"AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ\"")
         }
         create("production") {
@@ -102,6 +104,7 @@ dependencies {
     implementation (libs.converter.scalars)
     implementation (libs.logging.interceptor)
 
+    //Coil
     implementation(libs.coil)
     implementation(libs.coil.compose)
 
@@ -147,5 +150,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.auth)
 
+    //Coroutine
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 }

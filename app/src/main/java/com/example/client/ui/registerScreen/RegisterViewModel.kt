@@ -8,6 +8,7 @@ import com.example.client.common.StringProvider
 import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.user.AuthenticationUser
 import com.example.client.domain.usecases.user.RegisterUseCase
+import com.example.client.domain.usecases.user.firebase.FirebaseRegisterUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,6 +23,7 @@ class RegisterViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
     private val stringProvider: StringProvider,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    private val firebaseRegisterUseCase: FirebaseRegisterUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterState())
@@ -40,9 +42,28 @@ class RegisterViewModel @Inject constructor(
     private fun register(authenticationUser: AuthenticationUser) {
         viewModelScope.launch(dispatcher) {
             when (val result = registerUseCase.invoke(authenticationUser)) {
-                is NetworkResult.Success -> _uiState.value =
-                    _uiState.value.copy(event = UiEvent.ShowSnackbar(stringProvider.getString(R.string.user_registered)),
-                        isRegistered = true)
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            event = UiEvent.ShowSnackbar(stringProvider.getString(R.string.user_registered)),
+                            isRegistered = true
+                        )
+                    }
+                    when (val authenticationResponse = firebaseRegisterUseCase.invoke(authenticationUser)) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                event = UiEvent.ShowSnackbar(authenticationResponse.message),
+                                isLoading = false,
+                            )
+                        }
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                        is NetworkResult.Success -> {}
+                    }
+                }
 
                 is NetworkResult.Error -> _uiState.update {
                     it.copy(

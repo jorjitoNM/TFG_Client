@@ -42,7 +42,7 @@ import com.example.client.ui.userScreen.visitor.VisitorUserScreen
 import kotlinx.coroutines.launch
 
 @Composable
-fun Navigation() {
+fun Navigation () {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
