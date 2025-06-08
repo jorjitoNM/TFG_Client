@@ -155,7 +155,7 @@ fun Navigation(
                 UserScreen(
                     showSnackbar = { showSnackbar(it) },
                     onToggleTheme = onToggleTheme,
-                    isDarkTheme = isDarkTheme
+                    isDarkTheme = isDarkTheme,
                     onNavigateToNoteDetail = { navController.navigate(MyNoteDetailDestination(it)) },
                     onNavigateToDetailObservable = { navController.navigate(NormalNoteDetailDestination(it)) }
                 )

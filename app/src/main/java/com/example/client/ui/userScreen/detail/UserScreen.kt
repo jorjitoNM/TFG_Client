@@ -100,10 +100,11 @@ fun UserScreen(
                         .align(Alignment.End)
                         .padding(16.dp)
                 )
-
                 UserContent(
                     notes = uiState.notes,
                     user = uiState.user,
+                    followers = uiState.followers,
+                    following = uiState.following,
                     selectedTab = uiState.selectedTab,
                     onTabSelected = { tab ->
                         viewModel.handleEvent(UserEvent.SelectTab(tab))
@@ -127,43 +128,13 @@ fun UserScreen(
                                 viewModel.handleEvent(UserEvent.LikeNote(noteId))
                             }
                         }
-                    }
+                    },
+                    onNoteClick = { noteId ->
+                        val isMyNote = uiState.selectedTab == UserTab.NOTES
+                        viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
+                    },
                 )
             }
-            UserContent(
-                notes = uiState.notes,
-                user = uiState.user,
-                followers = uiState.followers,
-                following = uiState.following,
-                selectedTab = uiState.selectedTab,
-                onTabSelected = { tab ->
-                    viewModel.handleEvent(UserEvent.SelectTab(tab))
-                },
-                onFavClick = { noteId ->
-                    val note = uiState.notes.find { it.id == noteId }
-                    note?.let {
-                        if (it.saved) {
-                            viewModel.handleEvent(UserEvent.DelFavNote(noteId))
-                        } else {
-                            viewModel.handleEvent(UserEvent.FavNote(noteId))
-                        }
-                    }
-                },
-                onLikeClick = { noteId ->
-                    val note = uiState.notes.find { it.id == noteId }
-                    note?.let {
-                        if (it.liked) {
-                            viewModel.handleEvent(UserEvent.DelLikeNote(noteId))
-                        } else {
-                            viewModel.handleEvent(UserEvent.LikeNote(noteId))
-                        }
-                    }
-                },
-                onNoteClick = { noteId ->
-                    val isMyNote = uiState.selectedTab == UserTab.NOTES
-                    viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
-                },
-            )
         }
     }
 }
