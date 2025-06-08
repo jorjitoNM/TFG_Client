@@ -1,8 +1,10 @@
 package com.example.client.ui.userScreen.detail
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.di.IoDispatcher
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.usecases.follow.GetMyFollowersUseCase
 import com.example.client.domain.usecases.follow.GetMyFollowingUseCase
@@ -14,9 +16,12 @@ import com.example.client.domain.usecases.social.GetLikedNoteUseCase
 import com.example.client.domain.usecases.social.GetNoteSavedUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.domain.usecases.user.GetUserUseCase
+import com.example.client.domain.usecases.user.images.LoadProfileImageUseCase
+import com.example.client.domain.usecases.user.images.SaveProfileImageUseCase
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.userScreen.DetailNavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +34,8 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase,
     private val getNoteSavedUseCase: GetNoteSavedUseCase,
+    private val saveProfileImageUseCase: SaveProfileImageUseCase,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val favNoteUseCase: FavNoteUseCase,
     private val likeNoteUseCase: LikeNoteUseCase,
     private val delLikeNoteUseCase: DelLikeNoteUseCase,
@@ -36,7 +43,8 @@ class UserViewModel @Inject constructor(
     private val getMyNote: GetMyNoteUseCase,
     private val getLikedNoteUseCase: GetLikedNoteUseCase,
     private val getMyFollowersUseCase: GetMyFollowersUseCase,
-    private val getMyFollowingsUseCase: GetMyFollowingUseCase
+    private val getMyFollowingsUseCase: GetMyFollowingUseCase,
+    private val loadProfileImageUseCase: LoadProfileImageUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserState())
@@ -77,6 +85,7 @@ class UserViewModel @Inject constructor(
         }
 
             is UserEvent.SelectedNote -> selectNote(event.noteId, event.isMyNote)
+            is UserEvent.SaveProfileImage -> saveProfileImage(event.imageUri)
         }
     }
 
@@ -283,6 +292,44 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    private fun saveProfileImage(imagesUri: Uri) {
+        viewModelScope.launch(dispatcher) {
+            saveProfileImageUseCase.invoke(imagesUri,_uiState.value.user.id).collect { result ->
+                when (result) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                user = _uiState.value.user.copy(
+                                    profilePhoto = result.data,
+                                ),
+                                isLoading = false
+                            )
+                        }
+                    }
+
+                    is NetworkResult.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+                    }
+
+                    is NetworkResult.Loading -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
     private fun loadUser() {
         viewModelScope.launch {
@@ -307,6 +354,36 @@ class UserViewModel @Inject constructor(
 
                 is NetworkResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
+                }
+            }
+        }
+    }
+
+    private fun loadUserProfileImage() {
+        viewModelScope.launch (dispatcher){
+            loadProfileImageUseCase.invoke(_uiState.value.user.id).collect {result ->
+                when (result) {
+                    is NetworkResult.Error -> _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+
+                    is NetworkResult.Loading -> _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+
+                    is NetworkResult.Success -> _uiState.update {
+                        it.copy(
+                            user = _uiState.value.user.copy(
+                                profilePhoto = result.data
+                            ),
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }

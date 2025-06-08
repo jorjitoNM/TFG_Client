@@ -1,5 +1,10 @@
 package com.example.client.ui.userScreen.visitor
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,11 +38,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.model.note.NotePrivacy
@@ -76,6 +83,7 @@ fun VisitorUserScreen(
             }
         }
     }
+
 
     Box(
         modifier = Modifier
@@ -184,12 +192,31 @@ fun VisitorUserContent(
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Foto de perfil",
-                        modifier = Modifier.size(110.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (user.profilePhoto != null) {
+                            AsyncImage(
+                                model = user.profilePhoto,
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier.size(110.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -243,7 +270,6 @@ fun VisitorUserContent(
                         modifier = Modifier.weight(1f)
                     )
                 }
-
             }
         }
 

@@ -1,5 +1,9 @@
 package com.example.client.ui.userScreen.detail
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,10 +39,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.model.note.NoteType
@@ -94,9 +101,11 @@ fun UserScreen(
                 onNavigateToDetailObservable(event.noteId)
                 viewModel.handleEvent(UserEvent.NavigationConsumed)
             }
-            else -> {}
+
+            is DetailNavigationEvent.None -> {}
         }
     }
+
 
     Box(
         modifier = Modifier
@@ -123,6 +132,7 @@ fun UserScreen(
                     selectedTab = tab
                     viewModel.handleEvent(UserEvent.SelectTab(tab))
                 },
+                onProfileImageSelected = { imageUri -> viewModel.handleEvent(UserEvent.SaveProfileImage(imageUri)) },
                 onFavClick = { noteId ->
                     val note = uiState.notes.find { it.id == noteId }
                     note?.let {
@@ -144,7 +154,7 @@ fun UserScreen(
                     }
                 },
                 onNoteClick = { noteId ->
-                    val isMyNote = selectedTab == UserTab.NOTES
+                    val isMyNote = uiState.selectedTab == UserTab.NOTES
                     viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
                 },
                 listState = currentListState,
@@ -155,6 +165,7 @@ fun UserScreen(
     }
 }
 
+
 @Composable
 fun UserContent(
     notes: List<NoteDTO>,
@@ -164,18 +175,22 @@ fun UserContent(
     selectedTab: UserTab,
     favorites: List<NoteDTO>,
     likes: List<NoteDTO>,
-    onNoteClick: (Int) -> Unit,
     onTabSelected: (UserTab) -> Unit,
+    onProfileImageSelected: (Uri) -> Unit,
+    onNoteClick: (Int) -> Unit,
     onFavClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit,
     listState: LazyListState
 ) {
-    // FILTRA LAS NOTAS SEGÚN EL TAB
     val filteredNotes = when (selectedTab) {
         UserTab.NOTES -> notes
         UserTab.FAVORITES -> favorites
         UserTab.LIKES -> likes
     }
+
+    val pickMedia = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri -> if (uri != null) onProfileImageSelected(uri) }
 
     Column(
         modifier = Modifier
@@ -199,15 +214,31 @@ fun UserContent(
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .clickable(onClick = {
+                            pickMedia.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Foto de perfil",
-                        modifier = Modifier.size(110.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    if (user.profilePhoto != null) {
+                        AsyncImage(
+                            model = user.profilePhoto,
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.size(110.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -256,6 +287,7 @@ fun UserContent(
 
 
 
+
 @Composable
 fun TabSelector(
     selectedTab: UserTab,
@@ -293,7 +325,6 @@ fun TabSelector(
         }
     }
 }
-
 
 @Composable
 fun TabButton(
@@ -354,8 +385,5 @@ fun Preview() {
         followers = emptyList(),
         following = emptyList(),
         onNoteClick = {},
-listState = rememberLazyListState(),
-        likes = emptyList(),
-        favorites = emptyList()
     )
 }

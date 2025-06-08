@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
-    private val userRemoteDataSource: UserRemoteDataSource
+    private val userRemoteDataSource: UserRemoteDataSource,
 ) {
     suspend fun getUser() = withContext(dispatcher) {
         try {

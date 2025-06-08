@@ -10,5 +10,5 @@ class LoadSelectedNoteImagesUseCase @Inject constructor(
     private val imagesRepository: ImagesRepository
 ) {
     fun invoke (notes : List<NoteDTO>) : Flow<NetworkResult<List<NoteDTO>>> =
-        imagesRepository.loadSelectedNoteImagesUseCase(notes)
+        imagesRepository.loadSelectedNoteImages(notes)
 }

@@ -1,5 +1,7 @@
 package com.example.client.ui.userScreen.detail
 
+import android.net.Uri
+
 sealed class UserEvent {
     data object AvisoVisto : UserEvent()
     data class SelectTab(val tab: UserTab) : UserEvent()
@@ -8,6 +10,7 @@ sealed class UserEvent {
     data class DelFavNote(val noteId: Int) : UserEvent()
     data class DelLikeNote(val noteId: Int) : UserEvent()
     data object GetMyNote : UserEvent()
+    data class SaveProfileImage (val imageUri : Uri) : UserEvent()
     data object GetFollowing : UserEvent()
     data object GetFollowers : UserEvent()
     data class SelectedNote(val noteId: Int, val isMyNote: Boolean) : UserEvent()

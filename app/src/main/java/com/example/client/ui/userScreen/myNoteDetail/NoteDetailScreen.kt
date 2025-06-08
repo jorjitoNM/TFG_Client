@@ -1,9 +1,12 @@
 package com.example.client.ui.userScreen.myNoteDetail
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -111,6 +114,7 @@ fun NoteDetailScreen(
     }
 }
 
+
 @Composable
 fun NoteDetailContent(
     state: NoteDetailState,
@@ -138,7 +142,7 @@ fun NoteDetailContent(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // Header
+        // Header with back button, title and edit button
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -147,7 +151,7 @@ fun NoteDetailContent(
                 OutlinedTextField(
                     value = state.editedTitle,
                     onValueChange = { onEvent(NoteDetailEvent.UpdateEditedTitle(it)) },
-                    label = { Text("Title", color = textColor) },
+                    label = { Text("Title") },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -176,6 +180,7 @@ fun NoteDetailContent(
 
             Spacer(modifier = Modifier.width(8.dp))
 
+            // Edit/Save/Cancel buttons
             if (state.isEditing) {
                 Row {
                     IconButton(onClick = { onEvent(NoteDetailEvent.UpdateNote) }) {
@@ -255,6 +260,7 @@ fun NoteDetailContent(
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
+            // Rating: X/10 y estrella dorada
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -315,6 +321,7 @@ fun NoteDetailContent(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Only for you", color = textColor)
                             }
+
                             NotePrivacy.PUBLIC -> {
                                 Icon(
                                     imageVector = Icons.Default.Person,
@@ -330,6 +337,7 @@ fun NoteDetailContent(
                 }
             }
         } else {
+            // Icono de privacidad según el tipo, con texto al costado
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -349,6 +357,7 @@ fun NoteDetailContent(
                             color = textColor
                         )
                     }
+
                     NotePrivacy.PUBLIC -> {
                         Icon(
                             imageVector = Icons.Default.Person,
@@ -441,6 +450,7 @@ fun NoteDetailContent(
         ) {
             val photos = note.photos
             if (state.isImagesLoading) {
+                // Loader SOLO en la galería
                 Box(
                     Modifier
                         .fillMaxSize(),
@@ -466,6 +476,7 @@ fun NoteDetailContent(
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(cardColor)
                             )
+                            // Solo muestra el botón de eliminar si está en modo edición
                             if (state.isEditing) {
                                 IconButton(
                                     onClick = { onEvent(NoteDetailEvent.DeleteImage(photos[idx])) },
@@ -487,6 +498,7 @@ fun NoteDetailContent(
                             }
                         }
                     }
+                    // Solo muestra el botón de agregar si está en modo edición y hay menos de 4 fotos
                     if (state.isEditing && photos.size < 8) {
                         item {
                             AddImageButton(
@@ -499,7 +511,6 @@ fun NoteDetailContent(
         }
     }
 }
-
 
 
 
