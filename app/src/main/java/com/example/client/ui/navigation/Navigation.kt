@@ -59,16 +59,6 @@ fun Navigation(
             )
         }
     }
-    NavHost(navController = navController, startDestination = "userScreen") {
-        composable<UserScreenDestination> {
-            UserScreen(
-                showSnackbar = { showSnackbar(it) },
-                onToggleTheme = onToggleTheme,
-                isDarkTheme = isDarkTheme
-            )
-        }
-
-    }
     val screen = appDestinationList.find { screen ->
         val currentRoute = state?.destination?.route?.substringBefore("/")
         val screenRoute = screen.route.toString().substringBefore("@").substringBefore("$")
