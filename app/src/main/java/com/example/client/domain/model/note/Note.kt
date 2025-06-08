@@ -7,7 +7,7 @@ data class Note(
     val id : Int = 0,
     val tittle : String = "",
     val content : String = "",
-    val privacy : NotePrivacy = NotePrivacy.FOLLOWERS,
+    val privacy : NotePrivacy = NotePrivacy.PUBLIC,
     val rating: Int = 5,
     val owner : User = User(),
     val created : LocalDateTime = LocalDateTime.now(),
