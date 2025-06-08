@@ -76,7 +76,7 @@ fun AddImageButton(modifier: Modifier = Modifier, onLoadImages : (List<Uri>) -> 
 }
 
 @Composable
-fun NoteImageItem(modifier: Modifier = Modifier, index: Int, imageUri: Uri, onDeleteImage: (Uri) -> Unit) {
+fun NoteImageItem(modifier: Modifier = Modifier, index: Int, imageUri: Uri, onDeleteImage: (Uri) -> Unit = {}) {
     Box(
         modifier = modifier
     ) {

@@ -4,6 +4,7 @@ import android.net.Uri
 import com.example.client.R
 import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
+import com.example.client.data.model.NoteDTO
 import com.example.client.di.IoDispatcher
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineDispatcher
@@ -58,5 +59,24 @@ class ImagesRepository @Inject constructor(
             .delete().isSuccessful)
             emit(NetworkResult.Success(Unit))
         else emit(NetworkResult.Error(stringProvider.getString(R.string.error_deleting_image)))
+    }
+
+    fun loadSelectedNoteImagesUseCase(notes : List<NoteDTO>): Flow<NetworkResult<List<NoteDTO>>> = flow {
+        emit(NetworkResult.Loading())
+        try {
+            notes.forEach { note ->
+                val noteImagesReference =
+                    storage.reference.child("${stringProvider.getString(R.string.fb_storage_images_url)}/${note.id}")
+                val listResult = noteImagesReference .list(1).await()
+                val noteUri = listResult.items.map { item ->
+                    item.downloadUrl.await()
+                }
+                note.photos = noteUri.toList()
+            }
+
+            emit(NetworkResult.Success(notes))
+        } catch (e: Exception) {
+            emit(NetworkResult.Error(e.message ?: stringProvider.getString(R.string.error_loading_images)))
+        }
     }
 }
