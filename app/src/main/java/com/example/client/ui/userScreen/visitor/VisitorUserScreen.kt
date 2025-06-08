@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +55,9 @@ fun VisitorUserScreen(
     onNavigateToNoteDetail: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    // Scroll persistente para la lista de notas públicas
+    val notesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
 
     LaunchedEffect(username) {
         viewModel.handleEvent(VisitorUserEvent.LoadUser(username))
@@ -117,8 +123,9 @@ fun VisitorUserScreen(
                     onNoteClick = { noteId ->
                         viewModel.handleEvent(VisitorUserEvent.SelectedNote(noteId))
                     },
+                    notesListState = notesListState // <-- Pasa el estado de scroll
                 )
-                // Si está cargando, muestra un loader pequeño en la esquina
+                // Loader pequeño en la esquina si está cargando
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier
@@ -136,7 +143,6 @@ fun VisitorUserScreen(
 }
 
 
-
 @Composable
 fun VisitorUserContent(
     user: UserDTO,
@@ -147,7 +153,9 @@ fun VisitorUserContent(
     onFollowClick: () -> Unit,
     onFavClick: (Int) -> Unit,
     onNoteClick: (Int) -> Unit,
-    onLikeClick: (Int) -> Unit
+    onLikeClick: (Int) -> Unit,
+    notesListState: LazyListState // <-- Recibe el estado de scroll
+
 ) {
     val publicNotes = notes.filter { it.privacy == NotePrivacy.PUBLIC }
 
@@ -216,15 +224,26 @@ fun VisitorUserContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 50.dp, end = 32.dp), // Ajusta el padding a tu gusto
-                    horizontalArrangement = Arrangement.Center
+                        .padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    UserStat(number = user.notes.size, label = "Posts")
-                    Spacer(Modifier.width(32.dp)) // Espacio entre stats
-                    UserStat(number = followers.size, label = "Followers")
-                    Spacer(Modifier.width(32.dp))
-                    UserStat(number = following.size, label = "Following")
+                    UserStat(
+                        number = user.notes.size ?: 0,
+                        label = "Posts",
+                        modifier = Modifier.weight(1f)
+                    )
+                    UserStat(
+                        number = followers.size,
+                        label = "Followers",
+                        modifier = Modifier.weight(1f)
+                    )
+                    UserStat(
+                        number = following.size,
+                        label = "Following",
+                        modifier = Modifier.weight(1f)
+                    )
                 }
+
             }
         }
 
@@ -254,7 +273,8 @@ fun VisitorUserContent(
                 notes = publicNotes,
                 onNoteClick = onNoteClick,
                 onFavClick = onFavClick,
-                onLikeClick = onLikeClick
+                onLikeClick = onLikeClick,
+                listState = notesListState
             )
         }
     }
@@ -307,7 +327,6 @@ fun VisitorUserSkeleton() {
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Stats (Posts, Followers, Following)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -405,7 +424,8 @@ fun VisitorUserContentPreview(
         onLikeClick = {},
         followers = emptyList(),
         following = emptyList(),
-        onNoteClick = {}
+        onNoteClick = {},
+        notesListState = rememberLazyListState()
     )
 }
 

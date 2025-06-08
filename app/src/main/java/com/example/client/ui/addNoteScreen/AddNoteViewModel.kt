@@ -32,6 +32,9 @@ class AddNoteViewModel @Inject constructor(
                 _uiState.update { it.copy(selectedImages = event.uris) }
             }
             is AddNoteEvents.UiNoteEventsDone -> _uiState.update { it.copy(uiEvent = null) }
+            is AddNoteEvents.RemoveSelectedImage -> {
+                _uiState.update { it.copy(selectedImages = it.selectedImages - event.uri) }
+            }
         }
     }
 

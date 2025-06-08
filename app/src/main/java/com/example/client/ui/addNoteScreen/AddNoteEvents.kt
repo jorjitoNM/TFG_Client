@@ -9,4 +9,5 @@ sealed interface AddNoteEvents {
     data object UiNoteEventsDone : AddNoteEvents
     data class EditNote(val note: NoteDTO) : AddNoteEvents
     data class AddNoteImages(val uris: List<Uri>) : AddNoteEvents
+    data class RemoveSelectedImage(val uri: Uri) : AddNoteEvents
 }

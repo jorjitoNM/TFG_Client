@@ -22,9 +22,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -142,6 +144,7 @@ fun AddNoteScreen(
             isDarkMode = isDarkMode,
             onAddImages = { imagePickerLauncher.launch("image/*") },
             selectedImages = uiState.selectedImages,
+            onRemoveImage = { uri -> addNoteViewModel.handleEvent(AddNoteEvents.RemoveSelectedImage(uri)) }
 
             )
     }
@@ -157,6 +160,8 @@ private fun AddNoteContent(
     isDarkMode: Boolean,
     onAddImages: () -> Unit,
     selectedImages: List<Uri>,
+    onRemoveImage: (Uri) -> Unit,
+
 
     ) {
     var localNote by remember { mutableStateOf(note) }
@@ -578,10 +583,29 @@ private fun AddNoteContent(
                                         contentDescription = "Selected photo",
                                         modifier = Modifier.fillMaxSize()
                                     )
+                                    // Botón X para eliminar
+                                    IconButton(
+                                        onClick = { onRemoveImage(uri) },
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(24.dp)
+                                            .background(
+                                                Color.White.copy(alpha = 0.8f),
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove image",
+                                            tint = Color.Red,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+
                 }
 
 
@@ -881,5 +905,6 @@ fun AddNoteScreenPreview() {
         isDarkMode = false,
         onAddImages = {},
         selectedImages = emptyList(),
+        onRemoveImage = {},
     )
 }

@@ -14,7 +14,13 @@ data class UserState(
     val followers: List<UserDTO> = emptyList(),
     val following: List<UserDTO> = emptyList(),
     val selectedNoteId : Int = 0,
-    val navigationEvent: DetailNavigationEvent = DetailNavigationEvent.None
+    val navigationEvent: DetailNavigationEvent = DetailNavigationEvent.None,
+    val notesScrollIndex: Int = 0,
+    val notesScrollOffset: Int = 0,
+    val favoritesScrollIndex: Int = 0,
+    val favoritesScrollOffset: Int = 0,
+    val likesScrollIndex: Int = 0,
+    val likesScrollOffset: Int = 0,
 )
 
 enum class UserTab { NOTES, FAVORITES, LIKES }

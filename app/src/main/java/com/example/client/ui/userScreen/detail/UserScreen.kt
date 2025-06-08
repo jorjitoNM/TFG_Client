@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,9 +52,22 @@ fun UserScreen(
     showSnackbar: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel(),
     onNavigateToNoteDetail: (Int) -> Unit,
-    onNavigateToDetailObservable : (Int) -> Unit
+    onNavigateToDetailObservable: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    var selectedTab by rememberSaveable { mutableStateOf(UserTab.NOTES) }
+
+    val notesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    val favoritesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+    val likesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
+
+    // Selecciona el estado de scroll correcto según la pestaña activa
+    val currentListState = when (uiState.selectedTab) {
+        UserTab.NOTES -> notesListState
+        UserTab.FAVORITES -> favoritesListState
+        UserTab.LIKES -> likesListState
+    }
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(UserEvent.LoadUser)
@@ -60,8 +78,8 @@ fun UserScreen(
     LaunchedEffect(uiState.aviso) {
         uiState.aviso?.let { event ->
             if (event is UiEvent.ShowSnackbar) {
-                    showSnackbar(event.message)
-                    viewModel.handleEvent(UserEvent.AvisoVisto)
+                showSnackbar(event.message)
+                viewModel.handleEvent(UserEvent.AvisoVisto)
             }
         }
     }
@@ -80,7 +98,6 @@ fun UserScreen(
         }
     }
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -96,8 +113,9 @@ fun UserScreen(
                 user = uiState.user,
                 followers = uiState.followers,
                 following = uiState.following,
-                selectedTab = uiState.selectedTab,
+                selectedTab = selectedTab,
                 onTabSelected = { tab ->
+                    selectedTab = tab
                     viewModel.handleEvent(UserEvent.SelectTab(tab))
                 },
                 onFavClick = { noteId ->
@@ -121,14 +139,14 @@ fun UserScreen(
                     }
                 },
                 onNoteClick = { noteId ->
-                    val isMyNote = uiState.selectedTab == UserTab.NOTES
+                    val isMyNote = selectedTab == UserTab.NOTES
                     viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
                 },
+                listState = currentListState
             )
         }
     }
 }
-
 
 @Composable
 fun UserContent(
@@ -140,7 +158,8 @@ fun UserContent(
     onNoteClick: (Int) -> Unit,
     onTabSelected: (UserTab) -> Unit,
     onFavClick: (Int) -> Unit,
-    onLikeClick: (Int) -> Unit
+    onLikeClick: (Int) -> Unit,
+    listState: LazyListState // <-- Scroll correcto
 ) {
     Column(
         modifier = Modifier
@@ -209,37 +228,15 @@ fun UserContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        when (selectedTab) {
-            UserTab.NOTES -> {
-                NoteList(
-                    notes = notes,
-                    onNoteClick = {onNoteClick(it)},
-                    onFavClick = onFavClick,
-                    onLikeClick = onLikeClick
-                )
-            }
-
-            UserTab.FAVORITES -> {
-                NoteList(
-                    notes = notes,
-                    onNoteClick = {onNoteClick(it)},
-                    onFavClick = onFavClick,
-                    onLikeClick = onLikeClick
-                )
-            }
-
-            UserTab.LIKES -> {
-                NoteList(
-                    notes = notes,
-                    onNoteClick = {onNoteClick(it)},
-                    onFavClick = onFavClick,
-                    onLikeClick = onLikeClick
-                )
-            }
-        }
+        NoteList(
+            notes = notes,
+            onNoteClick = onNoteClick,
+            onFavClick = onFavClick,
+            onLikeClick = onLikeClick,
+            listState = listState
+        )
     }
 }
-
 
 
 
@@ -340,5 +337,6 @@ fun Preview() {
         followers = emptyList(),
         following = emptyList(),
         onNoteClick = {},
+listState = rememberLazyListState()
     )
 }

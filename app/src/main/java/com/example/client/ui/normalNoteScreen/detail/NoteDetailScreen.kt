@@ -1,10 +1,7 @@
 package com.example.client.ui.normalNoteScreen.detail
 
-import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,40 +20,25 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -77,13 +59,14 @@ fun NoteDetailScreen(
     viewModel: NoteDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isDarkMode = isSystemInDarkTheme()
 
     // Obtener nota y cargar imágenes
     LaunchedEffect(noteId) {
         viewModel.handleEvent(NoteDetailEvent.GetNote(noteId))
     }
     LaunchedEffect(state.note?.id) {
-        state.note?.id?.let { NoteDetailEvent.LoadNoteImages(it) }
+        state.note?.id?.let { viewModel.handleEvent(NoteDetailEvent.LoadNoteImages(it)) }
     }
     LaunchedEffect(state.aviso) {
         state.aviso?.let {
@@ -102,7 +85,8 @@ fun NoteDetailScreen(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
             NoteDetailContent(
-                state = state
+                state = state,
+                isDarkMode = isDarkMode
             )
         }
     }
@@ -111,13 +95,22 @@ fun NoteDetailScreen(
 @Composable
 fun NoteDetailContent(
     state: NoteDetailState,
+    isDarkMode: Boolean
 ) {
     val note = state.note ?: return
+
+    val backgroundColor = if (isDarkMode) Color(0xFF23272F) else Color.White
+    val textColor = if (isDarkMode) Color(0xFFE0E0E0) else Color.Black
+    val secondaryTextColor = if (isDarkMode) Color(0xFFB0B0B0) else Color.DarkGray
+    val dividerColor = if (isDarkMode) Color(0xFF444444) else Color.LightGray
+    val cardColor = if (isDarkMode) Color(0xFF2D313A) else Color(0xFFF5F5F5)
+    val iconTint = if (isDarkMode) Color(0xFFE0E0E0) else Color.Black
+    val starColor = Color(0xFFFFD700)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(backgroundColor)
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -130,7 +123,7 @@ fun NoteDetailContent(
                 text = note.title,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                color = textColor,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp)
@@ -144,7 +137,7 @@ fun NoteDetailContent(
             Text(
                 text = note.content,
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.DarkGray
+                color = secondaryTextColor
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -157,14 +150,14 @@ fun NoteDetailContent(
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = "Rating",
-                tint = Color(0xFFFFD700),
+                tint = starColor,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "${note.rating}/10",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.Black
+                color = textColor
             )
         }
 
@@ -180,28 +173,28 @@ fun NoteDetailContent(
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Private",
-                        tint = Color.Black,
+                        tint = iconTint,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Only for you",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Black
+                        color = textColor
                     )
                 }
                 NotePrivacy.PUBLIC -> {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Public",
-                        tint = Color.Black,
+                        tint = iconTint,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Public",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Black
+                        color = textColor
                     )
                 }
             }
@@ -218,7 +211,7 @@ fun NoteDetailContent(
                 Icon(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = "Evento",
-                    tint = Color.Black,
+                    tint = iconTint,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -226,12 +219,12 @@ fun NoteDetailContent(
                     Text(
                         text = "Start: ${formatDateTime(note.start ?: "")}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black
+                        color = textColor
                     )
                     Text(
                         text = "End: ${formatDateTime(note.end ?: "")}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Black
+                        color = textColor
                     )
                 }
             }
@@ -245,14 +238,14 @@ fun NoteDetailContent(
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = "Date",
-                tint = Color.Black,
+                tint = iconTint,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = formatDateTime(note.created.toString()),
+                text = formatDateTime(note.created),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.Black
+                color = textColor
             )
         }
 
@@ -260,7 +253,7 @@ fun NoteDetailContent(
         HorizontalDivider(
             modifier = Modifier.fillMaxWidth(),
             thickness = 1.dp,
-            color = Color.LightGray
+            color = dividerColor
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -268,7 +261,7 @@ fun NoteDetailContent(
             text = "Photos",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = textColor
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -284,7 +277,7 @@ fun NoteDetailContent(
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = textColor)
                 }
             } else {
                 LazyVerticalGrid(
@@ -302,6 +295,7 @@ fun NoteDetailContent(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(RoundedCornerShape(12.dp))
+                                    .background(cardColor)
                             )
                         }
                     }
@@ -310,6 +304,8 @@ fun NoteDetailContent(
         }
     }
 }
+
+
 
 class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
     override val values = sequenceOf(
@@ -395,7 +391,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
 fun NoteDetailScreenPreview(@PreviewParameter(NoteDetailStateProvider::class) state: NoteDetailState) {
     MaterialTheme {
         Surface {
-            NoteDetailContent(state = state)
+            NoteDetailContent(state = state, true)
         }
     }
 }

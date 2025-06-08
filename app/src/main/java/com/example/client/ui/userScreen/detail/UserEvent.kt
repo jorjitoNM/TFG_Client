@@ -13,5 +13,6 @@ sealed class UserEvent {
     data object GetFollowers : UserEvent()
     data class SelectedNote(val noteId: Int, val isMyNote: Boolean) : UserEvent()
     data object NavigationConsumed : UserEvent()
+    data class SaveScrollPosition(val tab: UserTab, val index: Int, val offset: Int) : UserEvent()
 
 }
