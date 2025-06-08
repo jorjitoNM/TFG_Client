@@ -299,8 +299,8 @@ class UserViewModel @Inject constructor(
                     is NetworkResult.Success -> {
                         _uiState.update {
                             it.copy(
-                                user = _uiState.value.user.copy(
-                                    profilePhoto = result.data,
+                                user = it.user.copy(
+                                    profilePhoto = result.data // <-- ¡Asegúrate de que es el campo correcto!
                                 ),
                                 isLoading = false
                             )

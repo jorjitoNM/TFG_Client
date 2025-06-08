@@ -385,5 +385,10 @@ fun Preview() {
         followers = emptyList(),
         following = emptyList(),
         onNoteClick = {},
+        onProfileImageSelected = {},
+        listState = rememberLazyListState(),
+        likes = emptyList(),
+        favorites = emptyList(),
+
     )
 }
