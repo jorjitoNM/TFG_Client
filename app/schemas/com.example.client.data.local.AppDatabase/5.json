@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "46485b28757b93858203510a2a24b651",
+    "identityHash": "7b6e0b0ea0e40d1c76ead422fb1c3b48",
     "entities": [
       {
         "tableName": "locations",
@@ -74,7 +74,7 @@
       },
       {
         "tableName": "users",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`username` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `rol` TEXT NOT NULL, `userLogged` TEXT NOT NULL, PRIMARY KEY(`username`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`username` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `userLogged` TEXT NOT NULL, PRIMARY KEY(`username`))",
         "fields": [
           {
             "fieldPath": "username",
@@ -86,12 +86,6 @@
             "fieldPath": "timestamp",
             "columnName": "timestamp",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "rol",
-            "columnName": "rol",
-            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -114,7 +108,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '46485b28757b93858203510a2a24b651')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7b6e0b0ea0e40d1c76ead422fb1c3b48')"
     ]
   }
 }

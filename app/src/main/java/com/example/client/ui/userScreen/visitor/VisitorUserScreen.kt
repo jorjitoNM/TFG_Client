@@ -1,7 +1,5 @@
 package com.example.client.ui.userScreen.visitor
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,48 +11,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
+import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.NoteList
@@ -65,20 +47,24 @@ import com.example.client.ui.common.composables.UserStat
 fun VisitorUserScreen(
     username: String,
     showSnackbar: (String) -> Unit,
-    viewModel: VisitorUserViewModel = hiltViewModel()
+    viewModel: VisitorUserViewModel = hiltViewModel(),
+    onNavigateToNoteDetail: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Carga el usuario visitante al entrar en la pantalla
     LaunchedEffect(username) {
         viewModel.handleEvent(VisitorUserEvent.LoadUser(username))
+        viewModel.handleEvent(VisitorUserEvent.GetFollowers(username))
+        viewModel.handleEvent(VisitorUserEvent.GetFollowing(username))
     }
 
-    // Maneja eventos de aviso (snackbar)
     LaunchedEffect(uiState.aviso) {
         uiState.aviso?.let { event ->
             if (event is UiEvent.ShowSnackbar) {
                 showSnackbar(event.message)
+                viewModel.handleEvent(VisitorUserEvent.AvisoVisto)
+            } else if (event is UiEvent.PopBackStack) {
+                onNavigateToNoteDetail(uiState.selectedNoteId)
                 viewModel.handleEvent(VisitorUserEvent.AvisoVisto)
             }
         }
@@ -100,6 +86,8 @@ fun VisitorUserScreen(
                     user = user,
                     notes = uiState.notes,
                     isFollowing = uiState.isFollowing,
+                    followers = uiState.followers,
+                    following = uiState.following,
                     onFollowClick = {
                         if (uiState.isFollowing) {
                             viewModel.handleEvent(VisitorUserEvent.Unfollow(username))
@@ -126,7 +114,10 @@ fun VisitorUserScreen(
                                 viewModel.handleEvent(VisitorUserEvent.LikeNote(noteId))
                             }
                         }
-                    }
+                    },
+                    onNoteClick = { noteId ->
+                        viewModel.handleEvent(VisitorUserEvent.SelectedNote(noteId))
+                    },
                 )
 
             }
@@ -140,10 +131,15 @@ fun VisitorUserContent(
     user: UserDTO,
     notes: List<NoteDTO>,
     isFollowing: Boolean,
+    followers: List<UserDTO>,
+    following: List<UserDTO>,
     onFollowClick: () -> Unit,
     onFavClick: (Int) -> Unit,
+    onNoteClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit
 ) {
+    val publicNotes = notes.filter { it.privacy == NotePrivacy.PUBLIC }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -185,12 +181,6 @@ fun VisitorUserContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(
-                    text = user.rol,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
@@ -204,7 +194,7 @@ fun VisitorUserContent(
                         .width(120.dp)
                 ) {
                     Text(
-                        text = if (isFollowing) "Siguiendo" else "Seguir",
+                        text = if (isFollowing) "Following" else "Follow",
                         color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.labelLarge
                     )
@@ -220,9 +210,9 @@ fun VisitorUserContent(
                 ) {
                     UserStat(number = user.notes.size, label = "Posts")
                     Spacer(Modifier.width(32.dp)) // Espacio entre stats
-                    UserStat(number = user.followers.size, label = "Followers")
+                    UserStat(number = followers.size, label = "Followers")
                     Spacer(Modifier.width(32.dp))
-                    UserStat(number = user.following.size, label = "Following")
+                    UserStat(number = following.size, label = "Following")
                 }
             }
         }
@@ -235,12 +225,27 @@ fun VisitorUserContent(
             modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
         )
 
-        NoteList(
-            notes = notes,
-            onNoteClick = {},
-            onFavClick = onFavClick,
-            onLikeClick = onLikeClick
-        )
+        if (publicNotes.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "This user still doesn't have any notes to show.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            NoteList(
+                notes = publicNotes,
+                onNoteClick = onNoteClick,
+                onFavClick = onFavClick,
+                onLikeClick = onLikeClick
+            )
+        }
     }
 }
 
@@ -249,13 +254,10 @@ class VisitorUserPreviewProvider : PreviewParameterProvider<VisitorUserPreviewDa
         VisitorUserPreviewData(
             user = UserDTO(
                 username = "dave",
-                rol = "PREMIUM",
                 notes = listOf(
                     NoteDTO(id = 1, title = "Granada", content = "Alhambra", type = NoteType.HISTORICAL),
                     NoteDTO(id = 2, title = "Madrid", content = "Museo del Prado", type = NoteType.CULTURAL)
                 ),
-                followers = listOf(UserDTO(username = "eve"), UserDTO(username = "frank")),
-                following = listOf(UserDTO(username = "eve"), UserDTO(username = "frank"))
             ),
             notes = listOf(
                 NoteDTO(id = 1, title = "Granada", content = "Alhambra", type = NoteType.HISTORICAL),
@@ -283,7 +285,10 @@ fun VisitorUserContentPreview(
         isFollowing = previewData.isFollowing,
         onFollowClick = {},
         onFavClick = {},
-        onLikeClick = {}
+        onLikeClick = {},
+        followers = emptyList(),
+        following = emptyList(),
+        onNoteClick = {}
     )
 }
 

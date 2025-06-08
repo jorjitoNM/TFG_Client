@@ -50,4 +50,20 @@ class FollowRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
+
+    suspend fun getMyFollowers() = withContext(dispatcher) {
+        try {
+            followRemoteDataSource.getMyFollowers()
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun getMyFollowing() = withContext(dispatcher) {
+        try {
+            followRemoteDataSource.getMyFollowing()
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
 }

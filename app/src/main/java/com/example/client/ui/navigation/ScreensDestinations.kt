@@ -9,6 +9,9 @@ object NormalNoteListDestination
 data class NormalNoteDetailDestination (val noteId: Int)
 
 @Serializable
+data class MyNoteDetailDestination (val noteId: Int)
+
+@Serializable
 object NoteMapDestination
 
 @Serializable

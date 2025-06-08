@@ -40,32 +40,45 @@ import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.NoteList
 import com.example.client.ui.common.composables.UserStat
+import com.example.client.ui.userScreen.DetailNavigationEvent
 
 @Composable
 fun UserScreen(
     showSnackbar: (String) -> Unit,
     onToggleTheme: (Boolean) -> Unit,
     isDarkTheme: Boolean,
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = hiltViewModel(),
+    onNavigateToNoteDetail: (Int) -> Unit,
+    onNavigateToDetailObservable : (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(UserEvent.LoadUser)
+        viewModel.handleEvent(UserEvent.GetFollowers)
+        viewModel.handleEvent(UserEvent.GetFollowing)
     }
 
     LaunchedEffect(uiState.aviso) {
         uiState.aviso?.let { event ->
-            when (event) {
-                is UiEvent.ShowSnackbar -> {
+            if (event is UiEvent.ShowSnackbar) {
                     showSnackbar(event.message)
                     viewModel.handleEvent(UserEvent.AvisoVisto)
-                }
-
-                is UiEvent.PopBackStack -> {
-                    viewModel.handleEvent(UserEvent.AvisoVisto)
-                }
             }
+        }
+    }
+
+    LaunchedEffect(uiState.navigationEvent) {
+        when (val event = uiState.navigationEvent) {
+            is DetailNavigationEvent.NavigateToMyNoteDetail -> {
+                onNavigateToNoteDetail(event.noteId)
+                viewModel.handleEvent(UserEvent.NavigationConsumed)
+            }
+            is DetailNavigationEvent.NavigateToNormalNoteDetail -> {
+                onNavigateToDetailObservable(event.noteId)
+                viewModel.handleEvent(UserEvent.NavigationConsumed)
+            }
+            else -> {}
         }
     }
 
@@ -117,6 +130,40 @@ fun UserScreen(
                     }
                 )
             }
+            UserContent(
+                notes = uiState.notes,
+                user = uiState.user,
+                followers = uiState.followers,
+                following = uiState.following,
+                selectedTab = uiState.selectedTab,
+                onTabSelected = { tab ->
+                    viewModel.handleEvent(UserEvent.SelectTab(tab))
+                },
+                onFavClick = { noteId ->
+                    val note = uiState.notes.find { it.id == noteId }
+                    note?.let {
+                        if (it.saved) {
+                            viewModel.handleEvent(UserEvent.DelFavNote(noteId))
+                        } else {
+                            viewModel.handleEvent(UserEvent.FavNote(noteId))
+                        }
+                    }
+                },
+                onLikeClick = { noteId ->
+                    val note = uiState.notes.find { it.id == noteId }
+                    note?.let {
+                        if (it.liked) {
+                            viewModel.handleEvent(UserEvent.DelLikeNote(noteId))
+                        } else {
+                            viewModel.handleEvent(UserEvent.LikeNote(noteId))
+                        }
+                    }
+                },
+                onNoteClick = { noteId ->
+                    val isMyNote = uiState.selectedTab == UserTab.NOTES
+                    viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
+                },
+            )
         }
     }
 }
@@ -148,7 +195,10 @@ fun ThemeToggleSwitch(
 fun UserContent(
     notes: List<NoteDTO>,
     user: UserDTO,
+    followers: List<UserDTO>,
+    following: List<UserDTO>,
     selectedTab: UserTab,
+    onNoteClick: (Int) -> Unit,
     onTabSelected: (UserTab) -> Unit,
     onFavClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit
@@ -194,24 +244,17 @@ fun UserContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(
-                    text = user.rol,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-
-                    )
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 45.dp, end = 32.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    UserStat(number = user.notes.size, label = "Posts")
-                    Spacer(Modifier.width(32.dp)) // Espacio entre stats
-                    UserStat(number = user.followers.size, label = "Followers")
+                    UserStat(number = user.notes.size ?: 0, label = "Posts")
                     Spacer(Modifier.width(32.dp))
-                    UserStat(number = user.following.size, label = "Following")
+                    UserStat(number = followers.size, label = "Followers")
+                    Spacer(Modifier.width(32.dp))
+                    UserStat(number = following.size, label = "Following")
                 }
 
             }
@@ -231,7 +274,7 @@ fun UserContent(
             UserTab.NOTES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {},
+                    onNoteClick = {onNoteClick(it)},
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -240,7 +283,7 @@ fun UserContent(
             UserTab.FAVORITES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {},
+                    onNoteClick = {onNoteClick(it)},
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -249,7 +292,7 @@ fun UserContent(
             UserTab.LIKES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {},
+                    onNoteClick = {onNoteClick(it)},
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -278,13 +321,13 @@ fun TabSelector(
         Row(modifier = Modifier.fillMaxWidth()) {
 
             TabButton(
-                text = "Notas",
+                text = "Notes",
                 isSelected = selectedTab == UserTab.NOTES,
                 onClick = { onTabSelected(UserTab.NOTES) },
                 modifier = Modifier.weight(1f)
             )
             TabButton(
-                text = "Favoritos",
+                text = "Favorites",
                 isSelected = selectedTab == UserTab.FAVORITES,
                 onClick = { onTabSelected(UserTab.FAVORITES) },
                 modifier = Modifier.weight(1f)
@@ -354,6 +397,9 @@ fun Preview() {
         onTabSelected = {},
         selectedTab = UserTab.FAVORITES,
         onFavClick = {},
-        onLikeClick = {}
+        onLikeClick = {},
+        followers = emptyList(),
+        following = emptyList(),
+        onNoteClick = {},
     )
 }

@@ -10,15 +10,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.client.ui.navigation.Navigation
 import com.example.client.ui.splashScreen.SplashScreen
 import com.example.client.ui.theme.TFGclientTheme
+import com.google.firebase.FirebaseApp
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
-
         setContent {
             val systemDarkTheme = isSystemInDarkTheme()
             var darkThemeEnabled by rememberSaveable { mutableStateOf(systemDarkTheme) }

@@ -19,5 +19,5 @@ interface AuthenticationService {
     @GET("refresh")
     suspend fun refreshToken(
         @Header("Authorization") token: String,
-    ): Response<String>
+    ): Response<Token>
 }

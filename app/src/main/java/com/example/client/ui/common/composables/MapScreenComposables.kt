@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.client.BuildConfig
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
@@ -48,7 +49,8 @@ import com.google.android.gms.maps.model.LatLng
 @Composable
 fun NotesBottomSheet(
     notes: List<NoteDTO>,
-    location: LatLng?
+    location: LatLng?,
+    onNoteClick: (Int) -> Unit
 ) {
     val isDarkMode = isSystemInDarkTheme()
     val backgroundColor = if (isDarkMode) Color(0xFF23272F) else Color.White
@@ -81,14 +83,14 @@ fun NotesBottomSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(notes) { note ->
-                NoteCard(note = note, isDarkMode = isDarkMode)
+                NoteCard(note = note, isDarkMode = isDarkMode, onClick = { onNoteClick(note.id) })
             }
         }
     }
 }
 
 @Composable
-fun NoteCard(note: NoteDTO, isDarkMode : Boolean) {
+fun NoteCard(note: NoteDTO, isDarkMode : Boolean, onClick: () -> Unit) {
     val cardColor = if (isDarkMode) Color(0xFF2C313A) else Color.White
     val titleColor = if (isDarkMode) Color.White else Color.Black
     val contentColor = if (isDarkMode) Color(0xFFB0B4BA) else Color.DarkGray
@@ -96,7 +98,7 @@ fun NoteCard(note: NoteDTO, isDarkMode : Boolean) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Handle click if needed */ },
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
@@ -231,4 +233,10 @@ fun vectorToBitmap(@DrawableRes id: Int, context: Context): BitmapDescriptor {
     vectorDrawable.draw(canvas)
     return BitmapDescriptorFactory.fromBitmap(bitmap)
 }
+
+
+fun getGooglePhotoUrl(photoReference: String, maxWidth: Int = 400): String =
+    "https://maps.googleapis.com/maps/api/place/photo?maxwidth=$maxWidth&photoreference=$photoReference&key=${BuildConfig.GOOGLE_PLACES_API_KEY}"
+
+
 

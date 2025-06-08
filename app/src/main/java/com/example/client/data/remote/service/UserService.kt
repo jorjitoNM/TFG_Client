@@ -23,6 +23,11 @@ interface UserService {
     @GET("user/likes")
     suspend fun getLikedNotes(): Response<List<NoteDTO>>
 
+    data class FirebaseIdResponse(val firebaseId: String)
+
+    @GET("/user/firebase_id")
+    suspend fun getFirebaseId(): Response<FirebaseIdResponse>
+
     @GET("user/info/{username}")
     suspend fun getUserInfo(@Query("username") username: String): Response<UserDTO>
 }

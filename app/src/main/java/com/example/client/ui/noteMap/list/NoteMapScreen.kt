@@ -28,11 +28,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,9 +62,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
+import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.FilterChip
 import com.example.client.ui.common.composables.NotesBottomSheet
-import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.getMarkerColor
 import com.example.client.ui.common.composables.getMarkerIconRes
 import com.example.client.ui.common.composables.vectorToBitmap
@@ -90,7 +90,8 @@ fun NoteMapScreen(
     viewModel: NoteMapViewModel = hiltViewModel(),
     sharedLocationViewModel: SharedLocationViewModel,
     onNavigateToList: () -> Unit,
-    onAddNoteClick: () -> Unit
+    onAddNoteClick: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit
 
 
 ) {
@@ -276,7 +277,9 @@ fun NoteMapScreen(
         sheetContent = {
             NotesBottomSheet(
                 notes = selectedNotes,
-                location = selectedLocation
+                location = selectedLocation,
+                onNoteClick = { noteId -> onNavigateToDetail(noteId) }
+
             )
         },
         sheetPeekHeight = 0.dp,
@@ -386,7 +389,7 @@ fun NoteMapScreen(
                                     viewModel.handleEvent(NoteMapEvent.NavigateToSearch)
                                 },
                             enabled = false, // Deshabilita edición directa aquí
-                            placeholder = { Text("Buscar lugares...") },
+                            placeholder = { Text("Search places...") },
                             singleLine = true,
                             leadingIcon = {
                                 Icon(
@@ -509,13 +512,12 @@ fun NoteMapScreen(
 
             // Loading indicator
             if (uiState.isLoading) {
-                CircularProgressIndicator(
+                LinearProgressIndicator(
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
                 )
             }
-
         }
     }
-
 }
