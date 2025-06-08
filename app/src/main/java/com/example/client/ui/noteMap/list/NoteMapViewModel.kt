@@ -1,7 +1,13 @@
 package com.example.client.ui.noteMap.list
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +22,7 @@ import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,6 +43,7 @@ class NoteMapViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteMapState())
     val uiState = _uiState.asStateFlow()
+    private var locationReceiver: BroadcastReceiver? = null
 
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(application)
@@ -98,6 +106,23 @@ class NoteMapViewModel @Inject constructor(
                 notes =  updatedNotes,
                 isLoading = false
             )
+        }
+    }
+
+    fun registerLocationReceiver() {
+        val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+        locationReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                checkLocationEnabled()
+            }
+        }
+        application.registerReceiver(locationReceiver, filter)
+    }
+
+    fun unregisterLocationReceiver() {
+        locationReceiver?.let {
+            application.unregisterReceiver(it)
+            locationReceiver = null
         }
     }
 
@@ -251,16 +276,30 @@ class NoteMapViewModel @Inject constructor(
                 ) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    location?.let {
-                        _uiState.update { state ->
-                            state.copy(currentLocation = location)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    fusedLocationClient.getCurrentLocation(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        null
+                    ).addOnSuccessListener { location ->
+                        location?.let {
+                            _uiState.update { state ->
+                                state.copy(currentLocation = location)
+                            }
+                        }
+                    }
+                } else {
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                        location?.let {
+                            _uiState.update { state ->
+                                state.copy(currentLocation = location)
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 
     private fun selectNote(id: Int) {
         _uiState.update {
@@ -269,6 +308,13 @@ class NoteMapViewModel @Inject constructor(
                 aviso = UiEvent.PopBackStack
             )
         }
+    }
+
+    fun checkLocationEnabled() {
+        val locationManager = application.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        _uiState.update { it.copy(isLocationEnabled = isEnabled) }
     }
 
     private fun avisoVisto() {

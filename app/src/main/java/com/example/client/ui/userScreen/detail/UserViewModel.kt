@@ -60,6 +60,24 @@ class UserViewModel @Inject constructor(
             is UserEvent.GetFollowers -> getFollowers()
             is UserEvent.GetFollowing -> getFollowing()
             is UserEvent.NavigationConsumed -> clearNavigation()
+            is UserEvent.SaveScrollPosition ->  {
+            _uiState.update {
+                when (event.tab) {
+                    UserTab.NOTES -> it.copy(
+                        notesScrollIndex = event.index,
+                        notesScrollOffset = event.offset
+                    )
+                    UserTab.FAVORITES -> it.copy(
+                        favoritesScrollIndex = event.index,
+                        favoritesScrollOffset = event.offset
+                    )
+                    UserTab.LIKES -> it.copy(
+                        likesScrollIndex = event.index,
+                        likesScrollOffset = event.offset
+                    )
+                }
+            }
+        }
 
             is UserEvent.SelectedNote -> selectNote(event.noteId, event.isMyNote)
         }
