@@ -345,10 +345,10 @@ fun NoteMapScreen(
                             onClick = {
                                 selectedNotes.clear()
                                 selectedNotes.addAll(notes)
+                                viewModel.handleEvent(NoteMapEvent.GetSelectedNotesImages(selectedNotes.toList()))
                                 selectedLocation = location
                                 scope.launch { bottomSheetState.expand() }
                                 false
-                                viewModel.handleEvent(NoteMapEvent.GetSelectedNotesImages(selectedNotes))
                             }
                         )
                     }

@@ -2,7 +2,6 @@ package com.example.client.ui.noteMap.list
 
 import android.app.Application
 import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -59,12 +58,13 @@ class NoteMapViewModel @Inject constructor(
             }
 
             is NoteMapEvent.SelectedNote -> selectNote(event.noteId)
+            is NoteMapEvent.GetSelectedNotesImages -> getSelectedNotesImages(event.selectedNotes)
         }
     }
 
-    private fun getSelectedNotesImages() {
+    private fun getSelectedNotesImages(selectedNotes : List<NoteDTO> ) {
         viewModelScope.launch(dispatcher) {
-            loadSelectedNoteImagesUseCase.invoke(_uiState.value.notes)
+            loadSelectedNoteImagesUseCase.invoke(selectedNotes)
                 .collect { result ->
                     when (result) {
                         is NetworkResult.Error -> _uiState.update {
@@ -80,14 +80,24 @@ class NoteMapViewModel @Inject constructor(
                             )
                         }
 
-                        is NetworkResult.Success -> _uiState.update {
-                            it.copy(
-                                notes =  result.data,
-                                isLoading = false
-                            )
-                        }
+                        is NetworkResult.Success -> parseImagesIntoNotes(result.data)
                     }
                 }
+        }
+    }
+
+    private fun parseImagesIntoNotes (selectedNotesWithImages : List<NoteDTO>) {
+        val updatedNotes = ArrayList<NoteDTO>()
+        for (note : NoteDTO in _uiState.value.notes) {
+            if (selectedNotesWithImages.map { it.id }.contains(note.id))
+                selectedNotesWithImages.find { it.id == note.id }?.let { updatedNotes.add(it) }
+            else updatedNotes.add(note)
+        }
+        _uiState.update {
+            it.copy(
+                notes =  updatedNotes,
+                isLoading = false
+            )
         }
     }
 
@@ -193,7 +203,6 @@ class NoteMapViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(notes = result.data, isLoading = false)
                     }
-                    getSelectedNotesImages()
                 }
 
                 is NetworkResult.Error -> {

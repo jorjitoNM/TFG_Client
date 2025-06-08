@@ -73,6 +73,7 @@ class ImagesRepository @Inject constructor(
                 }
                 note.photos = noteUri.toList()
             }
+
             emit(NetworkResult.Success(notes))
         } catch (e: Exception) {
             emit(NetworkResult.Error(e.message ?: stringProvider.getString(R.string.error_loading_images)))
