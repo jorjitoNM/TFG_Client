@@ -5,7 +5,6 @@ import com.example.client.data.remote.datasource.SocialRemoteDataSource
 import com.example.client.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.UUID
 import javax.inject.Inject
 
 class SocialRepository @Inject constructor(
@@ -13,24 +12,37 @@ class SocialRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun getNotes() = withContext(dispatcher) {
+    suspend fun getSavedNotes() = withContext(dispatcher) {
         try {
-            socialRemoteDataSource.getNotes()
+            socialRemoteDataSource.getSavedNotes()
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
 
-    suspend fun favNote(id: Int, username: String) = withContext(dispatcher) {
+    suspend fun favNote(id: Int) = withContext(dispatcher) {
         try {
-            socialRemoteDataSource.favNote(id, username)
+            socialRemoteDataSource.favNote(id)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
 
-    suspend fun likeNote (noteId : Int, userId : UUID)
-            = socialRemoteDataSource.likeNote(noteId,userId)
+    suspend fun delLikeNote(noteId: Int) = withContext(dispatcher) {
+        try {
+            socialRemoteDataSource.delLikeNote(noteId)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
 
-
+    suspend fun delFavNote(noteId: Int) = withContext(dispatcher) {
+        try {
+            socialRemoteDataSource.delFavNote(noteId)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+    suspend fun likeNote (noteId : Int) : NetworkResult<Unit>
+            = socialRemoteDataSource.likeNote(noteId)
 }

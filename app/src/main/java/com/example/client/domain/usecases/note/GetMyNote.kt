@@ -1,8 +1,8 @@
 package com.example.client.domain.usecases.note
 
-import com.example.client.data.repositories.NoteRepository
+import com.example.client.data.repositories.UserRepository
 import javax.inject.Inject
 
-class GetMyNote@Inject constructor(private val noteRepository: NoteRepository)  {
-    suspend operator fun invoke() = noteRepository.getNotes()
+class GetMyNoteUseCase @Inject constructor(private val userRepository: UserRepository) {
+    suspend operator fun invoke() = userRepository.getMyNotes()
 }

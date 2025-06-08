@@ -5,6 +5,7 @@ import com.example.client.R
 import com.example.client.common.NetworkResult
 import com.example.client.common.StringProvider
 import com.example.client.data.remote.datasource.UserRemoteDataSource
+import com.example.client.data.remote.service.UserService
 import com.example.client.di.IoDispatcher
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.CoroutineDispatcher
@@ -18,20 +19,47 @@ import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    private val userRemoteDataSource: UserRemoteDataSource
+) {
     private val userRemoteDataSource: UserRemoteDataSource,
     private val stringProvider: StringProvider,
     private val storage: FirebaseStorage,
     ) {
     suspend fun getUser() = withContext(dispatcher) {
         try {
-            userRemoteDataSource.getUser("user1")
+            userRemoteDataSource.getUser()
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
-    suspend fun getMyNotes()= withContext(dispatcher) {
+
+    suspend fun getMyNotes() = withContext(dispatcher) {
         try {
-            userRemoteDataSource.getMyNotes("user1")
+            userRemoteDataSource.getMyNotes()
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun getUserInfo(username: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getUserInfo(username)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun getUserNotes(username: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getUserNotes(username)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun getLikedNotes() = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getLikedNotes()
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }
@@ -50,4 +78,16 @@ class UserRepository @Inject constructor(
         emit(NetworkResult.Error(e.message ?: stringProvider.getString(R.string.error_uploading_images)))
     }
         .flowOn(dispatcher)
+
+    suspend fun getAllUserStartsWithText(text: String) = withContext(dispatcher) {
+        try {
+            userRemoteDataSource.getAllUserStartsWithText(text)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
+    }
+
+    suspend fun getFirebaseId(): NetworkResult<UserService.FirebaseIdResponse> =
+        userRemoteDataSource.getFirebaseId()
+
 }

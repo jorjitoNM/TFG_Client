@@ -1,7 +1,9 @@
 package com.example.client.ui.noteMap.list
 
+import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
 import com.google.android.gms.maps.model.LatLng
+
 sealed class NoteMapEvent {
     data object AvisoVisto : NoteMapEvent()
     data object GetNotes : NoteMapEvent()
@@ -13,4 +15,6 @@ sealed class NoteMapEvent {
     data class UpdateSearchText(val text: String) : NoteMapEvent()
     data class FilterByType(val noteType: NoteType?) : NoteMapEvent()
     data object NavigateToSearch : NoteMapEvent()
+    data class SelectedNote (val noteId: Int) : NoteMapEvent()
+    data class GetSelectedNotesImages(val selectedNotes: List<NoteDTO>) : NoteMapEvent()
 }

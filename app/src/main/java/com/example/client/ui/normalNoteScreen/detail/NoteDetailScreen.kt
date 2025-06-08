@@ -1,5 +1,8 @@
 package com.example.client.ui.normalNoteScreen.detail
 
+import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
@@ -52,8 +54,9 @@ import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
-import com.example.client.ui.normalNoteScreen.list.formatDateTime
+import com.example.client.ui.common.composables.formatDateTime
 
+@RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
 fun NoteDetailScreen(
     noteId: Int,
@@ -74,7 +77,7 @@ fun NoteDetailScreen(
                     showSnackbar(it.message)
                     viewModel.handleEvent(NoteDetailEvent.AvisoVisto)
                 }
-                else -> {}
+                UiEvent.PopBackStack -> {}
             }
         }
     }
@@ -92,6 +95,8 @@ fun NoteDetailScreen(
                 onSaveClick = { viewModel.handleEvent(NoteDetailEvent.UpdateNote) },
                 onCancelClick = { viewModel.handleEvent(NoteDetailEvent.ToggleEditMode) },
                 onBackClick = onNavigateBack,
+                onDeleteClick = {imageUrl -> viewModel.handleEvent(NoteDetailEvent.DeleteImage(imageUrl)) },
+                onLoadImages = { viewModel.handleEvent(NoteDetailEvent.SaveNoteImages(it))}
             )
         }
     }
@@ -107,6 +112,8 @@ fun NoteDetailContent(
     onSaveClick: () -> Unit = {},
     onCancelClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
+    onDeleteClick: (Uri) -> Unit = {},
+    onLoadImages: (List<Uri>) -> Unit = {},
 ) {
     val note = state.note ?: return
 
@@ -238,6 +245,20 @@ fun NoteDetailContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    NoteImages(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .size(170.dp),
+                        photos = note.photos,
+                        onLoadImages = onLoadImages,
+                        onDeleteImage = onDeleteClick
+                    )
+                }
+
                 // Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -252,6 +273,7 @@ fun NoteDetailContent(
                     ) {
                         Text("Back")
                     }
+
 
                     if (state.isEditing) {
                         Row {
@@ -363,7 +385,9 @@ fun RatingBar(
                 Icon(
                     imageVector = if (i <= currentRating) Icons.Filled.Star else Icons.Outlined.Star,
                     contentDescription = "Star $i",
-                    tint = if (i <= currentRating) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    tint = if (i <= currentRating) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                        alpha = 0.5f
+                    ),
                     modifier = Modifier
                         .size(24.dp)
                         .clickable { onRatingChanged(i) }
@@ -421,6 +445,7 @@ fun PrivacyDropdown(
         }
     }
 }
+
 class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
     override val values = sequenceOf(
         // Loading state
@@ -449,7 +474,7 @@ class NoteDetailStateProvider : PreviewParameterProvider<NoteDetailState> {
                 id = 2,
                 title = "Team Meeting",
                 content = "Discuss project roadmap and assign tasks for the next sprint.",
-                privacy = NotePrivacy.FOLLOWERS,
+                privacy = NotePrivacy.PRIVATE,
                 rating = 4,
                 ownerUsername = "manager",
                 created = "2023-04-15T10:30:00",

@@ -7,9 +7,17 @@ class UserRemoteDataSource @Inject constructor(private val userService: UserServ
     BaseApiResponse() {
 
 
-    suspend fun getUser(username: String) = safeApiCall {
-        userService.getUser(username)
-    }
+    suspend fun getUser() = safeApiCall { userService.getUser() }
 
-    suspend fun getMyNotes(username: String) = safeApiCall { userService.getMyNotes(username) }
+    suspend fun getAllUserStartsWithText(text: String) = safeApiCall { userService.getAllUserStartsWithText(text) }
+
+    suspend fun getMyNotes() = safeApiCall { userService.getMyNotes() }
+
+    suspend fun getLikedNotes() = safeApiCall { userService.getLikedNotes() }
+
+    suspend fun getUserNotes(username: String) = safeApiCall { userService.getUserNotes(username) }
+
+    suspend fun getUserInfo(username: String) = safeApiCall { userService.getUserInfo(username) }
+
+    suspend fun getFirebaseId () = safeApiCall { userService.getFirebaseId() }
 }

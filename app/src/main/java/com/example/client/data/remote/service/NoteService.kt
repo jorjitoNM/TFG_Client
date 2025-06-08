@@ -7,6 +7,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -40,8 +41,16 @@ interface NoteService {
         @Query("type") noteType: NoteType,
     ): Response<List<NoteDTO>>
 
+    @GET("notes/antiquity")
+    suspend fun orderByChronologicalOrder(): Response<List<NoteDTO>>
+
     @DELETE("notes/{id}")
     suspend fun deleteNote(@Path("id") id: Int):Response<Unit>
 
+
+    @POST("notes/addNota")
+    suspend fun addNote(
+        @Body note: NoteDTO
+    ): Response<NoteDTO>
 
 }

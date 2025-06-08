@@ -10,5 +10,8 @@ sealed class NoteListEvent {
     data class FavNote(val noteId: Int) : NoteListEvent()
     data class ApplyFilter(val asc: Boolean) : NoteListEvent()
     data class OrderByType(val type: NoteType) : NoteListEvent()
-    data class GetNoteSearch(val title:String):NoteListEvent()
+    data class GetNoteSearch(val title: String) : NoteListEvent()
+    data class DelFavNote(val noteId: Int) : NoteListEvent()
+    data class DelLikeNote(val noteId: Int) : NoteListEvent()
+    data object OrderByChronological : NoteListEvent()
 }

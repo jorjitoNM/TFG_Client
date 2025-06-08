@@ -2,25 +2,32 @@ package com.example.client.data.remote.service
 
 import com.example.client.data.model.NoteDTO
 import retrofit2.Response
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
+import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
-import java.util.UUID
 
 interface SocialService {
 
-    @POST("social/saveds")
+    @POST("social/saves")
     suspend fun favNote(
-        @Query("noteId") noteId: Int,
-        @Query("username") username: String
+        @Query("noteId") noteId: Int
     ): Response<Unit>
 
-    @GET("notes/saveds?username=user1")
-    suspend fun getNotes(): Response<List<NoteDTO>>
+    @GET("notes/saves")
+    suspend fun getNotesSaved(): Response<List<NoteDTO>>
 
-    @FormUrlEncoded
-    @POST("/social/like")
-    suspend fun likeNote (@Field("noteId") noteId : Int, @Field("userId") userId : UUID) : Response<Unit>
+    @DELETE("notes/saves")
+    suspend fun deleteSavedNote(
+        @Query("noteId") noteId: Int
+    ): Response<Void>
+
+    @DELETE("notes/liked")
+    suspend fun deleteLikeNote(
+        @Query("noteId") noteId: Int
+    ): Response<Void>
+
+    @POST("social/like")
+    suspend fun likeNote (@Body noteId : Int) : Response<Unit>
 }

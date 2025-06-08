@@ -10,7 +10,7 @@ import timber.log.Timber
 
 
 abstract class BaseApiResponse {
-    inline fun <reified T> safeApiCall(apiCall: () -> Response<T>): NetworkResult<T> {
+    inline fun < reified T > safeApiCall(apiCall: () -> Response<T>): NetworkResult<T> {
         return try {
             val response = apiCall()
             if (response.isSuccessful) {
@@ -22,10 +22,9 @@ abstract class BaseApiResponse {
             } else {
                 response.errorBody()?.let { errorBody ->
                     parseErrorResponse(errorBody)
-                } ?: NetworkResult.Error("${response.code()} ${response.message()})")
+                } ?: NetworkResult.Error("${response.code()} ${response.message()}")
             }
         } catch (e: Exception) {
-            Timber.e(e.message, e)
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
@@ -46,17 +45,15 @@ abstract class BaseApiResponse {
     private fun <T> error(errorMessage: String): NetworkResult<T> =
         NetworkResult.Error(errorMessage)
 
-
-
-
-}
-
-fun <T> parseErrorResponse(errorBody: ResponseBody): NetworkResult<T> {
-    return try {
-        val errorBodyString = errorBody.string()
-        val apiError = Gson().fromJson(errorBodyString, ApiError::class.java)
-        NetworkResult.Error(apiError.message)
-    } catch (e: Exception) {
-        NetworkResult.Error(e.message ?: e.toString())
+    fun <T> parseErrorResponse(errorBody: ResponseBody): NetworkResult<T> {
+        return try {
+            val errorBodyString = errorBody.string()
+            val apiError = Gson().fromJson(errorBodyString, ApiError::class.java)
+            NetworkResult.Error(apiError.message)
+        } catch (e: Exception) {
+            NetworkResult.Error(e.message ?: e.toString())
+        }
     }
+
 }
+

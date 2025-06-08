@@ -1,5 +1,6 @@
 package com.example.client.data.model
 
+import android.net.Uri
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 
@@ -12,11 +13,12 @@ data class NoteDTO(
     val ownerUsername: String? = null,
     val likes: Int = 0,
     val created: String = "",
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
+    var latitude: Double = 0.0,
+    var longitude: Double = 0.0,
     val type: NoteType = NoteType.CLASSIC,
     val start: String? = null,
     val end: String? = null,
+    var photos : List<Uri> = emptyList(),
     val saved : Boolean = false,
     val liked : Boolean = false
 )
