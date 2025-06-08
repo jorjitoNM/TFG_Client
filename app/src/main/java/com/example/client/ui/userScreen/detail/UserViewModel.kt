@@ -341,6 +341,7 @@ class UserViewModel @Inject constructor(
                         user = result.data,
                         selectedTab = UserTab.NOTES
                     )
+                    loadUserProfileImage()
                     getMyNotes()
                 }
 
@@ -450,6 +451,10 @@ class UserViewModel @Inject constructor(
                     following = (followingResult as? NetworkResult.Success)?.data ?: emptyList(),
                     isLoading = false
                 )
+            }
+
+            if (userResult is NetworkResult.Success) {
+                loadUserProfileImage()
             }
         }
     }
