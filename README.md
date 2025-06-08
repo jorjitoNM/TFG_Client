@@ -22,7 +22,7 @@
 
 ### 🔐 **Secure Authentication System**
 - 🆔 **Smart Registration & Login** with real-time validation
-- 👆 **Biometric Authentication** - Login with your fingerprint or face!
+- 👆 **Biometric Authentication** - Login with your fingerprint!
 - 🔒 **Military-grade Security** with encrypted credential storage
 - 🎨 **Beautiful UI** with custom themes and animations
 
@@ -32,18 +32,18 @@ Create different types of notes with unique icons for each category:
 
 <div align="center">
 
-| Note Type | Icon | Description |
-|-----------|------|-------------|
-| **Classic** 📖 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/classic.svg" width="32"/> | Everyday thoughts |
-| **Event** 🎉 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/event.svg" width="32"/> | Special occasions and events |
-| **Historical** 🏛️ | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/historical.svg" width="32"/> | Cultural heritage sites |
-| **Food** 🍕 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/food.svg" width="32"/> | Culinary adventures and reviews |
-| **Landscape** 🏔️ | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/landscape.svg" width="32"/> | Breathtaking natural landscapes |
-| **Cultural** 🎭 | <img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/cultural.svg" width="32"/> | Art, museums, and cultural experiences |
+| Note Type | Description |
+|-----------|------------|
+| **Classic** 📖 | Everyday thoughts |
+| **Event** 🎉 | Special occasions and events |
+| **Historical** 🏛️| Cultural heritage sites |
+| **Food** 🍕 | Culinary adventures and reviews |
+| **Landscape** 🏔️ | Breathtaking natural landscapes |
+| **Cultural** 🎭 | Art, museums, and cultural experiences |
 
 </div>
 
-- 🔒 **Privacy Controls** - Public, Private, or Friends-only
+- 🔒 **Privacy Controls** - Public or Private
 - ⭐ **Rating System** - Rate your experiences from 1–10
 - 📍 **GPS Integration** - Automatic location tagging
 
@@ -55,9 +55,7 @@ Create different types of notes with unique icons for each category:
 - 🏷️ **Filter by Note Type** - Find exactly what you're looking for
 
 <div align="center">
-<img src="https://github.com/jorjitoNM/TFG_Client/blob/main/app/src/main/res/drawable/multinote.svg" alt="Multiple Notes Marker" width="48"/>
-<br/>
-<em>Special marker for locations with multiple notes</em>
+<em>Special marker for locations with multiple notes in the same latitude and longitude</em>
 </div>
 
 ### 👥 **Social Features**
@@ -95,7 +93,7 @@ Create different types of notes with unique icons for each category:
 ### ⚙️ **Build Configuration**
 
 🌍 **Two Environments Available:**
-- 🔧 **Development**: `http://192.168.0.63:8080/`
+- 🔧 **Development**: `http://localhost:8080/`
 - 🌐 **Production**: `https://informatica.iesquevedo.es/nomada/`
 
 📱 **Device Requirements:**
