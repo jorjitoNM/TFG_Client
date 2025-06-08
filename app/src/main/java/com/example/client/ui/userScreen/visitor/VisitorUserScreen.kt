@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -70,20 +71,18 @@ fun VisitorUserScreen(
         }
     }
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
-        } else {
-            uiState.user?.let { user ->
+        when {
+            uiState.user == null && uiState.isLoading -> {
+                VisitorUserSkeleton()
+            }
+            uiState.user != null -> {
                 VisitorUserContent(
-                    user = user,
+                    user = uiState.user!!,
                     notes = uiState.notes,
                     isFollowing = uiState.isFollowing,
                     followers = uiState.followers,
@@ -119,11 +118,23 @@ fun VisitorUserScreen(
                         viewModel.handleEvent(VisitorUserEvent.SelectedNote(noteId))
                     },
                 )
-
+                // Si está cargando, muestra un loader pequeño en la esquina
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(16.dp)
+                            .size(32.dp)
+                    )
+                }
+            }
+            else -> {
+                VisitorUserSkeleton()
             }
         }
     }
 }
+
 
 
 @Composable
@@ -220,7 +231,7 @@ fun VisitorUserContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "Notas",
+            text = "Notes",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
         )
@@ -248,6 +259,112 @@ fun VisitorUserContent(
         }
     }
 }
+
+@Composable
+fun VisitorUserSkeleton() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Card principal (Surface)
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            shadowElevation = 8.dp,
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Foto de perfil (círculo gris)
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(Color.Gray.copy(alpha = 0.15f)),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Nombre (caja rectangular)
+                Box(
+                    Modifier
+                        .height(28.dp)
+                        .width(140.dp)
+                        .background(Color.Gray.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Botón Follow (rectángulo redondeado)
+                Box(
+                    Modifier
+                        .height(36.dp)
+                        .width(120.dp)
+                        .background(Color.Gray.copy(alpha = 0.15f), RoundedCornerShape(50))
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Stats (Posts, Followers, Following)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 50.dp, end = 32.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(3) { idx ->
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            // Número (caja pequeña)
+                            Box(
+                                Modifier
+                                    .height(20.dp)
+                                    .width(36.dp)
+                                    .background(Color.Gray.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            // Label (caja más fina)
+                            Box(
+                                Modifier
+                                    .height(12.dp)
+                                    .width(48.dp)
+                                    .background(Color.Gray.copy(alpha = 0.10f), RoundedCornerShape(6.dp))
+                            )
+                        }
+                        if (idx < 2) Spacer(Modifier.width(32.dp))
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Título "Notas"
+        Box(
+            Modifier
+                .height(24.dp)
+                .width(80.dp)
+                .padding(start = 8.dp, bottom = 8.dp)
+                .background(Color.Gray.copy(alpha = 0.15f), RoundedCornerShape(6.dp))
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Lista de notas (simuladas)
+        repeat(3) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                    .padding(vertical = 8.dp)
+                    .background(Color.Gray.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            )
+        }
+    }
+}
+
+
 
 class VisitorUserPreviewProvider : PreviewParameterProvider<VisitorUserPreviewData> {
     override val values = sequenceOf(

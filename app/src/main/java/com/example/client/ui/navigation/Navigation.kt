@@ -113,7 +113,7 @@ fun Navigation () {
             }
             composable<NormalNoteDetailDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
-                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = {navController.navigate(NormalNoteListDestination)})
+                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) })
             }
             composable<NoteMapDestination> {
                 NoteMapScreen(
@@ -130,11 +130,15 @@ fun Navigation () {
                     onNavigateBack = { navController.popBackStack() })
             }
             composable<StartDestination> {
-                StartScreen( navigateToSignUp = { navController.navigate(RegisterDestination)},
+                StartScreen( navigateToSignUp = { navController.navigate(RegisterDestination){
+                    popUpTo<StartDestination> { inclusive = true }
+                } },
                     navigateToLogin = { navController.navigate(LoginDestination)})
             }
             composable<LoginDestination> {
-                LoginScreen( navigateToApp = { navController.navigate(NoteMapDestination)},
+                LoginScreen( navigateToApp = { navController.navigate(NoteMapDestination){
+                    popUpTo<LoginDestination> { inclusive = true }
+                } },
                     showSnackbar = { showSnackbar(it)},
                     navigateToRegister = { navController.navigate(RegisterDestination)},
                     onNavigateBack = { navController.popBackStack() }

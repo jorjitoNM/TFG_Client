@@ -1,5 +1,8 @@
 package com.example.client.ui.startScreen
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,11 +32,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.client.R
 
+@SuppressLint("ContextCastToActivity")
 @Composable
 fun StartScreen(
     navigateToSignUp: () -> Unit,
     navigateToLogin: () -> Unit,
 ) {
+    val context = LocalContext.current
+
+    BackHandler {
+        (context as? Activity)?.finish()
+    }
+
+
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.start_screen_background_big),
@@ -41,6 +54,8 @@ fun StartScreen(
             modifier = Modifier.fillMaxSize()
         )
     }
+
+
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(modifier = Modifier.weight(0.2f))
         Row(
@@ -64,6 +79,7 @@ fun StartScreen(
         }
         Spacer(modifier = Modifier.weight(0.1f))
     }
+
 }
 
 @Composable

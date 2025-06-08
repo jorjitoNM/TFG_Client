@@ -1,9 +1,5 @@
 package com.example.client.ui.userScreen.myNoteDetail
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -200,15 +196,19 @@ fun NoteDetailContent(
                 minLines = 3,
                 maxLines = 6
             )
+            Spacer(modifier = Modifier.height(16.dp))
         } else {
-            Text(
-                text = note.content ?: "Una breve descripción de esta nota",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.DarkGray
-            )
+            if (note.content != null) {
+                Text(
+                    text = note.content,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.DarkGray
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+
 
         // Rating section
         if (state.isEditing) {
