@@ -133,14 +133,18 @@ fun Navigation () {
                 StartScreen( navigateToSignUp = { navController.navigate(RegisterDestination){
                     popUpTo<StartDestination> { inclusive = true }
                 } },
-                    navigateToLogin = { navController.navigate(LoginDestination)})
+                    navigateToLogin = { navController.navigate(LoginDestination){
+                        popUpTo<StartDestination> { inclusive = true }
+                    } })
             }
             composable<LoginDestination> {
                 LoginScreen( navigateToApp = { navController.navigate(NoteMapDestination){
                     popUpTo<LoginDestination> { inclusive = true }
                 } },
                     showSnackbar = { showSnackbar(it)},
-                    navigateToRegister = { navController.navigate(RegisterDestination)},
+                    navigateToRegister = { navController.navigate(RegisterDestination){
+                        popUpTo<LoginDestination> { inclusive = true }
+                    } },
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

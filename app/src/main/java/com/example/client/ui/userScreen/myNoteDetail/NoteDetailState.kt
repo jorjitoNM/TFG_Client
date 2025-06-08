@@ -16,6 +16,4 @@ data class NoteDetailState(
     val editedPrivacy: NotePrivacy = NotePrivacy.PUBLIC
 )
 
-enum class NoteTab {
-    MY_NOTES, FAVORITES, LIKES
-}
+
