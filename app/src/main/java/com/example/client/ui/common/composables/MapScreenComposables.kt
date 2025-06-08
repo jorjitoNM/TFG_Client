@@ -3,6 +3,7 @@ package com.example.client.ui.common.composables
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +44,7 @@ import com.example.client.BuildConfig
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
+import com.example.client.ui.normalNoteScreen.detail.NoteImageItem
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -50,12 +53,13 @@ import com.google.android.gms.maps.model.LatLng
 fun NotesBottomSheet(
     notes: List<NoteDTO>,
     location: LatLng?,
-    onNoteClick: (Int) -> Unit
+    onNoteClick: (Int) -> Unit,
 ) {
     val isDarkMode = isSystemInDarkTheme()
     val backgroundColor = if (isDarkMode) Color(0xFF23272F) else Color.White
     val headerColor = if (isDarkMode) Color.White else Color.Black
     val subTextColor = if (isDarkMode) Color(0xFFB0B4BA) else Color.Gray
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,14 +87,14 @@ fun NotesBottomSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(notes) { note ->
-                NoteCard(note = note, isDarkMode = isDarkMode, onClick = { onNoteClick(note.id) })
+                NoteCard(note = note, isDarkMode = isDarkMode, onClick = { onNoteClick(note.id) }, imageUri = note.photos.first())
             }
         }
     }
 }
 
 @Composable
-fun NoteCard(note: NoteDTO, isDarkMode : Boolean, onClick: () -> Unit) {
+fun NoteCard(note: NoteDTO, isDarkMode : Boolean, onClick: () -> Unit, imageUri : Uri) {
     val cardColor = if (isDarkMode) Color(0xFF2C313A) else Color.White
     val titleColor = if (isDarkMode) Color.White else Color.Black
     val contentColor = if (isDarkMode) Color(0xFFB0B4BA) else Color.DarkGray
@@ -109,14 +113,17 @@ fun NoteCard(note: NoteDTO, isDarkMode : Boolean, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Image on the left
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_background),
-                contentDescription = "Note Image",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.Crop
-            )
+            NoteImageItem(modifier = Modifier
+                .size(80.dp)
+                .clip(RoundedCornerShape(4.dp)), index = 1, imageUri = imageUri) { }
+//            Image(
+//                painter = painterResource(id = R.drawable.ic_launcher_background),
+//                contentDescription = "Note Image",
+//                modifier = Modifier
+//                    .size(80.dp)
+//                    .clip(RoundedCornerShape(4.dp)),
+//                contentScale = ContentScale.Crop
+//            )
             Spacer(modifier = Modifier.width(12.dp))
             // Note details
             Column(modifier = Modifier.weight(1f)) {

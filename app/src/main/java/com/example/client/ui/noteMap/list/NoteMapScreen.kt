@@ -92,8 +92,6 @@ fun NoteMapScreen(
     onNavigateToList: () -> Unit,
     onAddNoteClick: () -> Unit,
     onNavigateToDetail: (Int) -> Unit
-
-
 ) {
     val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
     val sharedNoteType by sharedLocationViewModel.selectedNoteType.collectAsState()
@@ -267,7 +265,6 @@ fun NoteMapScreen(
                     onNavigateToList()
                     viewModel.handleEvent(NoteMapEvent.AvisoVisto)
                 }
-
             }
         }
     }
@@ -279,7 +276,6 @@ fun NoteMapScreen(
                 notes = selectedNotes,
                 location = selectedLocation,
                 onNoteClick = { noteId -> onNavigateToDetail(noteId) }
-
             )
         },
         sheetPeekHeight = 0.dp,
@@ -352,6 +348,7 @@ fun NoteMapScreen(
                                 selectedLocation = location
                                 scope.launch { bottomSheetState.expand() }
                                 false
+                                viewModel.handleEvent(NoteMapEvent.GetSelectedNotesImages(selectedNotes))
                             }
                         )
                     }
