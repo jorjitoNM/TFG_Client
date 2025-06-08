@@ -115,7 +115,7 @@ fun Navigation(
             }
             composable<NormalNoteDetailDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
-                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = {navController.navigate(NormalNoteListDestination)})
+                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) })
             }
             composable<NoteMapDestination> {
                 NoteMapScreen(
@@ -132,13 +132,21 @@ fun Navigation(
                     onNavigateBack = { navController.popBackStack() })
             }
             composable<StartDestination> {
-                StartScreen(navigateToSignUp = { navController.navigate(RegisterDestination) },
-                    navigateToLogin = { navController.navigate(LoginDestination) })
+                StartScreen( navigateToSignUp = { navController.navigate(RegisterDestination){
+                    popUpTo<StartDestination> { inclusive = true }
+                } },
+                    navigateToLogin = { navController.navigate(LoginDestination){
+                        popUpTo<StartDestination> { inclusive = true }
+                    } })
             }
             composable<LoginDestination> {
-                LoginScreen(navigateToApp = { navController.navigate(NoteMapDestination) },
-                    showSnackbar = { showSnackbar(it) },
-                    navigateToRegister = { navController.navigate(RegisterDestination) },
+                LoginScreen( navigateToApp = { navController.navigate(NoteMapDestination){
+                    popUpTo<LoginDestination> { inclusive = true }
+                } },
+                    showSnackbar = { showSnackbar(it)},
+                    navigateToRegister = { navController.navigate(RegisterDestination){
+                        popUpTo<LoginDestination> { inclusive = true }
+                    } },
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

@@ -4,8 +4,6 @@
     <string name="rating">Rating:</string>
     <string name="event_dates">Event Dates:</string>
     <string name="no_notes_found">No notes found</string>
-    <string name="error_uploading_images">We could not save your image correctly, please, try again</string>
-    <string name="fb_storage_images_url">note_images</string>
     <string name="load_image">Load images</string>
     <string name="app_logo">App logo</string>
     <string name="start_Screen_background">Start screen background</string>
@@ -36,4 +34,9 @@
     <string name="download_error">Error downloading images</string>
     <string name="unexpected_error">Unexpected error occurred</string>
     <string name="error_deleting_image">Could not delete the image, try again later</string>
+    <string name="error_uploading_images">We could not save your image correctly, please, try again</string>
+    <string name="fb_storage_images_url">note_images</string>
+    <string name="fb_storage_profile_images">profile_images</string>
+    <string name="error_loading_profile_image">We could not load this profile image</string>
+    <string name="error_profile_image_not_found">Profile image not found</string>
 </resources>
