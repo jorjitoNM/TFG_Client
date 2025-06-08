@@ -2,6 +2,7 @@ package com.example.client.data.repositories
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
@@ -10,6 +11,9 @@ import javax.inject.Inject
 
 object PreferencesKeys {
     val USERNAME = stringPreferencesKey("username")
+
+        val DARK_THEME = booleanPreferencesKey("dark_theme")
+
 }
 
 class PreferencesRepository @Inject constructor(private val dataStore: DataStore<Preferences>) {

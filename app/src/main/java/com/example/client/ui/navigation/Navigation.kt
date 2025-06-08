@@ -42,12 +42,15 @@ import com.example.client.ui.userScreen.visitor.VisitorUserScreen
 import kotlinx.coroutines.launch
 
 @Composable
-fun Navigation() {
+fun Navigation(
+    onToggleTheme: (Boolean) -> Unit,
+    isDarkTheme: Boolean
+) {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val sharedLocationViewModel: SharedLocationViewModel = hiltViewModel()
-
+    val state by navController.currentBackStackEntryAsState()
     val showSnackbar = { message: String ->
         scope.launch {
             snackbarHostState.showSnackbar(
@@ -56,9 +59,16 @@ fun Navigation() {
             )
         }
     }
+    NavHost(navController = navController, startDestination = "userScreen") {
+        composable<UserScreenDestination> {
+            UserScreen(
+                showSnackbar = { showSnackbar(it) },
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
 
-    val state by navController.currentBackStackEntryAsState()
-
+    }
     val screen = appDestinationList.find { screen ->
         val currentRoute = state?.destination?.route?.substringBefore("/")
         val screenRoute = screen.route.toString().substringBefore("@").substringBefore("$")
@@ -109,11 +119,16 @@ fun Navigation() {
             popExitTransition = { ExitTransition.None }
         ) {
             composable<NormalNoteListDestination> {
-                NoteListScreen(showSnackbar = { showSnackbar(it) }, onNavigateToDetail = {navController.navigate(NormalNoteDetailDestination(it))})
+                NoteListScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateToDetail = { navController.navigate(NormalNoteDetailDestination(it)) })
             }
             composable<NormalNoteDetailDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as NormalNoteDetailDestination
-                NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
+                NoteDetailScreen(
+                    noteId = destination.noteId,
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateBack = { navController.navigateUp() })
             }
             composable<NoteMapDestination> {
                 NoteMapScreen(
@@ -124,18 +139,18 @@ fun Navigation() {
                 )
             }
             composable<RegisterDestination> {
-                SignUpScreen(showSnackbar = { showSnackbar(it)},
-                    navigateToLogin =  { navController.navigate(LoginDestination) },
+                SignUpScreen(showSnackbar = { showSnackbar(it) },
+                    navigateToLogin = { navController.navigate(LoginDestination) },
                     onNavigateBack = { navController.popBackStack() })
             }
             composable<StartDestination> {
-                StartScreen( navigateToSignUp = { navController.navigate(RegisterDestination)},
-                    navigateToLogin = { navController.navigate(LoginDestination)})
+                StartScreen(navigateToSignUp = { navController.navigate(RegisterDestination) },
+                    navigateToLogin = { navController.navigate(LoginDestination) })
             }
             composable<LoginDestination> {
-                LoginScreen( navigateToApp = { navController.navigate(NoteMapDestination)},
-                    showSnackbar = { showSnackbar(it)},
-                    navigateToRegister = { navController.navigate(RegisterDestination)},
+                LoginScreen(navigateToApp = { navController.navigate(NoteMapDestination) },
+                    showSnackbar = { showSnackbar(it) },
+                    navigateToRegister = { navController.navigate(RegisterDestination) },
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
@@ -149,21 +164,34 @@ fun Navigation() {
             }
 
             composable<UserScreenDestination> {
-                UserScreen(showSnackbar = { showSnackbar(it) }
+                UserScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onToggleTheme = onToggleTheme,
+                    isDarkTheme = isDarkTheme
                 )
             }
             composable<UserSearchDestination> {
-                UserSearchScreen( showSnackbar = { showSnackbar(it) }, onNavigateToVisitor = { navController.navigate(VisitorUserScreenDestination(it)) })
+                UserSearchScreen(
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateToVisitor = {
+                        navController.navigate(
+                            VisitorUserScreenDestination(it)
+                        )
+                    })
             }
 
             composable<VisitorUserScreenDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as VisitorUserScreenDestination
-                VisitorUserScreen(username = destination.username, showSnackbar = { showSnackbar(it) })
+                VisitorUserScreen(
+                    username = destination.username,
+                    showSnackbar = { showSnackbar(it) })
             }
 
-            composable <AddNoteDestination> {
+            composable<AddNoteDestination> {
                 AddNoteScreen(
-                    showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() }, sharedLocationViewModel = sharedLocationViewModel
+                    showSnackbar = { showSnackbar(it) },
+                    onNavigateBack = { navController.navigateUp() },
+                    sharedLocationViewModel = sharedLocationViewModel
                 )
             }
         }

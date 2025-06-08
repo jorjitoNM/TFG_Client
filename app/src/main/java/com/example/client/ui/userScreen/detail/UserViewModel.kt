@@ -1,8 +1,11 @@
 package com.example.client.ui.userScreen.detail
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.repositories.PreferencesKeys
 import com.example.client.domain.usecases.note.GetMyNoteUseCase
 import com.example.client.domain.usecases.social.DelFavNoteUseCase
 import com.example.client.domain.usecases.social.DelLikeNoteUseCase
@@ -16,8 +19,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.prefs.Preferences
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,8 +35,14 @@ class UserViewModel @Inject constructor(
     private val delFavNoteUseCase: DelFavNoteUseCase,
     private val getMyNote: GetMyNoteUseCase,
     private val getLikedNoteUseCase: GetLikedNoteUseCase,
-) : ViewModel() {
 
+) : ViewModel() {
+    private val _isDarkTheme = MutableStateFlow(false) // por defecto claro
+    val isDarkTheme: StateFlow<Boolean> = _isDarkTheme.asStateFlow()
+
+    fun toggleTheme() {
+        _isDarkTheme.value = !_isDarkTheme.value
+    }
     private val _uiState = MutableStateFlow(UserState())
     val uiState: StateFlow<UserState> = _uiState.asStateFlow()
 
@@ -53,8 +64,10 @@ class UserViewModel @Inject constructor(
             is UserEvent.DelLikeNote -> delLikedNote(event.noteId)
             is UserEvent.FavNote -> favNote(event.noteId)
             is UserEvent.LikeNote -> likeNote(event.noteId)
+
         }
     }
+
 
     private fun getLikedNotes() {
         viewModelScope.launch {

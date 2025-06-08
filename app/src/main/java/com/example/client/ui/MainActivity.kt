@@ -4,10 +4,9 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.client.ui.navigation.Navigation
 import com.example.client.ui.splashScreen.SplashScreen
 import com.example.client.ui.theme.TFGclientTheme
@@ -21,18 +20,22 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
-            TFGclientTheme {
+            val systemDarkTheme = isSystemInDarkTheme()
+            var darkThemeEnabled by rememberSaveable { mutableStateOf(systemDarkTheme) }
+
+
+            TFGclientTheme(darkTheme = darkThemeEnabled) {
                 var showSplash by remember { mutableStateOf(true) }
 
                 if (showSplash) {
                     SplashScreen(onFinished = { showSplash = false })
                 } else {
-                    Navigation()
+                    Navigation(
+                        onToggleTheme = { darkThemeEnabled = it },
+                        isDarkTheme = darkThemeEnabled
+                    )
                 }
             }
         }
     }
 }
-
-
-

@@ -60,7 +60,7 @@ fun NotesBottomSheet(
             .padding(16.dp)
             .background(backgroundColor, shape = RoundedCornerShape(16.dp))
     ) {
-        // Header
+
         Text(
             text = "Notes at this location",
             style = MaterialTheme.typography.titleLarge,

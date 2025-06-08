@@ -9,7 +9,7 @@ data class UserState(
     val aviso: UiEvent? = null,
     val user: UserDTO = UserDTO(),
     val selectedTab: UserTab = UserTab.NOTES,
-    val notes: List<NoteDTO> = emptyList()
+    val notes: List<NoteDTO> = emptyList(),
 )
 
 enum class UserTab { NOTES, FAVORITES, LIKES }

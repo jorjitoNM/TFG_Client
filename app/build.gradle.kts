@@ -146,5 +146,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.firestore)
+//Tema
+    implementation ("androidx.datastore:datastore-preferences:1.0.0")
+    implementation ("androidx.compose.material3:material3:1.1.1")
 
 }
