@@ -4,10 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.data.model.UserDTO
 import com.example.client.di.IoDispatcher
-import com.example.client.domain.useCases.user.LoadProfileImageUseCase
-import com.example.client.domain.usecases.note.GetMyNote
 import com.example.client.domain.usecases.follow.GetMyFollowersUseCase
 import com.example.client.domain.usecases.follow.GetMyFollowingUseCase
 import com.example.client.domain.usecases.note.GetMyNoteUseCase
@@ -18,6 +15,8 @@ import com.example.client.domain.usecases.social.GetLikedNoteUseCase
 import com.example.client.domain.usecases.social.GetNoteSavedUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.domain.usecases.user.GetUserUseCase
+import com.example.client.domain.usecases.user.images.LoadProfileImageUseCase
+import com.example.client.domain.usecases.user.images.SaveProfileImageUseCase
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.userScreen.DetailNavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,8 +32,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     private val getUserUseCase: GetUserUseCase,
     private val getNoteSavedUseCase: GetNoteSavedUseCase,
-    private val getMyNote: GetMyNote,
-    private val loadProfileImageUseCase: LoadProfileImageUseCase,
+    private val saveProfileImageUseCase: SaveProfileImageUseCase,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val favNoteUseCase: FavNoteUseCase,
     private val likeNoteUseCase: LikeNoteUseCase,
@@ -43,7 +41,8 @@ class UserViewModel @Inject constructor(
     private val getMyNote: GetMyNoteUseCase,
     private val getLikedNoteUseCase: GetLikedNoteUseCase,
     private val getMyFollowersUseCase: GetMyFollowersUseCase,
-    private val getMyFollowingsUseCase: GetMyFollowingUseCase
+    private val getMyFollowingsUseCase: GetMyFollowingUseCase,
+    private val loadProfileImageUseCase: LoadProfileImageUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserState())
@@ -61,7 +60,8 @@ class UserViewModel @Inject constructor(
                     UserTab.LIKES -> getLikedNotes()
                 }
             }
-           is  UserEvent.GetMyNote -> getMyNotes()
+
+            is UserEvent.GetMyNote -> getMyNotes()
             is UserEvent.DelFavNote -> delSavedNote(event.noteId)
             is UserEvent.DelLikeNote -> delLikedNote(event.noteId)
             is UserEvent.FavNote -> favNote(event.noteId)
@@ -69,30 +69,55 @@ class UserViewModel @Inject constructor(
             is UserEvent.GetFollowers -> getFollowers()
             is UserEvent.GetFollowing -> getFollowing()
             is UserEvent.NavigationConsumed -> clearNavigation()
-
             is UserEvent.SelectedNote -> selectNote(event.noteId, event.isMyNote)
+            is UserEvent.SaveProfileImage -> saveProfileImage(event.imageUri)
         }
     }
 
 
-
-   private fun getFollowers() {
+    private fun getFollowers() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = getMyFollowersUseCase()) {
-                is NetworkResult.Success -> _uiState.update { it.copy(followers = result.data, isLoading = false) }
-                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Success -> _uiState.update {
+                    it.copy(
+                        followers = result.data,
+                        isLoading = false
+                    )
+                }
+
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(
+                            result.message
+                        ), isLoading = false
+                    )
+                }
+
                 is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
             }
         }
     }
 
-   private fun getFollowing() {
+    private fun getFollowing() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = getMyFollowingsUseCase()) {
-                is NetworkResult.Success -> _uiState.update { it.copy(following = result.data, isLoading = false) }
-                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Success -> _uiState.update {
+                    it.copy(
+                        following = result.data,
+                        isLoading = false
+                    )
+                }
+
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(
+                            result.message
+                        ), isLoading = false
+                    )
+                }
+
                 is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
             }
         }
@@ -257,42 +282,33 @@ class UserViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = false, notes = updatedNotes) }
                 }
 
-                is NetworkResult.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            aviso = UiEvent.ShowSnackbar(result.message),
-                            isLoading = false
-                        )
-                    }
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(result.message),
+                        isLoading = false
+                    )
                 }
 
-            UserEvent.GetMyNote -> getMyNotes()
-            is UserEvent.LoadProfileImage -> loadProfileImage(event.imagesUris)
-
-
+                is NetworkResult.Loading -> _uiState.update {
+                    it.copy(
+                        isLoading = true
+                    )
+                }
+            }
         }
     }
 
-    private fun loadProfileImage(imagesUris: Uri) {
+    private fun saveProfileImage(imagesUri: Uri) {
         viewModelScope.launch(dispatcher) {
-            loadProfileImageUseCase.invoke(imagesUris).collect { result ->
+            saveProfileImageUseCase.invoke(imagesUri,_uiState.value.user.id).collect { result ->
                 when (result) {
                     is NetworkResult.Success -> {
                         _uiState.update {
                             it.copy(
-                                user = _uiState.value.user.let { user ->
-                                    UserDTO(
-                                        user.id,
-                                        user.username,
-                                        user.password,
-                                        user.email,
-                                        user.rol,
-                                        user.notes,
-                                        user.followers,
-                                        user.following,
-                                        user.profilePhoto,
-                                    )
-                                }
+                                user = _uiState.value.user.copy(
+                                    profilePhoto = result.data,
+                                ),
+                                isLoading = false
                             )
                         }
                     }
@@ -315,14 +331,6 @@ class UserViewModel @Inject constructor(
                     }
                 }
             }
-                is NetworkResult.Loading -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true
-                        )
-                    }
-                }
-            }
         }
     }
 
@@ -338,6 +346,7 @@ class UserViewModel @Inject constructor(
                         selectedTab = UserTab.NOTES
                     )
                     getMyNotes()
+                    loadUserProfileImage()
                 }
 
                 is NetworkResult.Error -> {
@@ -350,6 +359,36 @@ class UserViewModel @Inject constructor(
 
                 is NetworkResult.Loading -> {
                     _uiState.value = _uiState.value.copy(isLoading = true)
+                }
+            }
+        }
+    }
+
+    private fun loadUserProfileImage() {
+        viewModelScope.launch (dispatcher){
+            loadProfileImageUseCase.invoke(_uiState.value.user.id).collect {result ->
+                when (result) {
+                    is NetworkResult.Error -> _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+
+                    is NetworkResult.Loading -> _uiState.update {
+                        it.copy(
+                            isLoading = true
+                        )
+                    }
+
+                    is NetworkResult.Success -> _uiState.update {
+                        it.copy(
+                            user = _uiState.value.user.copy(
+                                profilePhoto = result.data
+                            ),
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }

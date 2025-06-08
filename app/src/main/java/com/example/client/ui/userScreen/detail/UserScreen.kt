@@ -1,5 +1,9 @@
 package com.example.client.ui.userScreen.detail
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,16 +28,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.model.note.NoteType
@@ -41,30 +47,15 @@ import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.NoteList
 import com.example.client.ui.common.composables.UserStat
 import com.example.client.ui.userScreen.DetailNavigationEvent
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImage
 
 @Composable
 fun UserScreen(
     showSnackbar: (String) -> Unit,
     viewModel: UserViewModel = hiltViewModel(),
     onNavigateToNoteDetail: (Int) -> Unit,
-    onNavigateToDetailObservable : (Int) -> Unit
+    onNavigateToDetailObservable: (Int) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    val pickImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            viewModel.handleEvent(UserEvent.LoadProfileImage(it))
-        }
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.handleEvent(UserEvent.LoadUser)
         viewModel.handleEvent(UserEvent.GetFollowers)
@@ -74,8 +65,8 @@ fun UserScreen(
     LaunchedEffect(uiState.aviso) {
         uiState.aviso?.let { event ->
             if (event is UiEvent.ShowSnackbar) {
-                    showSnackbar(event.message)
-                    viewModel.handleEvent(UserEvent.AvisoVisto)
+                showSnackbar(event.message)
+                viewModel.handleEvent(UserEvent.AvisoVisto)
             }
         }
     }
@@ -86,11 +77,13 @@ fun UserScreen(
                 onNavigateToNoteDetail(event.noteId)
                 viewModel.handleEvent(UserEvent.NavigationConsumed)
             }
+
             is DetailNavigationEvent.NavigateToNormalNoteDetail -> {
                 onNavigateToDetailObservable(event.noteId)
                 viewModel.handleEvent(UserEvent.NavigationConsumed)
             }
-            else -> {}
+
+            is DetailNavigationEvent.None -> {}
         }
     }
 
@@ -114,8 +107,7 @@ fun UserScreen(
                 onTabSelected = { tab ->
                     viewModel.handleEvent(UserEvent.SelectTab(tab))
                 },
-                profileImageUri = uiState.profileImageUri,
-                onProfileImageSelected = { pickImageLauncher.launch("image/*"),
+                onProfileImageSelected = { imageUri -> viewModel.handleEvent(UserEvent.SaveProfileImage(imageUri)) },
                 onFavClick = { noteId ->
                     val note = uiState.notes.find { it.id == noteId }
                     note?.let {
@@ -154,19 +146,14 @@ fun UserContent(
     following: List<UserDTO>,
     selectedTab: UserTab,
     onTabSelected: (UserTab) -> Unit,
-    profileImageUri: Uri?,
-    onProfileImageSelected: () -> Unit,
+    onProfileImageSelected: (Uri) -> Unit,
     onNoteClick: (Int) -> Unit,
     onFavClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit
 ) {
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
-
-    val pickImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        imageUri = uri
-    }
+    val pickMedia = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri -> if (uri != null) onProfileImageSelected(uri) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -190,16 +177,21 @@ fun UserContent(
                         .size(120.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .clickable(onClick = onProfileImageSelected),
+                        .clickable(onClick = {
+                            pickMedia.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (profileImageUri != null) {
+                    if (user.profilePhoto != null) {
                         AsyncImage(
-                            model = profileImageUri,
+                            model = user.profilePhoto,
                             contentDescription = "Foto de perfil",
                             modifier = Modifier
                                 .size(120.dp)
-                                .clip(CircleShape)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
                         )
                     } else {
                         Icon(
@@ -249,7 +241,7 @@ fun UserContent(
             UserTab.NOTES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {onNoteClick(it)},
+                    onNoteClick = { onNoteClick(it) },
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -258,7 +250,7 @@ fun UserContent(
             UserTab.FAVORITES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {onNoteClick(it)},
+                    onNoteClick = { onNoteClick(it) },
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -267,7 +259,7 @@ fun UserContent(
             UserTab.LIKES -> {
                 NoteList(
                     notes = notes,
-                    onNoteClick = {onNoteClick(it)},
+                    onNoteClick = { onNoteClick(it) },
                     onFavClick = onFavClick,
                     onLikeClick = onLikeClick
                 )
@@ -275,8 +267,6 @@ fun UserContent(
         }
     }
 }
-
-
 
 
 @Composable
@@ -317,6 +307,7 @@ fun TabSelector(
     }
 }
 
+
 @Composable
 fun TabButton(
     text: String,
@@ -350,7 +341,6 @@ fun TabButton(
 }
 
 
-
 @Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
 @Composable
 fun Preview() {
@@ -376,8 +366,6 @@ fun Preview() {
         followers = emptyList(),
         following = emptyList(),
         onNoteClick = {},
-        selectedTab = UserTab.FAVORITES,
-        profileImageUri = null,
         onProfileImageSelected = {}
     )
 }

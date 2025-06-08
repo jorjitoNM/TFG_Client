@@ -1,4 +1,4 @@
-package com.example.client.domain.useCases.authentication
+package com.example.client.domain.usecases.authentication
 
 import android.content.Context
 import androidx.biometric.BiometricManager

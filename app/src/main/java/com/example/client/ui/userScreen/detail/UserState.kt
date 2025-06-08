@@ -12,8 +12,7 @@ data class UserState(
     val user: UserDTO = UserDTO(),
     val selectedTab: UserTab = UserTab.NOTES,
     val notes: List<NoteDTO> = emptyList(),
-    val profileImageUri: Uri? = null
-    val notes: List<NoteDTO> = emptyList(),
+    val profileImageUri: Uri? = null,
     val followers: List<UserDTO> = emptyList(),
     val following: List<UserDTO> = emptyList(),
     val selectedNoteId : Int = 0,

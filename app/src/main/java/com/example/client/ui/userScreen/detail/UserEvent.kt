@@ -11,7 +11,7 @@ sealed class UserEvent {
     data class DelFavNote(val noteId: Int) : UserEvent()
     data class DelLikeNote(val noteId: Int) : UserEvent()
     data object GetMyNote : UserEvent()
-    data class LoadProfileImage (val imagesUris : Uri) : UserEvent()
+    data class SaveProfileImage (val imageUri : Uri) : UserEvent()
     data object GetFollowing : UserEvent()
     data object GetFollowers : UserEvent()
     data class SelectedNote(val noteId: Int, val isMyNote: Boolean) : UserEvent()
