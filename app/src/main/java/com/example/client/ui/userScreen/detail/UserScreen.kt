@@ -28,12 +28,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.model.note.NoteType
@@ -93,13 +96,6 @@ fun UserScreen(
             )
         } else {
             Column(modifier = Modifier.fillMaxSize()) {
-                ThemeToggleSwitch(
-                    isDarkTheme = isDarkTheme,
-                    onToggle = onToggleTheme,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(16.dp)
-                )
                 UserContent(
                     notes = uiState.notes,
                     user = uiState.user,
@@ -133,12 +129,13 @@ fun UserScreen(
                         val isMyNote = uiState.selectedTab == UserTab.NOTES
                         viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
                     },
+                    onToggleTheme = onToggleTheme,
+                    isDarkTheme = isDarkTheme,
                 )
             }
         }
     }
 }
-
 
 @Composable
 fun ThemeToggleSwitch(
@@ -148,20 +145,31 @@ fun ThemeToggleSwitch(
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = if (isDarkTheme) "Modo Oscuro" else "Modo Claro",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
+        Icon(
+            painter = painterResource(R.drawable.light_mode_24),
+            contentDescription = "Light theme",
+            modifier = Modifier
+                .size(24.dp)
+                .clickable { onToggle(false) }
+                .alpha(if (!isDarkTheme) 1f else 0.5f),
+            tint = if (!isDarkTheme) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
         )
-        Spacer(modifier = Modifier.width(8.dp))
-        androidx.compose.material3.Switch(
-            checked = isDarkTheme,
-            onCheckedChange = onToggle
+
+        Icon(
+            painter = painterResource(R.drawable.dark_mode_24),
+            contentDescription = "Dark theme",
+            modifier = Modifier
+                .size(24.dp)
+                .clickable { onToggle(true) }
+                .alpha(if (isDarkTheme) 1f else 0.5f),
+            tint = if (isDarkTheme) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
         )
     }
 }
+
 @Composable
 fun UserContent(
     notes: List<NoteDTO>,
@@ -172,103 +180,118 @@ fun UserContent(
     onNoteClick: (Int) -> Unit,
     onTabSelected: (UserTab) -> Unit,
     onFavClick: (Int) -> Unit,
-    onLikeClick: (Int) -> Unit
+    onLikeClick: (Int) -> Unit,
+    onToggleTheme: (Boolean) -> Unit,
+    isDarkTheme: Boolean,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Surface(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            shadowElevation = 8.dp,
-            color = MaterialTheme.colorScheme.surface
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Column(
+            Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                shadowElevation = 8.dp,
+                color = MaterialTheme.colorScheme.surface
             ) {
-                Box(
+                Column(
                     modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Foto de perfil",
-                        modifier = Modifier.size(110.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier.size(110.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = user.username,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 45.dp, end = 32.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        UserStat(number = user.notes.size ?: 0, label = "Posts")
+                        Spacer(Modifier.width(32.dp))
+                        UserStat(number = followers.size, label = "Followers")
+                        Spacer(Modifier.width(32.dp))
+                        UserStat(number = following.size, label = "Following")
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            TabSelector(
+                selectedTab = selectedTab,
+                onTabSelected = onTabSelected,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (selectedTab) {
+                UserTab.NOTES -> {
+                    NoteList(
+                        notes = notes,
+                        onNoteClick = {onNoteClick(it)},
+                        onFavClick = onFavClick,
+                        onLikeClick = onLikeClick
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = user.username,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 45.dp, end = 32.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    UserStat(number = user.notes.size ?: 0, label = "Posts")
-                    Spacer(Modifier.width(32.dp))
-                    UserStat(number = followers.size, label = "Followers")
-                    Spacer(Modifier.width(32.dp))
-                    UserStat(number = following.size, label = "Following")
+                UserTab.FAVORITES -> {
+                    NoteList(
+                        notes = notes,
+                        onNoteClick = {onNoteClick(it)},
+                        onFavClick = onFavClick,
+                        onLikeClick = onLikeClick
+                    )
                 }
 
+                UserTab.LIKES -> {
+                    NoteList(
+                        notes = notes,
+                        onNoteClick = {onNoteClick(it)},
+                        onFavClick = onFavClick,
+                        onLikeClick = onLikeClick
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        TabSelector(
-            selectedTab = selectedTab,
-            onTabSelected = onTabSelected,
-            modifier = Modifier.fillMaxWidth()
+        ThemeToggleSwitch(
+            isDarkTheme = isDarkTheme,
+            onToggle = onToggleTheme,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = CircleShape
+                )
+                .padding(8.dp)
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (selectedTab) {
-            UserTab.NOTES -> {
-                NoteList(
-                    notes = notes,
-                    onNoteClick = {onNoteClick(it)},
-                    onFavClick = onFavClick,
-                    onLikeClick = onLikeClick
-                )
-            }
-
-            UserTab.FAVORITES -> {
-                NoteList(
-                    notes = notes,
-                    onNoteClick = {onNoteClick(it)},
-                    onFavClick = onFavClick,
-                    onLikeClick = onLikeClick
-                )
-            }
-
-            UserTab.LIKES -> {
-                NoteList(
-                    notes = notes,
-                    onNoteClick = {onNoteClick(it)},
-                    onFavClick = onFavClick,
-                    onLikeClick = onLikeClick
-                )
-            }
-        }
     }
 }
 
@@ -372,5 +395,7 @@ fun Preview() {
         followers = emptyList(),
         following = emptyList(),
         onNoteClick = {},
+        onToggleTheme = {},
+        isDarkTheme = true
     )
 }
