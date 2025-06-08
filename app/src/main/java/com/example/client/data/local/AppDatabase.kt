@@ -9,7 +9,7 @@ import com.example.client.data.local.entities.UserEntity
 
 @Database(
     entities = [LocationEntity::class, UserEntity::class],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {

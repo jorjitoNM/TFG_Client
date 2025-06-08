@@ -2,15 +2,19 @@ package com.example.client.ui.noteMap.list
 
 
 import android.Manifest
+import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,26 +25,33 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,15 +67,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NoteType
+import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.FilterChip
 import com.example.client.ui.common.composables.NotesBottomSheet
-import com.example.client.ui.common.UiEvent
 import com.example.client.ui.common.composables.getMarkerColor
 import com.example.client.ui.common.composables.getMarkerIconRes
 import com.example.client.ui.common.composables.vectorToBitmap
@@ -90,9 +107,8 @@ fun NoteMapScreen(
     viewModel: NoteMapViewModel = hiltViewModel(),
     sharedLocationViewModel: SharedLocationViewModel,
     onNavigateToList: () -> Unit,
-    onAddNoteClick: () -> Unit
-
-
+    onAddNoteClick: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit
 ) {
     val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
     val sharedNoteType by sharedLocationViewModel.selectedNoteType.collectAsState()
@@ -100,6 +116,15 @@ fun NoteMapScreen(
     val initialLat = latLong?.first
     val initialLon = latLong?.second
     val isDarkMode = isSystemInDarkTheme()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        viewModel.registerLocationReceiver()
+        onDispose {
+            viewModel.unregisterLocationReceiver()
+        }
+    }
+
 
 
     var moveToCurrentLocation by remember { mutableStateOf(false) }
@@ -161,6 +186,7 @@ fun NoteMapScreen(
     // Selected notes for the bottom sheet
     val selectedNotes = remember { mutableStateListOf<NoteDTO>() }
     var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
+    var showLocationDialog by remember { mutableStateOf(false) }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -175,6 +201,8 @@ fun NoteMapScreen(
     LaunchedEffect(Unit) {
         viewModel.handleEvent(NoteMapEvent.GetNotes)
         viewModel.handleEvent(NoteMapEvent.CheckLocationPermission)
+        viewModel.checkLocationEnabled() // <--- aquí
+
     }
 
     // Solicitar permisos si no los tiene
@@ -185,6 +213,9 @@ fun NoteMapScreen(
             viewModel.handleEvent(NoteMapEvent.GetCurrentLocation)
         }
     }
+
+
+
 
     // Restaurar la posición de la cámara si hay guardada
     LaunchedEffect(uiState.cameraLatLng, uiState.cameraZoom) {
@@ -203,6 +234,14 @@ fun NoteMapScreen(
                     it
                 )
             }
+        }
+    }
+
+    LaunchedEffect(uiState.hasLocationPermission, uiState.isLocationEnabled) {
+        if (uiState.hasLocationPermission && !uiState.isLocationEnabled) {
+            showLocationDialog = true
+        } else {
+            showLocationDialog = false
         }
     }
 
@@ -266,7 +305,6 @@ fun NoteMapScreen(
                     onNavigateToList()
                     viewModel.handleEvent(NoteMapEvent.AvisoVisto)
                 }
-
             }
         }
     }
@@ -276,7 +314,8 @@ fun NoteMapScreen(
         sheetContent = {
             NotesBottomSheet(
                 notes = selectedNotes,
-                location = selectedLocation
+                location = selectedLocation,
+                onNoteClick = { noteId -> onNavigateToDetail(noteId) }
             )
         },
         sheetPeekHeight = 0.dp,
@@ -346,6 +385,7 @@ fun NoteMapScreen(
                             onClick = {
                                 selectedNotes.clear()
                                 selectedNotes.addAll(notes)
+                                viewModel.handleEvent(NoteMapEvent.GetSelectedNotesImages(selectedNotes.toList()))
                                 selectedLocation = location
                                 scope.launch { bottomSheetState.expand() }
                                 false
@@ -386,7 +426,7 @@ fun NoteMapScreen(
                                     viewModel.handleEvent(NoteMapEvent.NavigateToSearch)
                                 },
                             enabled = false, // Deshabilita edición directa aquí
-                            placeholder = { Text("Buscar lugares...") },
+                            placeholder = { Text("Search places...") },
                             singleLine = true,
                             leadingIcon = {
                                 Icon(
@@ -447,20 +487,61 @@ fun NoteMapScreen(
                             }
                         }
 
+                        if (showLocationDialog) {
+                            val context = LocalContext.current
+                            val isDarkMode = isSystemInDarkTheme()
+                            val textColor = if (isDarkMode) Color.White else Color.Black
+                            val ajustesColor = Color(0xFF1976D2) // Azul
+
+                            val annotatedText = buildAnnotatedString {
+                                append("To add notes you must activate the location. Go to ")
+                                pushStringAnnotation(tag = "AJUSTES", annotation = "ajustes")
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = ajustesColor,
+                                        fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                                        textDecoration = TextDecoration.Underline
+                                    )
+                                ) {
+                                    append("Settings")
+                                }
+                                pop()
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = annotatedText,
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = textColor),
+                                    modifier = Modifier.clickable {
+                                        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                                        context.startActivity(intent)
+                                    }
+                                )
+                            }
+                        }
+
                     }
                 }
             }
 
             // Location button
-            if (uiState.hasLocationPermission) {
+            // Botones solo si hay permiso Y la ubicación está activada
+            if (uiState.hasLocationPermission && uiState.isLocationEnabled) {
                 FloatingActionButton(
-                    onClick = { viewModel.handleEvent(NoteMapEvent.GetCurrentLocation)
-                        moveToCurrentLocation = true},
+                    onClick = {
+                        viewModel.handleEvent(NoteMapEvent.GetCurrentLocation)
+                        moveToCurrentLocation = true
+                    },
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.BottomStart),
                     containerColor = fabContainerColor,
-                    contentColor =  fabContentColor
+                    contentColor = fabContentColor
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.google_map_icon),
@@ -471,11 +552,9 @@ fun NoteMapScreen(
 
                 FloatingActionButton(
                     onClick = {
-
                         uiState.currentLocation?.let { location ->
                             sharedLocationViewModel.setLocation(location.latitude, location.longitude)
                         }
-
                         onAddNoteClick()
                     },
                     modifier = Modifier
@@ -487,6 +566,9 @@ fun NoteMapScreen(
                     Icon(Icons.Default.Add, contentDescription = "Añadir Nota")
                 }
             }
+
+
+
 
             LaunchedEffect(uiState.currentLocation, moveToCurrentLocation) {
                 if (moveToCurrentLocation && uiState.currentLocation != null) {
@@ -509,13 +591,12 @@ fun NoteMapScreen(
 
             // Loading indicator
             if (uiState.isLoading) {
-                CircularProgressIndicator(
+                LinearProgressIndicator(
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
                 )
             }
-
         }
     }
-
 }

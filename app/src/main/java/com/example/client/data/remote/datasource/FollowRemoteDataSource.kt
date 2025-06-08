@@ -19,6 +19,12 @@ class FollowRemoteDataSource @Inject constructor(
     suspend fun getFollowing(username: String) =
         safeApiCall { followService.getFollowing(username) }
 
+    suspend fun getMyFollowing() =
+        safeApiCall { followService.getMyFollowing() }
+
+    suspend fun getMyFollowers() =
+        safeApiCall { followService.getMyFollowers() }
+
     suspend fun isFollowing(username: String) =
         safeApiCall { followService.isFollowing(username) }
 }

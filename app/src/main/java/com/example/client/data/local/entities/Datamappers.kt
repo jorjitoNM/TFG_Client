@@ -25,12 +25,10 @@ fun Location.toEntity(userLogged: String, timestamp: Long = System.currentTimeMi
 
 fun UserEntity.toUserDTO()= UserDTO(
     username = username,
-    rol = rol
 )
 
 fun UserDTO.toEntity(userLogged: String, timestamp: Long = System.currentTimeMillis()) = UserEntity(
     username = username,
     timestamp = timestamp,
-    rol = rol,
     userLogged = userLogged
 )

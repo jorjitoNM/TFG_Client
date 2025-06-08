@@ -10,7 +10,10 @@ data class NoteDetailState(
     val isUpdating: Boolean = false,
     val isEditing: Boolean = false,
     val aviso: UiEvent? = null,
+    val isImagesLoading: Boolean = false,
     val editedTitle: String = "",
     val editedContent: String = "",
     val editedPrivacy: NotePrivacy = NotePrivacy.PUBLIC
 )
+
+

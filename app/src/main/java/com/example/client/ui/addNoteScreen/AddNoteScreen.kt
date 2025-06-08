@@ -2,8 +2,10 @@ package com.example.client.ui.addNoteScreen
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,23 +26,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -62,20 +59,28 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
 import com.example.client.ui.common.UiEvent
+import com.example.client.ui.common.composables.ColorfulLinearRatingBar
 import com.example.client.ui.noteMap.search.SharedLocationViewModel
-import com.example.client.ui.theme.*
+import com.example.client.ui.theme.ClassicLight
+import com.example.client.ui.theme.CulturalDark2
+import com.example.client.ui.theme.CulturalLight
+import com.example.client.ui.theme.EventLight
+import com.example.client.ui.theme.FoodLight
+import com.example.client.ui.theme.HistoricalDark2
+import com.example.client.ui.theme.HistoricalLight
+import com.example.client.ui.theme.LandscapeLight
 import timber.log.Timber
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlin.math.roundToInt
-import java.time.Duration
 
 
 @Composable
@@ -88,6 +93,14 @@ fun AddNoteScreen(
     val uiState by addNoteViewModel.uiState.collectAsStateWithLifecycle()
     val sharedLocation by sharedLocationViewModel.selectedLocation.collectAsState()
     val isDarkMode = isSystemInDarkTheme()
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris: List<Uri> ->
+        if (uris.isNotEmpty()) {
+            addNoteViewModel.handleEvent(AddNoteEvents.AddNoteImages(uris))
+        }
+    }
 
     // Actualiza la nota con la ubicación recibida del mapa
     LaunchedEffect(sharedLocation) {
@@ -128,8 +141,12 @@ fun AddNoteScreen(
             note = uiState.note,
             onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
             onAddNote = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
-            isDarkMode = isDarkMode
-        )
+            isDarkMode = isDarkMode,
+            onAddImages = { imagePickerLauncher.launch("image/*") },
+            selectedImages = uiState.selectedImages,
+            onRemoveImage = { uri -> addNoteViewModel.handleEvent(AddNoteEvents.RemoveSelectedImage(uri)) }
+
+            )
     }
 }
 
@@ -137,10 +154,16 @@ fun AddNoteScreen(
 private fun AddNoteContent(
     modifier: Modifier = Modifier,
     note: NoteDTO,
+
     onEdit: (NoteDTO) -> Unit,
     onAddNote: () -> Unit,
-    isDarkMode: Boolean
-) {
+    isDarkMode: Boolean,
+    onAddImages: () -> Unit,
+    selectedImages: List<Uri>,
+    onRemoveImage: (Uri) -> Unit,
+
+
+    ) {
     var localNote by remember { mutableStateOf(note) }
     LaunchedEffect(note) {
         localNote = note
@@ -150,7 +173,6 @@ private fun AddNoteContent(
     val textColor = if (isDarkMode) Color(0xFFE0E0E0) else Color.Gray
     val inputTextColor = if (isDarkMode) Color.White else Color.Black
     val borderColor = if (isDarkMode) Color(0xFF3A3A3A) else Color.LightGray
-    val focusedBorderColor = if (isDarkMode) primaryColor else Color.Blue
 
     var datePickerForStart by remember { mutableStateOf(true) } // true = start, false = end
 
@@ -524,8 +546,9 @@ private fun AddNoteContent(
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
+                    // Botón para añadir fotos
                     OutlinedButton(
-                        onClick = { /* Handle photo selection */ },
+                        onClick = onAddImages,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -539,7 +562,52 @@ private fun AddNoteContent(
                             fontSize = 16.sp
                         )
                     }
+
+
+                    // Galería de imágenes seleccionadas (scroll horizontal)
+                    if (selectedImages.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(selectedImages) { uri ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color.LightGray.copy(alpha = 0.6f))
+                                ) {
+                                    androidx.compose.foundation.Image(
+                                        painter = rememberAsyncImagePainter(uri),
+                                        contentDescription = "Selected photo",
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    // Botón X para eliminar
+                                    IconButton(
+                                        onClick = { onRemoveImage(uri) },
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(24.dp)
+                                            .background(
+                                                Color.White.copy(alpha = 0.8f),
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove image",
+                                            tint = Color.Red,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
+
 
 
             }
@@ -547,6 +615,7 @@ private fun AddNoteContent(
         val isTitleValid = localNote.title.isNotBlank()
         val isDescriptionValid = localNote.content?.isNotBlank()
         val isRatingNotZero = localNote.rating != 0
+        val hasImages = selectedImages.isNotEmpty()
 
 // Valida que start y end no sean nulos ni vacíos
 
@@ -571,8 +640,7 @@ private fun AddNoteContent(
 
 
 
-        val isAddEnabled = isTitleValid && isDescriptionValid == true && areDatesValid && isRatingNotZero
-
+        val isAddEnabled = isTitleValid && isDescriptionValid == true && areDatesValid && isRatingNotZero && hasImages
 
 
         // Botón fijo en la parte inferior
@@ -624,8 +692,6 @@ private fun AddNoteContent(
                         if (startDate != null && !pickedDate.isBefore(startDate)) {
                             localNote = localNote.copy(end = pickedDate.atStartOfDay().toString())
                             onEdit(localNote)
-                        } else {
-                            // Mensaje de error si lo deseas
                         }
                     }
                     showDatePicker = false
@@ -751,104 +817,6 @@ private fun PrivacyTabs(
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ColorfulLinearRatingBar(
-    rating: Int,
-    onRatingChanged: (Int) -> Unit,
-    maxRating: Int = 10,
-    modifier: Modifier = Modifier,
-    isDarkMode: Boolean
-) {
-    fun getBarColor(value: Float): Color = when {
-        value <= maxRating / 3f -> Color(0xFFE53935) // Rojo
-        value <= 2 * maxRating / 3f -> Color(0xFFFF903B) // Amarillo
-        else -> Color(0xFF43A047) // Verde
-    }
-
-    var sliderValue by remember { mutableStateOf(rating.toFloat()) }
-
-    Column(
-        modifier = modifier.padding(top = 10.dp, bottom = 3.dp)
-    ) {
-        // Calcula el progreso del slider (0f a 1f)
-        val progress = (sliderValue - 1f) / (maxRating.toFloat() - 1f)
-
-        Slider(
-            value = sliderValue,
-            onValueChange = {
-                sliderValue = it
-                // Si quieres actualizar en tiempo real con decimales, puedes mostrarlo
-                // Si prefieres solo enteros, usa: onRatingChanged(it.roundToInt())
-            },
-            onValueChangeFinished = {
-                // Aquí puedes redondear y notificar el valor final entero
-                onRatingChanged(sliderValue.roundToInt())
-            },
-            valueRange = 1f..maxRating.toFloat(),
-            steps = 0, // Slider continuo (decimales)
-            colors = SliderDefaults.colors(
-                thumbColor = getBarColor(sliderValue),
-                activeTrackColor = Color.Transparent,
-                inactiveTrackColor = Color.Transparent
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp),
-            thumb = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .background(
-                            color = getBarColor(sliderValue),
-                            shape = CircleShape
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = getBarColor(sliderValue),
-                            shape = CircleShape
-                        )
-                )
-            },
-            track = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                color = if (!isDarkMode) Color(0xFFD7D7D7) else Color(
-                                    0xFF5F5F5F
-                                ),
-                                shape = RoundedCornerShape(3.dp)
-                            )
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(progress)
-                            .fillMaxHeight()
-                            .background(
-                                color = getBarColor(sliderValue),
-                                shape = RoundedCornerShape(3.dp)
-                            )
-                    )
-                }
-            }
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = "${sliderValue.roundToInt()} / $maxRating",
-            fontSize = 16.sp,
-            color = Color.Gray,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-    }
-}
 
 @Composable
 fun NoteTypeTabs(
@@ -905,16 +873,6 @@ fun NoteTypeTabs(
     }
 }
 
-fun formatDateForDisplay(dateString: String): String {
-    return try {
-        val date = LocalDate.parse(dateString)
-        date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-    } catch (e: Exception) {
-        dateString
-    }
-}
-
-
 
 
 
@@ -944,6 +902,9 @@ fun AddNoteScreenPreview() {
         ),
         onEdit = {},
         onAddNote = {},
-        isDarkMode = false
+        isDarkMode = false,
+        onAddImages = {},
+        selectedImages = emptyList(),
+        onRemoveImage = {},
     )
 }

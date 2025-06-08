@@ -12,6 +12,7 @@ composeBom = "2025.01.01"
 coil = "2.6.0"
 ksp = "1.9.24-1.0.20"
 loggingInterceptor = "4.12.0"
+kotlinxCoroutines = "1.8.1"
 
 hilt = "2.51"
 androidxHiltNavigationCompose = "1.2.0"
@@ -29,12 +30,17 @@ mapsCompose = "4.3.3"
 playServicesLocation = "21.2.0"
 accompanist = "0.32.0"
 
-firebaseBom = "33.10.0"
+#Firebase
+firebaseBom = "33.1.0"
 crashlytics = "3.0.2"
+services = "4.4.2"
 biometricKtx = "1.4.0-alpha02"
 securityCryptoKtx = "1.1.0-alpha07"
 securityCrypto = "1.1.0-alpha07"
 appcompat = "1.7.0"
+googleGmsGoogleServices = "4.4.2"
+firebaseMessaging = "24.1.1"
+firebaseMessagingKtx = "24.1.1"
 
 
 
@@ -96,12 +102,22 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 
 #Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
-firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-firestore = {module= "com.google.firebase:firebase-firestore"}
+firebase-crashlytics = {module = "com.google.firebase:firebase-crashlytics" }
+firebase-storage = { module = "com.google.firebase:firebase-storage-ktx" }
+firebase-auth = {module = "com.google.firebase:firebase-auth-ktx" }
 androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometricKtx" }
 androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+
+#Coroutines
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+firebase-messaging-ktx = { group = "com.google.firebase", name = "firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -109,6 +125,8 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 jetbrainsKotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-room = { id = "androidx.room", version.ref = "roomRuntime" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
+room = { id="androidx.room", version.ref = "roomRuntime" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
+crashlytics = {id= "com.google.firebase.crashlytics", version.ref = "crashlytics"}
+googleServices = { id = "com.google.gms.google-services", version.ref = "services"}
+

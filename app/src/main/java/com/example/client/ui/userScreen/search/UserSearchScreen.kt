@@ -39,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -81,7 +80,7 @@ fun UserSearchScreen(
         uiState = uiState,
         onSearchTextChanged = { viewModel.handleEvent(UserSearchEvent.UpdateSearchText(it)) },
         onUserClick = { user ->
-            viewModel.handleEvent(UserSearchEvent.UserSelected(user.username))
+            viewModel.handleEvent(UserSearchEvent.UserSelected(user.email))
             viewModel.handleEvent(UserSearchEvent.UserClicked(user))
         },
         onUserDelete = { viewModel.handleEvent(UserSearchEvent.OnDeleteUser(it)) },
@@ -119,7 +118,7 @@ fun UserSearchScreenContent(
                     .padding(horizontal = 16.dp, vertical = 10.dp)
                     .height(56.dp)
                     .focusRequester(focusRequester),
-                placeholder = { Text("Buscar usuarios...") },
+                placeholder = { Text("Search users...") },
                 singleLine = true,
                 leadingIcon = {
                     Icon(
@@ -165,14 +164,14 @@ fun UserSearchScreenContent(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "No hay búsquedas recientes",
+                            text = "There are no recent users",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.95f)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text =
-                                "Cuando busques o selecciones usuarios aparecerán aquí.",
+                                "When you search for users, they will appear here.",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
@@ -199,13 +198,13 @@ fun UserSearchScreenContent(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         Text(
-                            text = "No hemos encontrado ningún usuario",
+                            text = "No users found",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.95f)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Intenta buscar con otro nombre o revisa la ortografía.",
+                            text = "Try to find with a different name or check your spelling.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
                             textAlign = TextAlign.Center
@@ -289,24 +288,6 @@ fun UserCard(
                     color = textColor,
                     fontWeight = FontWeight.Medium
                 )
-
-                // Solo si es premium, muestra el badge
-                if (user.rol == "PREMIUM") {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(Color(0xFF4CAF50))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "PREMIUM",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1
-                        )
-                    }
-                }
             }
 
             // Icono de eliminar (solo si tiene callback)
@@ -352,9 +333,9 @@ class UserSearchStateProvider : PreviewParameterProvider<UserSearchState> {
         // Estado: con usuarios encontrados
         UserSearchState(
             users = listOf(
-                UserDTO(username = "alice", rol = "PREMIUM"),
-                UserDTO(username = "bob", rol = "FREE"),
-                UserDTO(username = "charlie", rol = "PREMIUM")
+                UserDTO(username = "alice", ),
+                UserDTO(username = "bob",) ,
+                UserDTO(username = "charlie",)
             ),
             isLoading = false,
             searchText = "a",
@@ -374,9 +355,9 @@ class UserSearchStateProvider : PreviewParameterProvider<UserSearchState> {
             showEmptyState = true,
         ),UserSearchState(
             users = listOf(
-                UserDTO(username = "alice", rol = "PREMIUM"),
-                UserDTO(username = "bob", rol = "FREE"),
-                UserDTO(username = "charlie", rol = "PREMIUM")
+                UserDTO(username = "alice",),
+                UserDTO(username = "bob", ),
+                UserDTO(username = "charlie", )
             ),
             isLoading = false,
             searchText = "",

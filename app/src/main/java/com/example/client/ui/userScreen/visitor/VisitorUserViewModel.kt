@@ -3,13 +3,22 @@ package com.example.client.ui.userScreen.visitor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.domain.usecases.follow.*
-import com.example.client.domain.usecases.note.*
-import com.example.client.domain.usecases.social.*
+import com.example.client.di.IoDispatcher
+import com.example.client.domain.usecases.follow.FollowUserUseCase
+import com.example.client.domain.usecases.follow.GetFollowersUseCase
+import com.example.client.domain.usecases.follow.GetFollowingUseCase
+import com.example.client.domain.usecases.follow.IsFollowingUseCase
+import com.example.client.domain.usecases.follow.UnfollowUserUseCase
+import com.example.client.domain.usecases.note.GetUserNotesUseCase
+import com.example.client.domain.usecases.social.DelFavNoteUseCase
+import com.example.client.domain.usecases.social.DelLikeNoteUseCase
+import com.example.client.domain.usecases.social.FavNoteUseCase
+import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.domain.usecases.user.GetUserInfoUseCase
-import com.example.client.domain.usecases.user.GetUserUseCase
+import com.example.client.domain.usecases.user.images.LoadProfileImageUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,6 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class VisitorUserViewModel @Inject constructor(
     private val followUserUseCase: FollowUserUseCase,
+    private val getFollowersUseCase: GetFollowersUseCase,
+    private val getFollowingUseCase: GetFollowingUseCase,
     private val unfollowUserUseCase: UnfollowUserUseCase,
     private val isFollowingUseCase: IsFollowingUseCase,
     private val getUserNotesUseCase: GetUserNotesUseCase,
@@ -27,6 +38,8 @@ class VisitorUserViewModel @Inject constructor(
     private val likeNoteUseCase: LikeNoteUseCase,
     private val delLikeNoteUseCase: DelLikeNoteUseCase,
     private val delFavNoteUseCase: DelFavNoteUseCase,
+    private val loadProfileImageUseCase: LoadProfileImageUseCase,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VisitorUserState())
@@ -43,6 +56,33 @@ class VisitorUserViewModel @Inject constructor(
             is VisitorUserEvent.DelLikeNote -> delLikedNote(event.noteId)
             is VisitorUserEvent.LoadIsFollowing -> loadIsFollowing(event.username)
             is VisitorUserEvent.AvisoVisto -> avisoVisto()
+            is VisitorUserEvent.GetFollowers -> getFollowers(event.username)
+            is VisitorUserEvent.GetFollowing -> getFollowing(event.username)
+            is VisitorUserEvent.SelectedNote -> selectNote(event.noteId)
+        }
+    }
+
+    private fun getFollowers(username: String, showLoading: Boolean = true) {
+        viewModelScope.launch {
+            if (showLoading) {
+                _uiState.update { it.copy(isLoading = true) }
+            }
+            when (val result = getFollowersUseCase(username)) {
+                is NetworkResult.Success -> _uiState.update { it.copy(followers = result.data, isLoading = false) }
+                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Loading -> if (showLoading) _uiState.update { it.copy(isLoading = true) }
+            }
+        }
+    }
+
+    private fun getFollowing(username: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = getFollowingUseCase(username)) {
+                is NetworkResult.Success -> _uiState.update { it.copy(following = result.data, isLoading = false) }
+                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
+            }
         }
     }
 
@@ -136,12 +176,13 @@ class VisitorUserViewModel @Inject constructor(
             ) {
                 _uiState.update {
                     it.copy(
-                        user = userResult.data, // Ahora sí es un UserDTO
+                        user = userResult.data,
                         notes = notesResult.data,
                         isFollowing = isFollowingResult.data,
                         isLoading = false
                     )
                 }
+                loadUserProfileImage()
             } else {
                 _uiState.update {
                     it.copy(
@@ -153,11 +194,44 @@ class VisitorUserViewModel @Inject constructor(
         }
     }
 
+    private fun loadUserProfileImage() {
+        viewModelScope.launch (dispatcher){
+            _uiState.value.user?.let {
+                loadProfileImageUseCase.invoke(it.id).collect { result ->
+                    when (result) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+
+                        is NetworkResult.Success -> _uiState.update {
+                            it.copy(
+                                user = _uiState.value.user!!.copy(
+                                    profilePhoto = result.data
+                                ),
+                                isLoading = false
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun followUser(username: String) {
         viewModelScope.launch {
             when (val result = followUserUseCase(username)) {
                 is NetworkResult.Success -> {
                     _uiState.update { it.copy(isFollowing = true) }
+                    getFollowers(username, showLoading = false) // <-- Actualiza la lista de seguidores
                 }
                 is NetworkResult.Error -> {
                     _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message)) }
@@ -174,6 +248,7 @@ class VisitorUserViewModel @Inject constructor(
             when (val result = unfollowUserUseCase(username)) {
                 is NetworkResult.Success -> {
                     _uiState.update { it.copy(isFollowing = false) }
+                    getFollowers(username, showLoading = false) // <-- Actualiza la lista de seguidores
                 }
                 is NetworkResult.Error -> {
                     _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message)) }
@@ -184,6 +259,7 @@ class VisitorUserViewModel @Inject constructor(
             }
         }
     }
+
 
     private fun loadIsFollowing(username: String) {
         viewModelScope.launch {
@@ -198,6 +274,15 @@ class VisitorUserViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = true) }
                 }
             }
+        }
+    }
+
+    private fun selectNote(id: Int) {
+        _uiState.update {
+            it.copy(
+                selectedNoteId = id,
+                aviso = UiEvent.PopBackStack
+            )
         }
     }
 

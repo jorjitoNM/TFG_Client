@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.googleServices)
+    alias(libs.plugins.crashlytics)
 }
 
 android {
@@ -28,11 +30,13 @@ android {
     productFlavors {
         create("development") {
             dimension = "env"
-            buildConfigField("String", "API_URL", "\"http://192.168.0.63:8080/\"")
+            buildConfigField("String", "API_URL", "\"http://192.168.0.86:8080/\"")
+            buildConfigField("String","GOOGLE_PLACES_API_KEY","\"AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ\"")
         }
         create("production") {
             dimension = "env"
             buildConfigField("String", "API_URL", "\"https://informatica.iesquevedo.es/nomada/\"")
+            buildConfigField("String","GOOGLE_PLACES_API_KEY","\"AIzaSyDkxAbEuZkmyNA1wT1rKqT3L5pwJHUAEqQ\"")
         }
     }
 
@@ -81,7 +85,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
@@ -101,6 +104,7 @@ dependencies {
     implementation (libs.converter.scalars)
     implementation (libs.logging.interceptor)
 
+    //Coil
     implementation(libs.coil)
     implementation(libs.coil.compose)
 
@@ -116,7 +120,9 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.appcompat)
 
+
     implementation(libs.material)
+    implementation(libs.firebase.messaging.ktx)
 
 
     kapt(libs.hilt.compiler)
@@ -146,5 +152,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.auth)
 
+    //Coroutine
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
 }

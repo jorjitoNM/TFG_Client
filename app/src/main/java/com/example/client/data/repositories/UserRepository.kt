@@ -2,6 +2,7 @@ package com.example.client.data.repositories
 
 import com.example.client.common.NetworkResult
 import com.example.client.data.remote.datasource.UserRemoteDataSource
+import com.example.client.data.remote.service.UserService
 import com.example.client.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -9,7 +10,7 @@ import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
-    private val userRemoteDataSource: UserRemoteDataSource
+    private val userRemoteDataSource: UserRemoteDataSource,
 ) {
     suspend fun getUser() = withContext(dispatcher) {
         try {
@@ -58,5 +59,8 @@ class UserRepository @Inject constructor(
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
+
+    suspend fun getFirebaseId(): NetworkResult<UserService.FirebaseIdResponse> =
+        userRemoteDataSource.getFirebaseId()
 
 }

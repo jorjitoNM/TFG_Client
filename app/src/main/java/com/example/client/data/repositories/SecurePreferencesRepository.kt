@@ -17,8 +17,8 @@ class SecurePreferencesRepository @Inject constructor(
         private val ENCRYPTED_CREDENTIALS = stringPreferencesKey("encrypted_credentials_marker")
     }
 
-    suspend fun saveCredentials(username: String, password: String) {
-        val combined = "$username:$password"
+    suspend fun saveCredentials(email: String, password: String) {
+        val combined = "$email:$password"
         cryptoHelper.encryptAndSaveData(combined)
         dataStore.edit { preferences ->
             preferences[ENCRYPTED_CREDENTIALS] = "present"

@@ -4,5 +4,5 @@ import com.example.client.data.repositories.GooglePlacesRepository
 import javax.inject.Inject
 
 class GetPlaceDetailsUseCase @Inject constructor(private val googlePlacesRepository: GooglePlacesRepository) {
-    suspend operator fun invoke(placeId: String, apiKey: String) = googlePlacesRepository.getPlacesDetails(placeId, apiKey)
+    suspend operator fun invoke(placeId: String) = googlePlacesRepository.getPlacesDetails(placeId)
 }
