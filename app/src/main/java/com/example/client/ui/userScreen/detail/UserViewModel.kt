@@ -1,14 +1,11 @@
 package com.example.client.ui.userScreen.detail
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.datastore.core.DataStore
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.data.repositories.PreferencesKeys
-import com.example.client.di.IoDispatcher
 import com.example.client.data.model.UserDTO
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.usecases.follow.GetMyFollowersUseCase
 import com.example.client.domain.usecases.follow.GetMyFollowingUseCase
 import com.example.client.domain.usecases.note.GetMyNoteUseCase
@@ -29,10 +26,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.prefs.Preferences
 import javax.inject.Inject
 
 @HiltViewModel

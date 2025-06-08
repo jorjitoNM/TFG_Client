@@ -46,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.client.R
 import com.example.client.data.model.NoteDTO
@@ -102,6 +101,7 @@ fun UserScreen(
                 onNavigateToNoteDetail(event.noteId)
                 viewModel.handleEvent(UserEvent.NavigationConsumed)
             }
+
             is DetailNavigationEvent.NavigateToNormalNoteDetail -> {
                 onNavigateToDetailObservable(event.noteId)
                 viewModel.handleEvent(UserEvent.NavigationConsumed)
@@ -136,7 +136,13 @@ fun UserScreen(
                     selectedTab = tab
                     viewModel.handleEvent(UserEvent.SelectTab(tab))
                 },
-                onProfileImageSelected = { imageUri -> viewModel.handleEvent(UserEvent.SaveProfileImage(imageUri)) },
+                onProfileImageSelected = { imageUri ->
+                    viewModel.handleEvent(
+                        UserEvent.SaveProfileImage(
+                            imageUri
+                        )
+                    )
+                },
                 onFavClick = { noteId ->
                     val note = uiState.notes.find { it.id == noteId }
                     note?.let {
@@ -163,7 +169,9 @@ fun UserScreen(
                 },
                 listState = currentListState,
                 favorites = uiState.favorites,
-                likes = uiState.likes
+                likes = uiState.likes,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
             )
         }
     }
@@ -187,7 +195,9 @@ fun ThemeToggleSwitch(
                 .size(24.dp)
                 .clickable { onToggle(false) }
                 .alpha(if (!isDarkTheme) 1f else 0.5f),
-            tint = if (!isDarkTheme) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+            tint = if (!isDarkTheme) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
+                alpha = 0.5f
+            )
         )
 
         Icon(
@@ -197,7 +207,9 @@ fun ThemeToggleSwitch(
                 .size(24.dp)
                 .clickable { onToggle(true) }
                 .alpha(if (isDarkTheme) 1f else 0.5f),
-            tint = if (isDarkTheme) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+            tint = if (isDarkTheme) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground.copy(
+                alpha = 0.5f
+            )
         )
     }
 }
@@ -230,54 +242,55 @@ fun UserContent(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri -> if (uri != null) onProfileImageSelected(uri) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Surface(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            shadowElevation = 8.dp,
-            color = MaterialTheme.colorScheme.surface
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Column(
+            Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                shadowElevation = 8.dp,
+                color = MaterialTheme.colorScheme.surface
             ) {
-                Box(
+                Column(
                     modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .clickable(onClick = {
-                            pickMedia.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        }),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (user.profilePhoto != null) {
-                        AsyncImage(
-                            model = user.profilePhoto,
-                            contentDescription = "Foto de perfil",
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Foto de perfil",
-                            modifier = Modifier.size(110.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .clickable(onClick = {
+                                pickMedia.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            }),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (user.profilePhoto != null) {
+                            AsyncImage(
+                                model = user.profilePhoto,
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier.size(110.dp),
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
                     }
-                }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -312,17 +325,29 @@ fun UserContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-        NoteList(
-            notes = filteredNotes,
-            onNoteClick = onNoteClick,
-            onFavClick = onFavClick,
-            onLikeClick = onLikeClick,
-            listState = listState
+            NoteList(
+                notes = filteredNotes,
+                onNoteClick = onNoteClick,
+                onFavClick = onFavClick,
+                onLikeClick = onLikeClick,
+                listState = listState
+            )
+
+        }
+        ThemeToggleSwitch(
+            isDarkTheme = isDarkTheme,
+            onToggle = onToggleTheme,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = CircleShape
+                )
+                .padding(8.dp)
         )
     }
 }
-
-
 
 
 @Composable
@@ -394,7 +419,6 @@ fun TabButton(
         )
     }
 }
-
 
 
 @Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
