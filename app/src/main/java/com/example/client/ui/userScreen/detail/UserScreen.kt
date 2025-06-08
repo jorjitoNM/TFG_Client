@@ -56,14 +56,14 @@ fun UserScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Tab y scroll locales y persistentes
     var selectedTab by rememberSaveable { mutableStateOf(UserTab.NOTES) }
 
     val notesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
     val favoritesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
     val likesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
 
-    // Selecciona el estado de scroll correcto según la pestaña activa
-    val currentListState = when (uiState.selectedTab) {
+    val currentListState = when (selectedTab) {
         UserTab.NOTES -> notesListState
         UserTab.FAVORITES -> favoritesListState
         UserTab.LIKES -> likesListState
@@ -103,7 +103,12 @@ fun UserScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (uiState.isLoading) {
+        val isDataReady = !uiState.isLoading &&
+                uiState.notes.isNotEmpty() &&
+                uiState.favorites.isNotEmpty() &&
+                uiState.likes.isNotEmpty()
+
+        if (!isDataReady) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -142,7 +147,9 @@ fun UserScreen(
                     val isMyNote = selectedTab == UserTab.NOTES
                     viewModel.handleEvent(UserEvent.SelectedNote(noteId, isMyNote))
                 },
-                listState = currentListState
+                listState = currentListState,
+                favorites = uiState.favorites,
+                likes = uiState.likes
             )
         }
     }
@@ -155,12 +162,21 @@ fun UserContent(
     followers: List<UserDTO>,
     following: List<UserDTO>,
     selectedTab: UserTab,
+    favorites: List<NoteDTO>,
+    likes: List<NoteDTO>,
     onNoteClick: (Int) -> Unit,
     onTabSelected: (UserTab) -> Unit,
     onFavClick: (Int) -> Unit,
     onLikeClick: (Int) -> Unit,
-    listState: LazyListState // <-- Scroll correcto
+    listState: LazyListState
 ) {
+    // FILTRA LAS NOTAS SEGÚN EL TAB
+    val filteredNotes = when (selectedTab) {
+        UserTab.NOTES -> notes
+        UserTab.FAVORITES -> favorites
+        UserTab.LIKES -> likes
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -229,7 +245,7 @@ fun UserContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         NoteList(
-            notes = notes,
+            notes = filteredNotes,
             onNoteClick = onNoteClick,
             onFavClick = onFavClick,
             onLikeClick = onLikeClick,
@@ -277,6 +293,7 @@ fun TabSelector(
         }
     }
 }
+
 
 @Composable
 fun TabButton(
@@ -337,6 +354,8 @@ fun Preview() {
         followers = emptyList(),
         following = emptyList(),
         onNoteClick = {},
-listState = rememberLazyListState()
+listState = rememberLazyListState(),
+        likes = emptyList(),
+        favorites = emptyList()
     )
 }

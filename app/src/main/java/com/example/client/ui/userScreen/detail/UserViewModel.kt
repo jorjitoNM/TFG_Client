@@ -3,6 +3,7 @@ package com.example.client.ui.userScreen.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.model.UserDTO
 import com.example.client.domain.usecases.follow.GetMyFollowersUseCase
 import com.example.client.domain.usecases.follow.GetMyFollowingUseCase
 import com.example.client.domain.usecases.note.GetMyNoteUseCase
@@ -16,6 +17,7 @@ import com.example.client.domain.usecases.user.GetUserUseCase
 import com.example.client.ui.common.UiEvent
 import com.example.client.ui.userScreen.DetailNavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,15 +44,10 @@ class UserViewModel @Inject constructor(
 
     fun handleEvent(event: UserEvent) {
         when (event) {
-            is UserEvent.LoadUser -> loadUser()
+            is UserEvent.LoadUser -> loadAllTabs()
             is UserEvent.AvisoVisto -> avisoVisto()
             is UserEvent.SelectTab -> {
                 _uiState.value = _uiState.value.copy(selectedTab = event.tab)
-                when (event.tab) {
-                    UserTab.NOTES -> getMyNotes()
-                    UserTab.FAVORITES -> getSavedNotes()
-                    UserTab.LIKES -> getLikedNotes()
-                }
             }
            is  UserEvent.GetMyNote -> getMyNotes()
             is UserEvent.DelFavNote -> delSavedNote(event.noteId)
@@ -345,6 +342,37 @@ class UserViewModel @Inject constructor(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun loadAllTabs() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val userDeferred = async { getUserUseCase() }
+            val notesDeferred = async { getMyNote() }
+            val favoritesDeferred = async { getNoteSavedUseCase() }
+            val likesDeferred = async { getLikedNoteUseCase() }
+            val followersDeferred = async { getMyFollowersUseCase() }
+            val followingDeferred = async { getMyFollowingsUseCase() }
+
+            val userResult = userDeferred.await()
+            val notesResult = notesDeferred.await()
+            val favoritesResult = favoritesDeferred.await()
+            val likesResult = likesDeferred.await()
+            val followersResult = followersDeferred.await()
+            val followingResult = followingDeferred.await()
+
+            _uiState.update {
+                it.copy(
+                    user = (userResult as? NetworkResult.Success)?.data ?: UserDTO(),
+                    notes = (notesResult as? NetworkResult.Success)?.data ?: emptyList(),
+                    favorites = (favoritesResult as? NetworkResult.Success)?.data ?: emptyList(),
+                    likes = (likesResult as? NetworkResult.Success)?.data ?: emptyList(),
+                    followers = (followersResult as? NetworkResult.Success)?.data ?: emptyList(),
+                    following = (followingResult as? NetworkResult.Success)?.data ?: emptyList(),
+                    isLoading = false
+                )
             }
         }
     }

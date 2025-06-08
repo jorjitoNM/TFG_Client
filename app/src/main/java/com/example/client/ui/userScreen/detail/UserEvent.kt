@@ -1,7 +1,6 @@
 package com.example.client.ui.userScreen.detail
 
 sealed class UserEvent {
-    data object LoadUser : UserEvent()
     data object AvisoVisto : UserEvent()
     data class SelectTab(val tab: UserTab) : UserEvent()
     data class LikeNote(val noteId: Int) : UserEvent()
@@ -14,5 +13,6 @@ sealed class UserEvent {
     data class SelectedNote(val noteId: Int, val isMyNote: Boolean) : UserEvent()
     data object NavigationConsumed : UserEvent()
     data class SaveScrollPosition(val tab: UserTab, val index: Int, val offset: Int) : UserEvent()
+    data object LoadUser : UserEvent()
 
 }

@@ -12,7 +12,9 @@ data class UserState(
     val selectedTab: UserTab = UserTab.NOTES,
     val notes: List<NoteDTO> = emptyList(),
     val followers: List<UserDTO> = emptyList(),
-    val following: List<UserDTO> = emptyList(),
+    val following: List<UserDTO> = emptyList(), // Para "Notes"
+    val favorites: List<NoteDTO> = emptyList(),    // Para "Favorites"
+    val likes: List<NoteDTO> = emptyList(),
     val selectedNoteId : Int = 0,
     val navigationEvent: DetailNavigationEvent = DetailNavigationEvent.None,
     val notesScrollIndex: Int = 0,
