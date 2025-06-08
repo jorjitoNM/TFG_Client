@@ -224,7 +224,7 @@ fun FilterHeader(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Filtros",
+            text = "Filters",
             style = MaterialTheme.typography.labelMedium,
             color = textColor
         )
@@ -281,7 +281,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Ascendente",
+                        text = "Ascending",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -309,7 +309,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Descendente",
+                        text = "Descending",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -337,7 +337,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Orden cronológico",
+                        text = "Chronological",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -362,7 +362,7 @@ fun FilterMenuOverlay(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Menu,
-                            contentDescription = "Filtrar por $noteType",
+                            contentDescription = "Filtering by $noteType",
                             tint = iconTint
                         )
                         Text(
@@ -389,7 +389,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Limpiar filtro",
+                        text = "Clean filter",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -408,7 +408,7 @@ fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text("Buscar notas...") },
+        placeholder = { Text("Search notes...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true,
         shape = RoundedCornerShape(12.dp),
