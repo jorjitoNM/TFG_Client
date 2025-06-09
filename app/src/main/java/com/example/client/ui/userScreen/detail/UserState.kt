@@ -14,8 +14,8 @@ data class UserState(
     val notes: List<NoteDTO> = emptyList(),
     val profileImageUri: Uri? = null,
     val followers: List<UserDTO> = emptyList(),
-    val following: List<UserDTO> = emptyList(), // Para "Notes"
-    val favorites: List<NoteDTO> = emptyList(),    // Para "Favorites"
+    val following: List<UserDTO> = emptyList(),
+    val favorites: List<NoteDTO> = emptyList(),
     val likes: List<NoteDTO> = emptyList(),
     val selectedNoteId : Int = 0,
     val navigationEvent: DetailNavigationEvent = DetailNavigationEvent.None,
@@ -25,7 +25,7 @@ data class UserState(
     val favoritesScrollOffset: Int = 0,
     val likesScrollIndex: Int = 0,
     val likesScrollOffset: Int = 0,
-    val isLoadingImage: Boolean = false // <-- Nuevo estado para la imagen
+    val isLoadingImage: Boolean = false
 
 )
 

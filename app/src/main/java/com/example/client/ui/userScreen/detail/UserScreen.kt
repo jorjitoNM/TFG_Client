@@ -44,7 +44,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
@@ -63,7 +62,6 @@ fun UserScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Tab y scroll locales y persistentes
     var selectedTab by rememberSaveable { mutableStateOf(UserTab.NOTES) }
 
     val notesListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState() }
@@ -97,6 +95,7 @@ fun UserScreen(
                 onNavigateToNoteDetail(event.noteId)
                 viewModel.handleEvent(UserEvent.NavigationConsumed)
             }
+
             is DetailNavigationEvent.NavigateToNormalNoteDetail -> {
                 onNavigateToDetailObservable(event.noteId)
                 viewModel.handleEvent(UserEvent.NavigationConsumed)
@@ -112,13 +111,14 @@ fun UserScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        val isDataReady = !uiState.isLoading && !uiState.isLoadingImage // <-- Ambas cargas
+        val isDataReady = !uiState.isLoading && !uiState.isLoadingImage
 
         if (!isDataReady) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
+
             UserContent(
                 notes = uiState.notes,
                 user = uiState.user,
@@ -129,9 +129,19 @@ fun UserScreen(
                     selectedTab = tab
                     viewModel.handleEvent(UserEvent.SelectTab(tab))
                 },
-                onProfileImageSelected = { imageUri -> viewModel.handleEvent(UserEvent.SaveProfileImage(imageUri)) },
+                onProfileImageSelected = { imageUri ->
+                    viewModel.handleEvent(
+                        UserEvent.SaveProfileImage(
+                            imageUri
+                        )
+                    )
+                },
                 onFavClick = { noteId ->
-                    val note = uiState.notes.find { it.id == noteId }
+                    val note = when (selectedTab) {
+                        UserTab.NOTES -> uiState.notes.find { it.id == noteId }
+                        UserTab.FAVORITES -> uiState.favorites.find { it.id == noteId }
+                        UserTab.LIKES -> uiState.likes.find { it.id == noteId }
+                    }
                     note?.let {
                         if (it.saved) {
                             viewModel.handleEvent(UserEvent.DelFavNote(noteId))
@@ -141,7 +151,11 @@ fun UserScreen(
                     }
                 },
                 onLikeClick = { noteId ->
-                    val note = uiState.notes.find { it.id == noteId }
+                    val note = when (selectedTab) {
+                        UserTab.NOTES -> uiState.notes.find { it.id == noteId }
+                        UserTab.FAVORITES -> uiState.favorites.find { it.id == noteId }
+                        UserTab.LIKES -> uiState.likes.find { it.id == noteId }
+                    }
                     note?.let {
                         if (it.liked) {
                             viewModel.handleEvent(UserEvent.DelLikeNote(noteId))
@@ -252,7 +266,7 @@ fun UserContent(
                         .padding(start = 45.dp, end = 32.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    UserStat(number = user.notes.size ?: 0, label = "Posts")
+                    UserStat(number = user.notes.size, label = "Posts")
                     Spacer(Modifier.width(32.dp))
                     UserStat(number = followers.size, label = "Followers")
                     Spacer(Modifier.width(32.dp))
@@ -281,8 +295,6 @@ fun UserContent(
         )
     }
 }
-
-
 
 
 @Composable
@@ -356,7 +368,6 @@ fun TabButton(
 }
 
 
-
 @Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
 @Composable
 fun Preview() {
@@ -387,5 +398,5 @@ fun Preview() {
         likes = emptyList(),
         favorites = emptyList(),
 
-    )
+        )
 }

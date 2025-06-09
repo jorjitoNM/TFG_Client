@@ -17,14 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
@@ -73,6 +74,7 @@ fun NoteListScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
     var isFilterExpanded by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         viewModel.handleEvent(NoteListEvent.GetNotes)
@@ -127,7 +129,8 @@ fun NoteListScreen(
                 },
 
                 isFilterExpanded = isFilterExpanded,
-                onFilterExpandToggle = { isFilterExpanded = !isFilterExpanded }
+                onFilterExpandToggle = { isFilterExpanded = !isFilterExpanded },
+                listState = listState
             )
 
             if (isFilterExpanded) {
@@ -146,7 +149,8 @@ fun NoteListScreen(
                         } ?: viewModel.handleEvent(NoteListEvent.GetNotes)
                         isFilterExpanded = false
                     },
-                    onDismiss = { isFilterExpanded = false }
+                    onDismiss = { isFilterExpanded = false },
+                    isChronologicalAsc = state.isChronologicalAsc
                 )
             }
         }
@@ -163,6 +167,7 @@ fun NoteListContent(
     onLikeClick: (Int) -> Unit,
     isFilterExpanded: Boolean,
     onFilterExpandToggle: () -> Unit,
+    listState: LazyListState
 ) {
     val publicNotes = notes.filter { it.privacy == NotePrivacy.PUBLIC }
 
@@ -190,7 +195,8 @@ fun NoteListContent(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            state = listState,
         ) {
             items(filteredNotes) { note ->
                 NoteItem(
@@ -241,6 +247,7 @@ fun FilterMenuOverlay(
     onFilterSelected: (Boolean) -> Unit,
     onNoteTypeFilterSelected: (NoteType?) -> Unit,
     onChronologicalOrderSelected: () -> Unit,
+    isChronologicalAsc: Boolean,
     onDismiss: () -> Unit,
 ) {
     val iconTint = MaterialTheme.colorScheme.primary
@@ -333,13 +340,19 @@ fun FilterMenuOverlay(
                 ) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
-                        contentDescription = "Orden cronológico",
-                        tint = iconTint
+                        tint = iconTint,
+                        contentDescription = if (isChronologicalAsc) "Orden cronológico ascendente" else "Orden cronológico descendente"
                     )
+
                     Text(
                         text = "Chronological",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
+                    )
+                    Icon(
+                        imageVector = if (isChronologicalAsc) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+                        contentDescription = if (isChronologicalAsc) "Orden cronológico ascendente" else "Orden cronológico descendente",
+                        tint = iconTint
                     )
                 }
 
@@ -360,10 +373,10 @@ fun FilterMenuOverlay(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Filtering by $noteType",
-                            tint = iconTint
+                        Image(
+                            painter = painterResource(getNoteTypeIcon(noteType)),
+                            contentDescription = "Filtrar por ${noteType.name}",
+                            modifier = Modifier.size(30.dp)
                         )
                         Text(
                             text = noteType.name,
@@ -396,6 +409,18 @@ fun FilterMenuOverlay(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun getNoteTypeIcon(noteType: NoteType): Int {
+    return when (noteType) {
+        NoteType.CLASSIC -> R.drawable.ic_note_classic
+        NoteType.EVENT -> R.drawable.ic_note_event
+        NoteType.HISTORICAL -> R.drawable.ic_note_historical
+        NoteType.FOOD -> R.drawable.ic_note_food
+        NoteType.LANDSCAPE -> R.drawable.ic_note_landscape
+        NoteType.CULTURAL -> R.drawable.ic_note_cultural
     }
 }
 
@@ -573,7 +598,14 @@ fun Preview() {
         notes = listOf(
             NoteDTO(title = "Nota 1", content = "Contenido 1", rating = 10, saved = true),
             NoteDTO(title = "Nota 1", rating = 5),
-            NoteDTO(title = "Nota 1", content = "dadadadasdad", type = NoteType.EVENT, liked = true, start = "01/02/2023 02:00", end = "01/02/2023 19:00"),
+            NoteDTO(
+                title = "Nota 1",
+                content = "dadadadasdad",
+                type = NoteType.EVENT,
+                liked = true,
+                start = "01/02/2023 02:00",
+                end = "01/02/2023 19:00"
+            ),
             NoteDTO(title = "Nota 1"),
             NoteDTO(title = "Nota 1"),
             NoteDTO(title = "Nota 1")
@@ -585,5 +617,6 @@ fun Preview() {
         isFilterExpanded = false,
         onFilterExpandToggle = {},
         onLikeClick = {},
+        listState = rememberLazyListState()
     )
 }

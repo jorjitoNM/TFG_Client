@@ -4,8 +4,9 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
-import com.example.client.di.IoDispatcher
+import com.example.client.data.model.NoteDTO
 import com.example.client.data.model.UserDTO
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.usecases.follow.GetMyFollowersUseCase
 import com.example.client.domain.usecases.follow.GetMyFollowingUseCase
 import com.example.client.domain.usecases.note.GetMyNoteUseCase
@@ -57,7 +58,8 @@ class UserViewModel @Inject constructor(
             is UserEvent.SelectTab -> {
                 _uiState.value = _uiState.value.copy(selectedTab = event.tab)
             }
-            is  UserEvent.GetMyNote -> getMyNotes()
+
+            is UserEvent.GetMyNote -> getMyNotes()
             is UserEvent.DelFavNote -> delSavedNote(event.noteId)
             is UserEvent.DelLikeNote -> delLikedNote(event.noteId)
             is UserEvent.FavNote -> favNote(event.noteId)
@@ -65,17 +67,19 @@ class UserViewModel @Inject constructor(
             is UserEvent.GetFollowers -> getFollowers()
             is UserEvent.GetFollowing -> getFollowing()
             is UserEvent.NavigationConsumed -> clearNavigation()
-            is UserEvent.SaveScrollPosition ->  {
+            is UserEvent.SaveScrollPosition -> {
                 _uiState.update {
                     when (event.tab) {
                         UserTab.NOTES -> it.copy(
                             notesScrollIndex = event.index,
                             notesScrollOffset = event.offset
                         )
+
                         UserTab.FAVORITES -> it.copy(
                             favoritesScrollIndex = event.index,
                             favoritesScrollOffset = event.offset
                         )
+
                         UserTab.LIKES -> it.copy(
                             likesScrollIndex = event.index,
                             likesScrollOffset = event.offset
@@ -90,13 +94,25 @@ class UserViewModel @Inject constructor(
     }
 
 
-
     private fun getFollowers() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = getMyFollowersUseCase()) {
-                is NetworkResult.Success -> _uiState.update { it.copy(followers = result.data, isLoading = false) }
-                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Success -> _uiState.update {
+                    it.copy(
+                        followers = result.data,
+                        isLoading = false
+                    )
+                }
+
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(
+                            result.message
+                        ), isLoading = false
+                    )
+                }
+
                 is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
             }
         }
@@ -106,45 +122,26 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = getMyFollowingsUseCase()) {
-                is NetworkResult.Success -> _uiState.update { it.copy(following = result.data, isLoading = false) }
-                is NetworkResult.Error -> _uiState.update { it.copy(aviso = UiEvent.ShowSnackbar(result.message), isLoading = false) }
+                is NetworkResult.Success -> _uiState.update {
+                    it.copy(
+                        following = result.data,
+                        isLoading = false
+                    )
+                }
+
+                is NetworkResult.Error -> _uiState.update {
+                    it.copy(
+                        aviso = UiEvent.ShowSnackbar(
+                            result.message
+                        ), isLoading = false
+                    )
+                }
+
                 is NetworkResult.Loading -> _uiState.update { it.copy(isLoading = true) }
             }
         }
     }
 
-    private fun getLikedNotes() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            when (val result = getLikedNoteUseCase()) {
-                is NetworkResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            notes = result.data,
-                            isLoading = false
-                        )
-                    }
-                }
-
-                is NetworkResult.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            aviso = UiEvent.ShowSnackbar(result.message),
-                            isLoading = false
-                        )
-                    }
-                }
-
-                is NetworkResult.Loading -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true
-                        )
-                    }
-                }
-            }
-        }
-    }
 
     private fun delSavedNote(noteId: Int) {
         viewModelScope.launch {
@@ -163,20 +160,31 @@ class UserViewModel @Inject constructor(
                     )
                 }
 
-                is NetworkResult.Success -> _uiState.update {
-                    val updatedNotes = uiState.value.notes.map { note ->
-                        if (note.id == noteId) {
-                            note.copy(saved = false)
-                        } else {
-                            note
+                is NetworkResult.Success -> {
+                    _uiState.update { state ->
+                        val updatedNotes = state.notes.map { note ->
+                            if (note.id == noteId) note.copy(saved = false) else note
                         }
-                    }.filterNot { note ->
-                        note.id == noteId && uiState.value.selectedTab == UserTab.FAVORITES
+
+                        val updatedLikes = state.likes.map { note ->
+                            if (note.id == noteId) note.copy(saved = false) else note
+                        }
+
+                        val updatedFavorites = if (state.selectedTab == UserTab.FAVORITES) {
+                            state.favorites.filterNot { it.id == noteId }
+                        } else {
+                            state.favorites.map { note ->
+                                if (note.id == noteId) note.copy(saved = false) else note
+                            }
+                        }
+
+                        state.copy(
+                            isLoading = false,
+                            notes = updatedNotes,
+                            likes = updatedLikes,
+                            favorites = updatedFavorites
+                        )
                     }
-                    it.copy(
-                        isLoading = false,
-                        notes = updatedNotes
-                    )
                 }
             }
         }
@@ -200,19 +208,28 @@ class UserViewModel @Inject constructor(
                 }
 
                 is NetworkResult.Success -> {
-                    val updatedNotes = uiState.value.notes.map { note ->
-                        if (note.id == noteId) {
-                            note.copy(liked = false)
-                        } else {
-                            note
+                    _uiState.update { state ->
+                        val updatedNotes = state.notes.map { note ->
+                            if (note.id == noteId) note.copy(liked = false) else note
                         }
-                    }.filterNot { note ->
-                        note.id == noteId && uiState.value.selectedTab == UserTab.LIKES
-                    }
-                    _uiState.update {
-                        it.copy(
+
+                        val updatedFavorites = state.favorites.map { note ->
+                            if (note.id == noteId) note.copy(liked = false) else note
+                        }
+
+                        val updatedLikes = if (state.selectedTab == UserTab.LIKES) {
+                            state.likes.filterNot { it.id == noteId }
+                        } else {
+                            state.likes.map { note ->
+                                if (note.id == noteId) note.copy(liked = false) else note
+                            }
+                        }
+
+                        state.copy(
                             isLoading = false,
-                            notes = updatedNotes
+                            notes = updatedNotes,
+                            favorites = updatedFavorites,
+                            likes = updatedLikes
                         )
                     }
                 }
@@ -239,18 +256,21 @@ class UserViewModel @Inject constructor(
                     )
                 }
 
-                is NetworkResult.Success -> _uiState.update {
-                    val updatedNotes = uiState.value.notes.map { note ->
-                        if (note.id == noteId) {
-                            note.copy(saved = true)
-                        } else {
-                            note
+                is NetworkResult.Success -> {
+                    val updateSavedState: (List<NoteDTO>) -> List<NoteDTO> = { notes ->
+                        notes.map { note ->
+                            if (note.id == noteId) note.copy(saved = true) else note
                         }
                     }
-                    it.copy(
-                        isLoading = false,
-                        notes = updatedNotes
-                    )
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            notes = updateSavedState(it.notes),
+                            favorites = updateSavedState(it.favorites),
+                            likes = updateSavedState(it.likes)
+                        )
+                    }
                 }
             }
         }
@@ -262,14 +282,20 @@ class UserViewModel @Inject constructor(
 
             when (val result = likeNoteUseCase.invoke(noteId)) {
                 is NetworkResult.Success -> {
-                    val updatedNotes = uiState.value.notes.map { note ->
-                        if (note.id == noteId) {
-                            note.copy(liked = true)
-                        } else {
-                            note
+                    val updateLikedState: (List<NoteDTO>) -> List<NoteDTO> = { notes ->
+                        notes.map { note ->
+                            if (note.id == noteId) note.copy(liked = true) else note
                         }
                     }
-                    _uiState.update { it.copy(isLoading = false, notes = updatedNotes) }
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            notes = updateLikedState(it.notes),
+                            favorites = updateLikedState(it.favorites),
+                            likes = updateLikedState(it.likes)
+                        )
+                    }
                 }
 
                 is NetworkResult.Error -> {
@@ -294,71 +320,41 @@ class UserViewModel @Inject constructor(
 
     private fun saveProfileImage(imagesUri: Uri) {
         viewModelScope.launch(dispatcher) {
-            saveProfileImageUseCase.invoke(imagesUri,_uiState.value.user.id).collect { result ->
-                when (result) {
-                    is NetworkResult.Success -> {
-                        _uiState.update {
-                            it.copy(
-                                user = it.user.copy(
-                                    profilePhoto = result.data // <-- ¡Asegúrate de que es el campo correcto!
-                                ),
-                                isLoading = false
-                            )
+            saveProfileImageUseCase.invoke(imagesUri, _uiState.value.user.id)
+                .collect { result ->
+                    when (result) {
+                        is NetworkResult.Success -> {
+                            _uiState.update {
+                                it.copy(
+                                    user = it.user.copy(
+                                        profilePhoto = result.data
+                                    ),
+                                    isLoading = false
+                                )
+                            }
                         }
-                    }
 
-                    is NetworkResult.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                aviso = UiEvent.ShowSnackbar(result.message),
-                                isLoading = false
-                            )
+                        is NetworkResult.Error -> {
+                            _uiState.update {
+                                it.copy(
+                                    aviso = UiEvent.ShowSnackbar(result.message),
+                                    isLoading = false
+                                )
+                            }
                         }
-                    }
 
-                    is NetworkResult.Loading -> {
-                        _uiState.update {
-                            it.copy(
-                                isLoading = true
-                            )
+                        is NetworkResult.Loading -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = true
+                                )
+                            }
                         }
                     }
                 }
-            }
         }
     }
 
-
-
-
-    private fun loadUser() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            when (val result = getUserUseCase()) {
-                is NetworkResult.Success -> {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        user = result.data,
-                        selectedTab = UserTab.NOTES
-                    )
-                    loadUserProfileImage()
-                    getMyNotes()
-                }
-
-                is NetworkResult.Error -> {
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        aviso = UiEvent.ShowSnackbar(result.message),
-                        selectedTab = UserTab.NOTES
-                    )
-                }
-
-                is NetworkResult.Loading -> {
-                    _uiState.value = _uiState.value.copy(isLoading = true)
-                }
-            }
-        }
-    }
 
     private fun loadUserProfileImage() {
         viewModelScope.launch(dispatcher) {
@@ -374,6 +370,7 @@ class UserViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is NetworkResult.Error -> {
                         _uiState.update {
                             it.copy(
@@ -382,48 +379,13 @@ class UserViewModel @Inject constructor(
                             )
                         }
                     }
-                    is NetworkResult.Loading -> {
-                        // No necesitamos cambiar isLoadingImage aquí
-                    }
+
+                    is NetworkResult.Loading -> {}
                 }
             }
         }
     }
 
-
-    private fun getSavedNotes() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-
-            when (val result = getNoteSavedUseCase()) {
-                is NetworkResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            notes = result.data,
-                            isLoading = false
-                        )
-                    }
-                }
-
-                is NetworkResult.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            aviso = UiEvent.ShowSnackbar(result.message),
-                            isLoading = false
-                        )
-                    }
-                }
-
-                is NetworkResult.Loading -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = true
-                        )
-                    }
-                }
-            }
-        }
-    }
 
     private fun loadAllTabs() {
         viewModelScope.launch {
@@ -446,10 +408,13 @@ class UserViewModel @Inject constructor(
                 it.copy(
                     user = (userResult as? NetworkResult.Success)?.data ?: UserDTO(),
                     notes = (notesResult as? NetworkResult.Success)?.data ?: emptyList(),
-                    favorites = (favoritesResult as? NetworkResult.Success)?.data ?: emptyList(),
+                    favorites = (favoritesResult as? NetworkResult.Success)?.data
+                        ?: emptyList(),
                     likes = (likesResult as? NetworkResult.Success)?.data ?: emptyList(),
-                    followers = (followersResult as? NetworkResult.Success)?.data ?: emptyList(),
-                    following = (followingResult as? NetworkResult.Success)?.data ?: emptyList(),
+                    followers = (followersResult as? NetworkResult.Success)?.data
+                        ?: emptyList(),
+                    following = (followingResult as? NetworkResult.Success)?.data
+                        ?: emptyList(),
                     isLoading = false
                 )
             }

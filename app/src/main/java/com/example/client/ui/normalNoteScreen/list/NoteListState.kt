@@ -7,5 +7,7 @@ data class NoteListState(
     val notes: List<NoteDTO> = emptyList(),
     val isLoading: Boolean = false,
     val selectedNoteId: Int = 0,
-    val aviso: UiEvent? = null
+    val aviso: UiEvent? = null,
+    val isChronologicalSelected: Boolean = false,
+    val isChronologicalAsc: Boolean = true,
 )

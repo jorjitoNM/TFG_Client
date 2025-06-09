@@ -62,9 +62,9 @@ class NoteRepository @Inject constructor(
         }
 
     }
-    suspend fun orderByChronologicalOrder() = withContext(dispatcher) {
+    suspend fun orderByChronologicalOrder(asc: Boolean) = withContext(dispatcher) {
         try {
-            noteRemoteDataSource.orderByChronologicalOrder()
+            noteRemoteDataSource.orderByChronologicalOrder(asc)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())
         }

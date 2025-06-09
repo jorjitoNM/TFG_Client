@@ -42,7 +42,7 @@ interface NoteService {
     ): Response<List<NoteDTO>>
 
     @GET("notes/antiquity")
-    suspend fun orderByChronologicalOrder(): Response<List<NoteDTO>>
+    suspend fun orderByChronologicalOrder(@Query("ascending") asc: Boolean): Response<List<NoteDTO>>
 
     @DELETE("notes/{id}")
     suspend fun deleteNote(@Path("id") id: Int):Response<Unit>

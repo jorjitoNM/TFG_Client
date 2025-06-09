@@ -34,7 +34,7 @@ class NoteListViewModel @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val delLikeNoteUseCase: DelLikeNoteUseCase,
     private val delFavNoteUseCase: DelFavNoteUseCase,
-    private val orderByChronological : OrderNotesByChronologicalUseCase,
+    private val orderByChronological: OrderNotesByChronologicalUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteListState())
     val uiState = _uiState.asStateFlow()
@@ -205,10 +205,23 @@ class NoteListViewModel @Inject constructor(
     }
 
     private fun orderByChronological() {
+        _uiState.update { current ->
+            if (current.isChronologicalSelected) {
+                current.copy(isChronologicalAsc = !current.isChronologicalAsc)
+            } else {
+                current.copy(
+                    isChronologicalSelected = true,
+                    isChronologicalAsc = true
+                )
+            }
+        }
+
+        val asc = _uiState.value.isChronologicalAsc
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = orderByChronological.invoke()) {
+            when (val result = orderByChronological.invoke(asc)) {
                 is NetworkResult.Success -> {
                     _uiState.update {
                         it.copy(
@@ -238,6 +251,8 @@ class NoteListViewModel @Inject constructor(
         }
     }
 
+
+
     private fun searchNote(title: Any) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -249,6 +264,7 @@ class NoteListViewModel @Inject constructor(
                     )
 
                 }
+
                 is NetworkResult.Success -> {
                     val notes = result.data.toList()
                     _uiState.update { it.copy(notes = notes) }

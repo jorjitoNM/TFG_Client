@@ -23,7 +23,7 @@ class NoteRemoteDataSource @Inject constructor(private val noteService: NoteServ
 
     suspend fun filterNoteByType(noteType: NoteType) = safeApiCall { noteService.filterNoteByType(noteType) }
 
-    suspend fun orderByChronologicalOrder() = safeApiCall { noteService.orderByChronologicalOrder() }
+    suspend fun orderByChronologicalOrder(asc: Boolean) = safeApiCall { noteService.orderByChronologicalOrder(asc) }
 
     suspend fun addNote(note: NoteDTO) = safeApiCall { noteService.addNote(note) }
 

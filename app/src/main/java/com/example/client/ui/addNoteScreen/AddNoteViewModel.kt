@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.repositories.ImagesRepository
-import com.example.client.domain.usecases.AddNota
+import com.example.client.domain.usecases.note.AddNota
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
