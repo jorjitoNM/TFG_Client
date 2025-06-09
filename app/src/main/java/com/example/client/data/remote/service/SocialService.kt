@@ -10,15 +10,15 @@ import retrofit2.http.Query
 
 interface SocialService {
 
-    @POST("social/saveds")
+    @POST("social/saves")
     suspend fun favNote(
         @Query("noteId") noteId: Int
     ): Response<Unit>
 
-    @GET("notes/saveds")
+    @GET("notes/saves")
     suspend fun getNotesSaved(): Response<List<NoteDTO>>
 
-    @DELETE("notes/saveds")
+    @DELETE("notes/saves")
     suspend fun deleteSavedNote(
         @Query("noteId") noteId: Int
     ): Response<Void>

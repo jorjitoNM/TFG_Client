@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -223,7 +224,7 @@ fun FilterHeader(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Filtros",
+            text = "Filters",
             style = MaterialTheme.typography.labelMedium,
             color = textColor
         )
@@ -280,7 +281,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Ascendente",
+                        text = "Ascending",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -308,7 +309,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Descendente",
+                        text = "Descending",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -336,7 +337,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Orden cronológico",
+                        text = "Chronological",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -361,7 +362,7 @@ fun FilterMenuOverlay(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Menu,
-                            contentDescription = "Filtrar por $noteType",
+                            contentDescription = "Filtering by $noteType",
                             tint = iconTint
                         )
                         Text(
@@ -388,7 +389,7 @@ fun FilterMenuOverlay(
                         tint = iconTint
                     )
                     Text(
-                        text = "Limpiar filtro",
+                        text = "Clean filter",
                         style = MaterialTheme.typography.bodyMedium,
                         color = textColor
                     )
@@ -407,7 +408,7 @@ fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text("Buscar notas...") },
+        placeholder = { Text("Search notes...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         singleLine = true,
         shape = RoundedCornerShape(12.dp),
@@ -506,9 +507,9 @@ fun NoteItem(
                 NoteTypeBadge(type = note.type)
                 if (note.type == NoteType.EVENT) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalAlignment = Alignment.Start
                     ) {
                         Text(
                             text = "Start: ${note.start?.let { formatDateTime(it) }}",
@@ -519,6 +520,7 @@ fun NoteItem(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+
                 }
             }
 
@@ -564,18 +566,14 @@ fun NoteItem(
 }
 
 
-@Preview(
-    name = "Portrait Mode",
-    showBackground = true,
-    device = "spec:width=411dp,height=891dp"
-)
+@Preview(name = "Portrait Mode", showBackground = true, device = Devices.PHONE)
 @Composable
 fun Preview() {
     NoteListContent(
         notes = listOf(
             NoteDTO(title = "Nota 1", content = "Contenido 1", rating = 10, saved = true),
             NoteDTO(title = "Nota 1", rating = 5),
-            NoteDTO(title = "Nota 1", type = NoteType.EVENT, liked = true),
+            NoteDTO(title = "Nota 1", content = "dadadadasdad", type = NoteType.EVENT, liked = true, start = "01/02/2023 02:00", end = "01/02/2023 19:00"),
             NoteDTO(title = "Nota 1"),
             NoteDTO(title = "Nota 1"),
             NoteDTO(title = "Nota 1")

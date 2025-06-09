@@ -2,6 +2,9 @@ package com.example.client.ui.addNoteScreen
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -19,9 +22,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -54,6 +59,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
 import com.example.client.data.model.NoteDTO
 import com.example.client.domain.model.note.NotePrivacy
 import com.example.client.domain.model.note.NoteType
@@ -87,6 +93,14 @@ fun AddNoteScreen(
     val uiState by addNoteViewModel.uiState.collectAsStateWithLifecycle()
     val sharedLocation by sharedLocationViewModel.selectedLocation.collectAsState()
     val isDarkMode = isSystemInDarkTheme()
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris: List<Uri> ->
+        if (uris.isNotEmpty()) {
+            addNoteViewModel.handleEvent(AddNoteEvents.AddNoteImages(uris))
+        }
+    }
 
     // Actualiza la nota con la ubicación recibida del mapa
     LaunchedEffect(sharedLocation) {
@@ -127,8 +141,12 @@ fun AddNoteScreen(
             note = uiState.note,
             onEdit = { note -> addNoteViewModel.handleEvent(AddNoteEvents.EditNote(note)) },
             onAddNote = { addNoteViewModel.handleEvent(AddNoteEvents.AddNoteNote) },
-            isDarkMode = isDarkMode
-        )
+            isDarkMode = isDarkMode,
+            onAddImages = { imagePickerLauncher.launch("image/*") },
+            selectedImages = uiState.selectedImages,
+            onRemoveImage = { uri -> addNoteViewModel.handleEvent(AddNoteEvents.RemoveSelectedImage(uri)) }
+
+            )
     }
 }
 
@@ -136,10 +154,16 @@ fun AddNoteScreen(
 private fun AddNoteContent(
     modifier: Modifier = Modifier,
     note: NoteDTO,
+
     onEdit: (NoteDTO) -> Unit,
     onAddNote: () -> Unit,
-    isDarkMode: Boolean
-) {
+    isDarkMode: Boolean,
+    onAddImages: () -> Unit,
+    selectedImages: List<Uri>,
+    onRemoveImage: (Uri) -> Unit,
+
+
+    ) {
     var localNote by remember { mutableStateOf(note) }
     LaunchedEffect(note) {
         localNote = note
@@ -149,7 +173,6 @@ private fun AddNoteContent(
     val textColor = if (isDarkMode) Color(0xFFE0E0E0) else Color.Gray
     val inputTextColor = if (isDarkMode) Color.White else Color.Black
     val borderColor = if (isDarkMode) Color(0xFF3A3A3A) else Color.LightGray
-    val focusedBorderColor = if (isDarkMode) primaryColor else Color.Blue
 
     var datePickerForStart by remember { mutableStateOf(true) } // true = start, false = end
 
@@ -523,8 +546,9 @@ private fun AddNoteContent(
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
+                    // Botón para añadir fotos
                     OutlinedButton(
-                        onClick = { /* Handle photo selection */ },
+                        onClick = onAddImages,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -538,7 +562,52 @@ private fun AddNoteContent(
                             fontSize = 16.sp
                         )
                     }
+
+
+                    // Galería de imágenes seleccionadas (scroll horizontal)
+                    if (selectedImages.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(selectedImages) { uri ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color.LightGray.copy(alpha = 0.6f))
+                                ) {
+                                    androidx.compose.foundation.Image(
+                                        painter = rememberAsyncImagePainter(uri),
+                                        contentDescription = "Selected photo",
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    // Botón X para eliminar
+                                    IconButton(
+                                        onClick = { onRemoveImage(uri) },
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(24.dp)
+                                            .background(
+                                                Color.White.copy(alpha = 0.8f),
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove image",
+                                            tint = Color.Red,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 }
+
 
 
             }
@@ -546,6 +615,7 @@ private fun AddNoteContent(
         val isTitleValid = localNote.title.isNotBlank()
         val isDescriptionValid = localNote.content?.isNotBlank()
         val isRatingNotZero = localNote.rating != 0
+        val hasImages = selectedImages.isNotEmpty()
 
 // Valida que start y end no sean nulos ni vacíos
 
@@ -570,8 +640,7 @@ private fun AddNoteContent(
 
 
 
-        val isAddEnabled = isTitleValid && isDescriptionValid == true && areDatesValid && isRatingNotZero
-
+        val isAddEnabled = isTitleValid && isDescriptionValid == true && areDatesValid && isRatingNotZero && hasImages
 
 
         // Botón fijo en la parte inferior
@@ -623,8 +692,6 @@ private fun AddNoteContent(
                         if (startDate != null && !pickedDate.isBefore(startDate)) {
                             localNote = localNote.copy(end = pickedDate.atStartOfDay().toString())
                             onEdit(localNote)
-                        } else {
-                            // Mensaje de error si lo deseas
                         }
                     }
                     showDatePicker = false
@@ -806,16 +873,6 @@ fun NoteTypeTabs(
     }
 }
 
-fun formatDateForDisplay(dateString: String): String {
-    return try {
-        val date = LocalDate.parse(dateString)
-        date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-    } catch (e: Exception) {
-        dateString
-    }
-}
-
-
 
 
 
@@ -845,6 +902,9 @@ fun AddNoteScreenPreview() {
         ),
         onEdit = {},
         onAddNote = {},
-        isDarkMode = false
+        isDarkMode = false,
+        onAddImages = {},
+        selectedImages = emptyList(),
+        onRemoveImage = {},
     )
 }

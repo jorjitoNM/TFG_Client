@@ -25,6 +25,7 @@ abstract class BaseApiResponse {
                 } ?: NetworkResult.Error("${response.code()} ${response.message()}")
             }
         } catch (e: Exception) {
+            Timber.e(e,e.message)
             NetworkResult.Error(e.message ?: e.toString())
         }
     }
@@ -49,6 +50,7 @@ abstract class BaseApiResponse {
         return try {
             val errorBodyString = errorBody.string()
             val apiError = Gson().fromJson(errorBodyString, ApiError::class.java)
+            Timber.e(apiError.message)
             NetworkResult.Error(apiError.message)
         } catch (e: Exception) {
             NetworkResult.Error(e.message ?: e.toString())

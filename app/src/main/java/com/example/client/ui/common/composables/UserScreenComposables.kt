@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -55,10 +56,10 @@ import com.example.client.ui.theme.LandscapeDark
 import com.example.client.ui.theme.LandscapeLight
 
 @Composable
-fun UserStat(number: Int, label: String) {
+fun UserStat(number: Int, label: String, modifier: Modifier = Modifier) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 12.dp)
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = number.toString(),
@@ -67,7 +68,7 @@ fun UserStat(number: Int, label: String) {
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
@@ -79,10 +80,12 @@ fun NoteList(
     notes: List<NoteDTO>,
     onNoteClick: (Int) -> Unit,
     onFavClick: (Int) -> Unit,
-    onLikeClick: (Int) -> Unit
+    onLikeClick: (Int) -> Unit,
+    listState: LazyListState
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

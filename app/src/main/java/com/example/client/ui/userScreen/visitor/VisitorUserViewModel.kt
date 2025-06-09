@@ -3,6 +3,7 @@ package com.example.client.ui.userScreen.visitor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.usecases.follow.FollowUserUseCase
 import com.example.client.domain.usecases.follow.GetFollowersUseCase
 import com.example.client.domain.usecases.follow.GetFollowingUseCase
@@ -14,8 +15,10 @@ import com.example.client.domain.usecases.social.DelLikeNoteUseCase
 import com.example.client.domain.usecases.social.FavNoteUseCase
 import com.example.client.domain.usecases.social.LikeNoteUseCase
 import com.example.client.domain.usecases.user.GetUserInfoUseCase
+import com.example.client.domain.usecases.user.images.LoadProfileImageUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -35,6 +38,8 @@ class VisitorUserViewModel @Inject constructor(
     private val likeNoteUseCase: LikeNoteUseCase,
     private val delLikeNoteUseCase: DelLikeNoteUseCase,
     private val delFavNoteUseCase: DelFavNoteUseCase,
+    private val loadProfileImageUseCase: LoadProfileImageUseCase,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VisitorUserState())
@@ -171,18 +176,51 @@ class VisitorUserViewModel @Inject constructor(
             ) {
                 _uiState.update {
                     it.copy(
-                        user = userResult.data, // Ahora sí es un UserDTO
+                        user = userResult.data,
                         notes = notesResult.data,
                         isFollowing = isFollowingResult.data,
                         isLoading = false
                     )
                 }
+                loadUserProfileImage()
             } else {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         aviso = UiEvent.ShowSnackbar("Error cargando usuario")
                     )
+                }
+            }
+        }
+    }
+
+    private fun loadUserProfileImage() {
+        viewModelScope.launch (dispatcher){
+            _uiState.value.user?.let {
+                loadProfileImageUseCase.invoke(it.id).collect { result ->
+                    when (result) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+
+                        is NetworkResult.Success -> _uiState.update {
+                            it.copy(
+                                user = _uiState.value.user!!.copy(
+                                    profilePhoto = result.data
+                                ),
+                                isLoading = false
+                            )
+                        }
+                    }
                 }
             }
         }

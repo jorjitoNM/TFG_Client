@@ -1,20 +1,31 @@
 package com.example.client.ui.noteMap.list
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
+import com.example.client.data.model.NoteDTO
+import com.example.client.di.IoDispatcher
 import com.example.client.domain.model.note.NoteType
+import com.example.client.domain.usecases.map.LoadSelectedNoteImagesUseCase
 import com.example.client.domain.usecases.note.GetNoteSearchUseCase
 import com.example.client.domain.usecases.note.GetNotesUseCase
 import com.example.client.domain.usecases.note.OrderNoteByTypUseCase
 import com.example.client.ui.common.UiEvent
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -26,10 +37,13 @@ class NoteMapViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
     private val getNoteSearchUseCase: GetNoteSearchUseCase,
     private val orderNoteByTypUseCase: OrderNoteByTypUseCase,
-    private val application: Application
+    private val application: Application,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
+    private val loadSelectedNoteImagesUseCase: LoadSelectedNoteImagesUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteMapState())
     val uiState = _uiState.asStateFlow()
+    private var locationReceiver: BroadcastReceiver? = null
 
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(application)
@@ -39,6 +53,7 @@ class NoteMapViewModel @Inject constructor(
         when (event) {
             is NoteMapEvent.GetNotes -> getNotes()
             is NoteMapEvent.AvisoVisto -> avisoVisto()
+
             is NoteMapEvent.GetCurrentLocation -> getCurrentLocation()
             is NoteMapEvent.CheckLocationPermission -> checkLocationPermission()
             is NoteMapEvent.SearchNote -> searchNote(event.query)
@@ -49,8 +64,65 @@ class NoteMapViewModel @Inject constructor(
             is NoteMapEvent.NavigateToSearch -> {
                 _uiState.update { it.copy(aviso = UiEvent.PopBackStack) }
             }
-            is NoteMapEvent.SelectedNote -> selectNote(event.noteId)
 
+            is NoteMapEvent.SelectedNote -> selectNote(event.noteId)
+            is NoteMapEvent.GetSelectedNotesImages -> getSelectedNotesImages(event.selectedNotes)
+        }
+    }
+
+    private fun getSelectedNotesImages(selectedNotes : List<NoteDTO> ) {
+        viewModelScope.launch(dispatcher) {
+            loadSelectedNoteImagesUseCase.invoke(selectedNotes)
+                .collect { result ->
+                    when (result) {
+                        is NetworkResult.Error -> _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoading = false
+                            )
+                        }
+
+                        is NetworkResult.Loading -> _uiState.update {
+                            it.copy(
+                                isLoading = true
+                            )
+                        }
+
+                        is NetworkResult.Success -> parseImagesIntoNotes(result.data)
+                    }
+                }
+        }
+    }
+
+    private fun parseImagesIntoNotes (selectedNotesWithImages : List<NoteDTO>) {
+        val updatedNotes = ArrayList<NoteDTO>()
+        for (note : NoteDTO in _uiState.value.notes) {
+            if (selectedNotesWithImages.map { it.id }.contains(note.id))
+                selectedNotesWithImages.find { it.id == note.id }?.let { updatedNotes.add(it) }
+            else updatedNotes.add(note)
+        }
+        _uiState.update {
+            it.copy(
+                notes =  updatedNotes,
+                isLoading = false
+            )
+        }
+    }
+
+    fun registerLocationReceiver() {
+        val filter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
+        locationReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                checkLocationEnabled()
+            }
+        }
+        application.registerReceiver(locationReceiver, filter)
+    }
+
+    fun unregisterLocationReceiver() {
+        locationReceiver?.let {
+            application.unregisterReceiver(it)
+            locationReceiver = null
         }
     }
 
@@ -68,6 +140,7 @@ class NoteMapViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is NetworkResult.Error -> {
                         _uiState.update {
                             it.copy(
@@ -76,6 +149,7 @@ class NoteMapViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is NetworkResult.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
                     }
@@ -89,6 +163,7 @@ class NoteMapViewModel @Inject constructor(
                             it.copy(notes = result.data, selectedType = noteType, isLoading = false)
                         }
                     }
+
                     is NetworkResult.Error -> {
                         _uiState.update {
                             it.copy(
@@ -97,6 +172,7 @@ class NoteMapViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is NetworkResult.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
                     }
@@ -104,10 +180,6 @@ class NoteMapViewModel @Inject constructor(
             }
         }
     }
-
-
-
-
 
 
     private fun updateSearchText(text: String) {
@@ -131,6 +203,7 @@ class NoteMapViewModel @Inject constructor(
                         it.copy(notes = result.data, isLoading = false)
                     }
                 }
+
                 is NetworkResult.Error -> {
                     _uiState.update {
                         it.copy(
@@ -139,6 +212,7 @@ class NoteMapViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Loading -> {
                     _uiState.update { it.copy(isLoading = true) }
                 }
@@ -155,6 +229,7 @@ class NoteMapViewModel @Inject constructor(
                         it.copy(notes = result.data, isLoading = false)
                     }
                 }
+
                 is NetworkResult.Error -> {
                     _uiState.update {
                         it.copy(
@@ -163,6 +238,7 @@ class NoteMapViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is NetworkResult.Loading -> {
                     _uiState.update { it.copy(isLoading = true) }
                 }
@@ -172,9 +248,15 @@ class NoteMapViewModel @Inject constructor(
 
     private fun checkLocationPermission() {
         val hasPermission =
-            ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+            ActivityCompat.checkSelfPermission(
+                application,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) ==
                     PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                    ActivityCompat.checkSelfPermission(
+                        application,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) ==
                     PackageManager.PERMISSION_GRANTED
 
         _uiState.update { it.copy(hasLocationPermission = hasPermission) }
@@ -183,21 +265,41 @@ class NoteMapViewModel @Inject constructor(
     private fun getCurrentLocation() {
         viewModelScope.launch {
             if (
-                ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                ActivityCompat.checkSelfPermission(
+                    application,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                ) ==
                 PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(application, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                ActivityCompat.checkSelfPermission(
+                    application,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    location?.let {
-                        _uiState.update { state ->
-                            state.copy(currentLocation = location)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    fusedLocationClient.getCurrentLocation(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        null
+                    ).addOnSuccessListener { location ->
+                        location?.let {
+                            _uiState.update { state ->
+                                state.copy(currentLocation = location)
+                            }
+                        }
+                    }
+                } else {
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                        location?.let {
+                            _uiState.update { state ->
+                                state.copy(currentLocation = location)
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 
     private fun selectNote(id: Int) {
         _uiState.update {
@@ -206,6 +308,13 @@ class NoteMapViewModel @Inject constructor(
                 aviso = UiEvent.PopBackStack
             )
         }
+    }
+
+    fun checkLocationEnabled() {
+        val locationManager = application.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        _uiState.update { it.copy(isLocationEnabled = isEnabled) }
     }
 
     private fun avisoVisto() {

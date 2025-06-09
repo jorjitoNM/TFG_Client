@@ -18,7 +18,7 @@ data class NoteDTO(
     val type: NoteType = NoteType.CLASSIC,
     val start: String? = null,
     val end: String? = null,
-    val photos : List<Uri> = emptyList(),
+    var photos : List<Uri> = emptyList(),
     val saved : Boolean = false,
     val liked : Boolean = false
 )

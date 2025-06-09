@@ -17,5 +17,6 @@ data class NoteMapState(
     val cameraLatLng: LatLng? = null,
     val cameraZoom: Float? = null,
     val selectedType: NoteType? = null,
-    val noteSelectedId : Int = 0
+    val noteSelectedId : Int = 0,
+    val isLocationEnabled: Boolean = false
 )
