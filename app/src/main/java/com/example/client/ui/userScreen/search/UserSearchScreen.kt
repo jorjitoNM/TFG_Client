@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -50,6 +51,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.client.data.model.UserDTO
 import com.example.client.ui.common.UiEvent
 
@@ -268,12 +270,15 @@ fun UserCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Usuario",
-                    tint = textColor,
-                    modifier = Modifier.size(24.dp)
-                )
+                if (user.profilePhoto != null) {
+                    AsyncImage(
+                        model = user.profilePhoto,
+                        contentDescription = "Profile photo",
+                        modifier = Modifier.size(48.dp).clip(CircleShape)
+                    )
+                } else {
+                    Icon(Icons.Default.AccountCircle, tint = textColor, contentDescription = "Default avatar")
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))

@@ -30,23 +30,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.client.R
 
-@Composable
-fun NoteImages(modifier: Modifier = Modifier, photos: List<Uri>, onLoadImages: (List<Uri>) -> Unit, onDeleteImage : (Uri) -> Unit) {
-    LazyRow {
-        itemsIndexed(photos) { index, imageUrl ->
-            Box(modifier = modifier) {
-                NoteImageItem(
-                    modifier = modifier,
-                    index = index,
-                    imageUri = imageUrl,
-                    onDeleteImage = onDeleteImage
-                )
-            }
-        }
-        if (photos.size < 4)
-            item { AddImageButton(modifier = modifier, onLoadImages = onLoadImages) }
-    }
-}
+
+
 
 @Composable
 fun AddImageButton(modifier: Modifier = Modifier, onLoadImages : (List<Uri>) -> Unit) {
@@ -87,24 +72,6 @@ fun NoteImageItem(modifier: Modifier = Modifier, index: Int, imageUri: Uri, onDe
             contentScale = ContentScale.Crop
         )
 
-        IconButton(
-            onClick = { onDeleteImage(imageUri)
-            },
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = CircleShape
-                )
-                .size(24.dp)
-                .padding(4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Remove image",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+
     }
 }

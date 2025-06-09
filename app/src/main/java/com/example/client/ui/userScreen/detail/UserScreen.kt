@@ -112,10 +112,7 @@ fun UserScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        val isDataReady = !uiState.isLoading &&
-                uiState.notes.isNotEmpty() &&
-                uiState.favorites.isNotEmpty() &&
-                uiState.likes.isNotEmpty()
+        val isDataReady = !uiState.isLoading
 
         if (!isDataReady) {
             CircularProgressIndicator(

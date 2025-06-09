@@ -3,7 +3,6 @@ package com.example.client.ui.startScreen
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -101,14 +98,15 @@ fun AccessButtons(
                     .weight(0.1f)
                     .fillMaxSize()
             ) {}
-            Column(
+            Column (
                 modifier = Modifier
                     .weight(0.8f)
+                    .padding(bottom = 64.dp)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(modifier = Modifier.weight(0.33f)) {
+                Row {
                     AuthenticationActionButton(
                         onClick = { navigateToSignUp() },
                         ButtonColors(
@@ -119,7 +117,7 @@ fun AccessButtons(
                         ), stringResource(R.string.register)
                     )
                 }
-                Row(modifier = Modifier.weight(0.33f)) {
+                Row{
                     AuthenticationActionButton(
                         onClick = { navigateToLogin() },
                         ButtonColors(
@@ -129,15 +127,6 @@ fun AccessButtons(
                             disabledContainerColor = Color(0xFFCBD5E0)
                         ),
                         stringResource(R.string.login)
-                    )
-                }
-                Row(modifier = Modifier.weight(0.33f)) {
-                    ContinueWithGoogleButton(onClick = {}, ButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color(0xFFE2E8F0),
-                        disabledContentColor = Color(0xFFA0AEC0),
-                        disabledContainerColor = Color(0xFFCBD5E0)
-                    ), stringResource(R.string.continue_with_google)
                     )
                 }
             }
@@ -160,32 +149,6 @@ fun  AuthenticationActionButton(onClick: () -> Unit, buttonColors: ButtonColors,
         Text(text = text)
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ContinueWithGoogleButton (onClick: () -> Unit, buttonColors: ButtonColors, text: String) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = buttonColors,
-        border = BorderStroke(1.dp, Color(0xFF8490B2))
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Icon(
-                painter = painterResource(R.drawable.google_logo),
-                contentDescription = stringResource(R.string.google_logo),
-                modifier = Modifier
-                    .align(Alignment.CenterStart),
-                tint = null
-            )
-            Text(
-                text = text,
-                modifier = Modifier.align(Alignment.Center),
-            )
-        }
-    }
-}
-
 @Composable
 fun LogoAndSlogan(modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
