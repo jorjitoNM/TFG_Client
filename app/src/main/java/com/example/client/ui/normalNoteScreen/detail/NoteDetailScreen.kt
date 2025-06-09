@@ -279,6 +279,18 @@ fun NoteDetailContent(
                 ) {
                     CircularProgressIndicator(color = textColor)
                 }
+            } else if (photos.isEmpty()) {
+                Box(
+                    Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "This user hasn't set images yet.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = textColor.copy(alpha = 0.7f)
+                    )
+                }
             } else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),

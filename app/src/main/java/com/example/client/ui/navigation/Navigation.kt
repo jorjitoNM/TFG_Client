@@ -167,7 +167,7 @@ fun Navigation () {
 
             composable<MyNoteDetailDestination> { backStackEntry ->
                 val destination = backStackEntry.toRoute() as MyNoteDetailDestination
-                com.example.client.ui.userScreen.myNoteDetail.NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) })
+                com.example.client.ui.userScreen.myNoteDetail.NoteDetailScreen(noteId = destination.noteId, showSnackbar = { showSnackbar(it) }, onNavigateBack = { navController.navigateUp() })
 
             }
             composable<UserSearchDestination> {

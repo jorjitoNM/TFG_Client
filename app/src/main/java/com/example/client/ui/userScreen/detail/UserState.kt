@@ -25,6 +25,8 @@ data class UserState(
     val favoritesScrollOffset: Int = 0,
     val likesScrollIndex: Int = 0,
     val likesScrollOffset: Int = 0,
+    val isLoadingImage: Boolean = false // <-- Nuevo estado para la imagen
+
 )
 
 enum class UserTab { NOTES, FAVORITES, LIKES }

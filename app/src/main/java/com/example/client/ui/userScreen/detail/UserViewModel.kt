@@ -361,32 +361,35 @@ class UserViewModel @Inject constructor(
     }
 
     private fun loadUserProfileImage() {
-        viewModelScope.launch (dispatcher){
-            loadProfileImageUseCase.invoke(_uiState.value.user.id).collect {result ->
+        viewModelScope.launch(dispatcher) {
+            _uiState.update { it.copy(isLoadingImage = true) } // <-- Usar nuevo estado
+
+            loadProfileImageUseCase.invoke(_uiState.value.user.id).collect { result ->
                 when (result) {
+                    is NetworkResult.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                user = it.user.copy(profilePhoto = result.data),
+                                isLoadingImage = false // <-- Actualizar nuevo estado
+                            )
+                        }
+                    }
                     is NetworkResult.Error -> {
-
+                        _uiState.update {
+                            it.copy(
+                                aviso = UiEvent.ShowSnackbar(result.message),
+                                isLoadingImage = false
+                            )
+                        }
                     }
-
-
-                    is NetworkResult.Loading -> _uiState.update {
-                        it.copy(
-                            isLoading = true
-                        )
-                    }
-
-                    is NetworkResult.Success -> _uiState.update {
-                        it.copy(
-                            user = _uiState.value.user.copy(
-                                profilePhoto = result.data
-                            ),
-                            isLoading = false
-                        )
+                    is NetworkResult.Loading -> {
+                        // No necesitamos cambiar isLoadingImage aquí
                     }
                 }
             }
         }
     }
+
 
     private fun getSavedNotes() {
         viewModelScope.launch {

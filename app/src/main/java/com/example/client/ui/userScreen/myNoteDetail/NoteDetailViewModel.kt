@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.client.common.NetworkResult
 import com.example.client.data.repositories.ImagesRepository
 import com.example.client.domain.model.note.NotePrivacy
+import com.example.client.domain.usecases.note.DeleteNoteUseCase
 import com.example.client.domain.usecases.note.GetNoteUseCase
 import com.example.client.domain.usecases.note.RateNoteUseCase
 import com.example.client.domain.usecases.note.UpdateNoteUseCase
@@ -22,7 +23,9 @@ class NoteDetailViewModel @Inject constructor(
     private val getNoteUseCase: GetNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val rateNoteUseCase: RateNoteUseCase,
-    private val imagesRepository: ImagesRepository
+    private val imagesRepository: ImagesRepository,
+    private val deleteNoteUseCase: DeleteNoteUseCase // <-- Añadir aquí
+
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NoteDetailState())
     val uiState = _uiState.asStateFlow()
@@ -39,6 +42,35 @@ class NoteDetailViewModel @Inject constructor(
             is NoteDetailEvent.AvisoVisto -> avisoVisto()
             is NoteDetailEvent.SaveNoteImages -> saveNoteImages(event.imagesUris)
             is NoteDetailEvent.DeleteImage -> deleteImage(event.imageUri)
+            is NoteDetailEvent.DeleteNote -> deleteNote()
+        }
+    }
+
+    private fun deleteNote() {
+        val noteId = _uiState.value.note?.id ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            when (val result = deleteNoteUseCase(noteId)) {
+                is NetworkResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.PopBackStack,
+                            isLoading = false
+                        )
+                    }
+                }
+                is NetworkResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            aviso = UiEvent.ShowSnackbar(result.message),
+                            isLoading = false
+                        )
+                    }
+                }
+                is NetworkResult.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
+            }
         }
     }
 
