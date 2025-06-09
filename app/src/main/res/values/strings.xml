@@ -25,7 +25,7 @@
     <string name="dont_have_account">Don`t have an account yet?</string>
     <string name="navigate_back">Navigate back</string>
     <string name="login_with_fingerprint">Sign in with fingerprint</string>
-    <string name="failed_to_authenticate_with_firebase">We could not authenticate you woth Firebase, maybe because you dont have a google email, but you can still use the app</string>
+    <string name="failed_to_authenticate_with_firebase">Welcome to Nomada!!</string>
     <string name="error_loading_images">We could not retreive the images from this note, please, try again later</string>
     <string name="timeout_error">Oops, something went of, check you connection</string>
     <string name="timeout_list_error">Failed to list images: Timeout occurred</string>
@@ -38,5 +38,5 @@
     <string name="fb_storage_images_url">note_images</string>
     <string name="fb_storage_profile_images">profile_images</string>
     <string name="error_loading_profile_image">We could not load this profile image</string>
-    <string name="error_profile_image_not_found">Profile image not found</string>
+    <string name="error_profile_image_not_found">There is no profile image here</string>
 </resources>

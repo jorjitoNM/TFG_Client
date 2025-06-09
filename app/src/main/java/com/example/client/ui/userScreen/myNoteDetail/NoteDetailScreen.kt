@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -77,7 +78,8 @@ import com.example.client.ui.normalNoteScreen.detail.AddImageButton
 fun NoteDetailScreen(
     noteId: Int,
     showSnackbar: (String) -> Unit,
-    viewModel: NoteDetailViewModel = hiltViewModel()
+    viewModel: NoteDetailViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val isDarkMode = isSystemInDarkTheme()
@@ -97,7 +99,10 @@ fun NoteDetailScreen(
                     showSnackbar(it.message)
                     viewModel.handleEvent(NoteDetailEvent.AvisoVisto)
                 }
-                else -> {}
+                is UiEvent.PopBackStack -> {
+                    onNavigateBack()
+                    viewModel.handleEvent(NoteDetailEvent.AvisoVisto)
+                }
             }
         }
     }
@@ -148,6 +153,9 @@ fun NoteDetailContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
+
+
+
             if (state.isEditing) {
                 OutlinedTextField(
                     value = state.editedTitle,
@@ -205,6 +213,16 @@ fun NoteDetailContent(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Edit",
                         tint = iconTint
+                    )
+                }
+                IconButton(
+                    onClick = { onEvent(NoteDetailEvent.DeleteNote) },
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete, // <-- Icono de basura
+                        contentDescription = "Delete note",
+                        tint = Color.Red
                     )
                 }
             }
@@ -459,7 +477,7 @@ fun NoteDetailContent(
                 ) {
                     CircularProgressIndicator(color = textColor)
                 }
-            } else {
+            }  else {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
@@ -477,26 +495,6 @@ fun NoteDetailContent(
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(cardColor)
                             )
-                            // Solo muestra el botón de eliminar si está en modo edición
-                            if (state.isEditing) {
-                                IconButton(
-                                    onClick = { onEvent(NoteDetailEvent.DeleteImage(photos[idx])) },
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .background(
-                                            iconDeleteBg.copy(alpha = 0.8f),
-                                            shape = CircleShape
-                                        )
-                                        .padding(2.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Delete photo",
-                                        tint = iconDeleteTint,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
                         }
                     }
                     // Solo muestra el botón de agregar si está en modo edición y hay menos de 4 fotos

@@ -8,6 +8,11 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,7 +36,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
+@OptIn(ExperimentalMaterial3Api::class)
 @HiltViewModel
 class NoteMapViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
@@ -44,6 +49,31 @@ class NoteMapViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(NoteMapState())
     val uiState = _uiState.asStateFlow()
     private var locationReceiver: BroadcastReceiver? = null
+
+    private val _selectedNotes = mutableStateListOf<NoteDTO>()
+    val selectedNotes: List<NoteDTO> = _selectedNotes
+
+    private val _selectedLocation = mutableStateOf<LatLng?>(null)
+    val selectedLocation: LatLng? get() = _selectedLocation.value
+    private val _bottomSheetState = MutableStateFlow(SheetValue.Hidden)
+    val bottomSheetState = _bottomSheetState.asStateFlow()
+    private val _isBottomSheetExpanded = mutableStateOf(false)
+    val isBottomSheetExpanded: Boolean get() = _isBottomSheetExpanded.value
+    // Estado del scroll
+    val bottomSheetScrollState = LazyListState()
+
+    fun setBottomSheetExpanded(expanded: Boolean) {
+        _isBottomSheetExpanded.value = expanded
+    }
+
+    fun setSelectedNotes(notes: List<NoteDTO>) {
+        _selectedNotes.clear()
+        _selectedNotes.addAll(notes)
+    }
+
+    fun setSelectedLocation(location: LatLng?) {
+        _selectedLocation.value = location
+    }
 
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(application)

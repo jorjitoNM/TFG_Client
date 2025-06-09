@@ -2,6 +2,7 @@ package com.example.client.ui.noteMap.list
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -54,6 +55,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -100,6 +102,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteMapScreen(
@@ -110,6 +113,38 @@ fun NoteMapScreen(
     onAddNoteClick: () -> Unit,
     onNavigateToDetail: (Int) -> Unit
 ) {
+
+    val scope = rememberCoroutineScope()
+    val selectedNotes by remember { derivedStateOf { viewModel.selectedNotes } }
+    val selectedLocation by remember { derivedStateOf { viewModel.selectedLocation } }
+    val isBottomSheetExpanded by remember { derivedStateOf { viewModel.isBottomSheetExpanded } }
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = if (isBottomSheetExpanded) SheetValue.Expanded else SheetValue.Hidden,
+        skipHiddenState = false
+    )
+    // Sincroniza cambios del estado con el ViewModel
+    LaunchedEffect(bottomSheetState.currentValue) {
+        viewModel.setBottomSheetExpanded(bottomSheetState.currentValue == SheetValue.Expanded)
+    }
+
+    val onMarkerClick = { location: LatLng, notes: List<NoteDTO> ->
+        viewModel.setSelectedNotes(notes)
+        viewModel.setSelectedLocation(location)
+        viewModel.handleEvent(NoteMapEvent.GetSelectedNotesImages(notes))
+        scope.launch { // <-- Usa el scope definido
+            bottomSheetState.expand()
+        }
+    }
+
+    val onMapClick = {
+        viewModel.setSelectedNotes(emptyList())
+        viewModel.setSelectedLocation(null)
+        scope.launch { // <-- Aquí también
+            bottomSheetState.hide()
+        }
+    }
+
+
     val latLong by sharedLocationViewModel.selectedLocation.collectAsState()
     val sharedNoteType by sharedLocationViewModel.selectedNoteType.collectAsState()
 
@@ -163,7 +198,7 @@ fun NoteMapScreen(
 
 
 
-    val scope = rememberCoroutineScope()
+
     val context = LocalContext.current
 
     val surfaceColor = if (isDarkMode) Color(0xFF23272F) else Color.White
@@ -171,11 +206,7 @@ fun NoteMapScreen(
     val fabContentColor = if (isDarkMode) Color.White else Color.Black
     val bottomSheetColor = if (isDarkMode) Color(0xFF23272F) else Color.White
 
-    // Bottom sheet state
-    val bottomSheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.Hidden,
-        skipHiddenState = false
-    )
+
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
 
@@ -184,8 +215,7 @@ fun NoteMapScreen(
         MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_dark)
     }
     // Selected notes for the bottom sheet
-    val selectedNotes = remember { mutableStateListOf<NoteDTO>() }
-    var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
+
     var showLocationDialog by remember { mutableStateOf(false) }
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
@@ -310,9 +340,12 @@ fun NoteMapScreen(
     }
 
     BottomSheetScaffold(
-        scaffoldState = scaffoldState,
+        scaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = bottomSheetState
+        ),
         sheetContent = {
             NotesBottomSheet(
+                listState = viewModel.bottomSheetScrollState,
                 notes = selectedNotes,
                 location = selectedLocation,
                 onNoteClick = { noteId -> onNavigateToDetail(noteId) }
@@ -350,14 +383,7 @@ fun NoteMapScreen(
                         )
                     }
                 },
-                onMapClick = { _ ->
-                    // Limpiar selección
-                    selectedNotes.clear()
-                    selectedLocation = null
-                    // Cerrar el bottom sheet
-                    scope.launch {
-                        bottomSheetState.hide()
-                    }
+                onMapClick = {onMapClick()
                 }
 
             ) {
@@ -382,14 +408,8 @@ fun NoteMapScreen(
                         Marker(
                             state = markerState,
                             icon = iconBitmapDescriptor,
-                            onClick = {
-                                selectedNotes.clear()
-                                selectedNotes.addAll(notes)
-                                viewModel.handleEvent(NoteMapEvent.GetSelectedNotesImages(selectedNotes.toList()))
-                                selectedLocation = location
-                                scope.launch { bottomSheetState.expand() }
-                                false
-                            }
+                            onClick = { onMarkerClick(location, notes)
+                            true}
                         )
                     }
                 }

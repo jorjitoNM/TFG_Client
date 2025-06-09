@@ -6,11 +6,14 @@ import com.example.client.common.NetworkResult
 import com.example.client.data.model.UserDTO
 import com.example.client.domain.usecases.user.GetAllUserStartsWithTextUseCase
 import com.example.client.domain.usecases.user.GetUserUseCase
+import com.example.client.domain.usecases.user.images.LoadProfileImageUseCase
 import com.example.client.domain.usecases.user.local.DeleteCachedUserUseCase
 import com.example.client.domain.usecases.user.local.GetCachedUsersUseCase
 import com.example.client.domain.usecases.user.local.InsertCachedUserUseCase
 import com.example.client.ui.common.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,12 +27,14 @@ class UserSearchViewModel @Inject constructor(
     private val getCachedUsersUseCase: GetCachedUsersUseCase,
     private val insertCachedUserUseCase: InsertCachedUserUseCase,
     private val deleteCachedUserUseCase: DeleteCachedUserUseCase,
-    private val getUserUseCase: GetUserUseCase
+    private val getUserUseCase: GetUserUseCase,
+    private val loadProfileImageUseCase: LoadProfileImageUseCase
+
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UserSearchState())
     val uiState: StateFlow<UserSearchState> = _uiState.asStateFlow()
 
-    fun getLoggedUser() {
+    private fun getLoggedUser() {
         viewModelScope.launch {
             val user = getUserUseCase()
             when (user) {
@@ -82,32 +87,7 @@ class UserSearchViewModel @Inject constructor(
         }
     }
 
-    private fun loadRecentUsers() {
-        val loggedUser = _uiState.value.userLogged
-        if (loggedUser == null) {
-            // Si aún no está disponible, puedes esperar o mostrar un loading
-            getLoggedUser() // Lanza la carga si aún no se ha hecho
-            return
-        }
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            when (val result = getCachedUsersUseCase.invoke(loggedUser)) {
-                is NetworkResult.Success -> _uiState.value = _uiState.value.copy(
-                    users = result.data,
-                    showEmptyState = result.data.isEmpty(),
-                    isLoading = false
-                )
 
-                is NetworkResult.Error -> _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    aviso = UiEvent.ShowSnackbar(result.message),
-                    showEmptyState = false
-                )
-
-                is NetworkResult.Loading -> _uiState.value = _uiState.value.copy(isLoading = true)
-            }
-        }
-    }
 
     private fun addRecentUser(user: UserDTO) {
         val loggedUser = _uiState.value.userLogged
@@ -158,22 +138,78 @@ class UserSearchViewModel @Inject constructor(
         }
     }
 
+
+    private fun loadRecentUsers() {
+        val loggedUser = _uiState.value.userLogged
+        if (loggedUser == null) {
+            // Si aún no está disponible, puedes esperar o mostrar un loading
+            getLoggedUser() // Lanza la carga si aún no se ha hecho
+            return
+        }
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            when (val result = getCachedUsersUseCase.invoke(loggedUser)) {
+                is NetworkResult.Success -> _uiState.value = _uiState.value.copy(
+                    users = result.data,
+                    showEmptyState = result.data.isEmpty(),
+                    isLoading = false
+                )
+
+                is NetworkResult.Error -> _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    aviso = UiEvent.ShowSnackbar(result.message),
+                    showEmptyState = false
+                )
+
+                is NetworkResult.Loading -> _uiState.value = _uiState.value.copy(isLoading = true)
+            }
+        }
+    }
+
+
     private suspend fun getAllUserStartsWithText(text: String) {
         if (text.isBlank()) {
-            _uiState.value =
-                _uiState.value.copy(users = emptyList(), showEmptyState = false, isLoading = false)
+            _uiState.value = _uiState.value.copy(
+                users = emptyList(),
+                showEmptyState = false,
+                isLoading = false
+            )
             return
         }
         _uiState.value = _uiState.value.copy(isLoading = true)
+
         when (val result = getAllUserStartsWithTextUseCase(text)) {
             is NetworkResult.Success -> {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    users = result.data,
-                    showEmptyState = result.data.isEmpty()
-                )
-            }
+                val originalUsers = result.data
 
+                viewModelScope.launch { // <-- Lanzamos una única corrutina padre
+                    val usersWithPhotos = originalUsers.map { user ->
+                        async { // <-- Paraleliza la carga de imágenes
+                            var updatedUser = user
+                            loadProfileImageUseCase.invoke(user.id).collect { photoResult ->
+                                when (photoResult) {
+                                    is NetworkResult.Success -> {
+                                        updatedUser = user.copy(profilePhoto = photoResult.data)
+                                    }
+                                    is NetworkResult.Error -> {
+                                        // Opcional: manejar error individual
+                                    }
+                                    is NetworkResult.Loading -> {
+                                        // Opcional: manejar loading
+                                    }
+                                }
+                            }
+                            updatedUser // <-- Devuelve el usuario actualizado
+                        }
+                    }.awaitAll() // <-- Espera a TODAS las imágenes
+
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        users = usersWithPhotos,
+                        showEmptyState = usersWithPhotos.isEmpty()
+                    )
+                }
+            }
             is NetworkResult.Error -> {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -181,10 +217,11 @@ class UserSearchViewModel @Inject constructor(
                     showEmptyState = false
                 )
             }
-
             is NetworkResult.Loading -> {
                 _uiState.value = _uiState.value.copy(isLoading = true)
             }
         }
     }
+
+
 }

@@ -14,4 +14,5 @@ sealed class NoteDetailEvent {
     data object AvisoVisto : NoteDetailEvent()
     data class SaveNoteImages(val imagesUris: List<Uri>) : NoteDetailEvent()
     data class DeleteImage(val imageUri: Uri) : NoteDetailEvent()
+    data object DeleteNote : NoteDetailEvent()
 }
